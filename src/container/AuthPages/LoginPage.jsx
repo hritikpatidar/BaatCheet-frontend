@@ -81,12 +81,12 @@ export default function LoginPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4">
-      <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-300">
+      <div className="bg-white w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300">
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Welcome Back 👋</h2>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Email */}
-          <div className="mb-4 relative">
+          <div className="relative col-span-2">
             <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="email"
@@ -99,7 +99,7 @@ export default function LoginPage() {
           </div>
 
           {/* Password */}
-          <div className="mb-4 relative">
+          <div className="relative col-span-2">
             <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
 
             <input
@@ -121,16 +121,23 @@ export default function LoginPage() {
           </div>
 
           {/* Submit */}
-          <button
+          {/* <button
             type="submit"
             className="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
             disabled={loading}
           >
             {loading ? "Logging in..." : "Login"}
+          </button> */}
+          <button
+            type="submit"
+            className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
+            disabled={loading}
+          >
+             {loading ? "Logging in..." : "Login"}
           </button>
 
           {/* Divider & Social Buttons */}
-          <div className="my-6">
+          <div className="mb-6 col-span-2">
             <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
               <hr className="flex-grow border-gray-300" />
               <span className="mx-2">or sign up with</span>
@@ -171,7 +178,7 @@ export default function LoginPage() {
         </form>
 
         {/* Divider */}
-        <div className="my-6 flex items-center justify-between text-sm text-gray-500">
+        <div className="mb-6 flex items-center justify-between text-sm text-gray-500">
           <hr className="flex-grow border-gray-300" />
           <span className="mx-2">or</span>
           <hr className="flex-grow border-gray-300" />

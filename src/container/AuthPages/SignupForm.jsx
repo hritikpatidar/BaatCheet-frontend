@@ -26,14 +26,14 @@ export const SignupForm = ({ handleSubmit, loading }) => {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4 pt-12">
-            <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-md border border-gray-300">
+            <div className="bg-white w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300">
                 <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
                     Create Account 👤
                 </h2>
 
-                <form onSubmit={handleSubmit} autoComplete="off">
+                <form onSubmit={handleSubmit} autoComplete="off" className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     {/* Full Name */}
-                    <div className="mb-4 relative">
+                    <div className="relative col-span-2 md:col-span-1">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
@@ -46,11 +46,11 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                     </div>
 
                     {/* Username */}
-                    <div className="mb-4 relative">
+                    <div className="relative col-span-2 md:col-span-1">
                         <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="text"
-                            placeholder="User_name"
+                            placeholder="Username"
                             name="user_name"
                             value={formDetails?.user_name}
                             onChange={handleChange}
@@ -59,7 +59,7 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                     </div>
 
                     {/* Email */}
-                    <div className="mb-4 relative">
+                    <div className="relative col-span-2">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="email"
@@ -72,7 +72,7 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                     </div>
 
                     {/* Phone Number */}
-                    <div className="mb-4 relative">
+                    <div className="relative col-span-2 md:col-span-1">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="tel"
@@ -80,30 +80,30 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                             name="phone_no"
                             value={formDetails?.phone_no}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 "
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
                         />
                     </div>
 
                     {/* Date of Birth */}
-                    <div className="mb-4 relative">
+                    <div className="relative col-span-2 md:col-span-1">
                         <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type="date"
                             name="dob"
-                            value={formDetails.dob}
+                            value={formDetails?.dob}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer "
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer"
                         />
                     </div>
 
                     {/* Gender */}
-                    <div className="mb-4 relative">
+                    <div className="relative col-span-2 md:col-span-1">
                         <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <select
                             name="gender"
                             value={formDetails?.gender}
                             onChange={handleChange}
-                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer "
+                            className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400 cursor-pointer"
                         >
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
@@ -113,7 +113,7 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                     </div>
 
                     {/* Password */}
-                    <div className="mb-6 relative">
+                    <div className="relative col-span-2 md:col-span-1">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                         <input
                             type={showPassword ? "text" : "password"}
@@ -128,25 +128,20 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                             onClick={() => setShowPassword(!showPassword)}
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
                         >
-                            {showPassword ? (
-                                <EyeOff className="w-5 h-5" />
-                            ) : (
-                                <Eye className="w-5 h-5" />
-                            )}
+                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
                     </div>
 
-                    {/* Submit */}
+                    {/* Sign Up Button spans full width */}
                     <button
                         type="submit"
-                        className="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
+                        className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
                         disabled={loading}
                     >
                         {loading ? "Signing up..." : "Sign Up"}
                     </button>
-
                     {/* Divider & Social Buttons */}
-                    <div className="my-6">
+                    <div className="mb-6 col-span-2 ">
                         <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
                             <hr className="flex-grow border-gray-300" />
                             <span className="mx-2">or sign up with</span>
@@ -187,7 +182,7 @@ export const SignupForm = ({ handleSubmit, loading }) => {
                 </form>
 
                 {/* Divider */}
-                <div className="my-6 flex items-center justify-between text-sm text-gray-500">
+                <div className="mb-6 flex items-center justify-between text-sm text-gray-500">
                     <hr className="flex-grow border-gray-300" />
                     <span className="mx-2">or</span>
                     <hr className="flex-grow border-gray-300" />
