@@ -29,6 +29,8 @@ import { checkIfImage, detectURLs, isValidURL } from "../../Utils/Auth";
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const dispatch = useDispatch();
+  const typingTimeoutRef = useRef(null);
+
   const { socket, fetchMessages, page, setPage, messageLoading } = useSocket()
   const fileInputRef = useRef(null);
   const messagesContainerRef = useRef(null)
@@ -40,6 +42,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [userDetails, setUserDetails] = useState()
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
+
+  useEffect(() => {
+    return () => {
+      if (typingTimeoutRef.current) {
+        clearTimeout(typingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const payload = { ...selectedUser, profile: selectedUser?.image }
@@ -541,14 +551,18 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               <input
                 value={message}
                 onChange={(e) => {
-                  let typingTimeout = null;
                   setMessage(e.target.value)
                   socket.current.emit('typing', selectedUser?._id, profileData?._id);
 
-                  clearTimeout(typingTimeout);
-                  typingTimeout = setTimeout(() => {
+                  // Clear previous timeout if it exists
+                  if (typingTimeoutRef.current) {
+                    clearTimeout(typingTimeoutRef.current);
+                  }
+
+                  // Set new timeout for stopTyping
+                  typingTimeoutRef.current = setTimeout(() => {
                     socket.current.emit('stopTyping', selectedUser?._id, profileData?._id);
-                  }, 5000);
+                  }, 2000);
                 }}
                 placeholder="Type a message..."
                 className="flex-1 px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
