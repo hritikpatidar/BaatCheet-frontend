@@ -69,8 +69,6 @@ export default function LoginPage() {
         toast.error(
           response.payload?.message || "Email or Password Does Not Exist"
         );
-        // setItemLocalStorage("token","nasidbclkzkjdnadsscknc");
-        // navigate("/"); 
       }
     } catch (error) {
       toast.error("An error occurred. Please try again.");
@@ -84,23 +82,23 @@ export default function LoginPage() {
       <div className="bg-white w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300">
         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Welcome Back 👋</h2>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Email */}
           <div className="relative col-span-2">
-            <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${errorMessages?.email ? " text-red-500" : " text-gray-400"}`} />
             <input
               type="email"
               placeholder="Email"
               name="email"
               value={loginFormDetails?.email}
               onChange={handleChange}
-              className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className={`w-full pl-10 pr-3 py-2 ${errorMessages?.email ? "border border-red-500" : "border border-gray-300"}  rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
             />
           </div>
 
           {/* Password */}
           <div className="relative col-span-2">
-            <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${errorMessages?.password ? " text-red-500" : " text-gray-400"}`} />
 
             <input
               type={showPassword ? "text" : "password"}
@@ -108,7 +106,7 @@ export default function LoginPage() {
               name="password"
               value={loginFormDetails?.password}
               onChange={handleChange}
-              className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className={`w-full pl-10 pr-10 py-2 ${errorMessages?.password ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
             />
 
             <button
@@ -119,60 +117,37 @@ export default function LoginPage() {
               {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
             </button>
           </div>
-
-          {/* Submit */}
-          {/* <button
-            type="submit"
-            className="w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button> */}
           <button
             type="submit"
             className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
             disabled={loading}
           >
-             {loading ? "Logging in..." : "Login"}
+            {loading ? "Logging in..." : "Login"}
           </button>
 
           {/* Divider & Social Buttons */}
-          <div className="mb-6 col-span-2">
+          <div className="mb-6 col-span-2 ">
             <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
               <hr className="flex-grow border-gray-300" />
               <span className="mx-2">or sign up with</span>
               <hr className="flex-grow border-gray-300" />
             </div>
-            <div className="flex flex-col space-y-3">
-              {/* Google */}
+            <div className="grid grid-cols-2 gap-3">
               <button
                 type="button"
-                // onClick={handleGoogleSignup}
                 className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
               >
                 <img src={google} alt="Google" className="h-5 w-5 mr-2" />
-                <span className="text-sm text-gray-700 font-medium">Sign up with Google</span>
+                <span className="text-sm text-gray-700 font-medium">Google</span>
               </button>
 
-              {/* Apple */}
               <button
                 type="button"
-                // onClick={handleAppleSignup}
                 className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
               >
                 <img src={apple} alt="Apple" className="h-5 w-5 mr-2" />
-                <span className="text-sm text-gray-700 font-medium">Sign up with Apple</span>
+                <span className="text-sm text-gray-700 font-medium">Apple</span>
               </button>
-
-              {/* Facebook */}
-              {/* <button
-                type="button"
-                // onClick={handleFacebookSignup}
-                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-              >
-                <img src={facebook} alt="Facebook" className="h-5 w-5 mr-2" />
-                <span className="text-sm text-gray-700 font-medium">Sign up with Facebook</span>
-              </button> */}
             </div>
           </div>
         </form>
