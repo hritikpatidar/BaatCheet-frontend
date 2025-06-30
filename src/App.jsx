@@ -7,7 +7,7 @@ import NotFound from './components/NotFound';
 import LoginPage from './container/AuthPages/LoginPage';
 import { SignupForm } from './container/AuthPages/SignupForm';
 
-export default function App() {
+export default function App() { 
   return (
     <Router>
       <SocketProvider>
