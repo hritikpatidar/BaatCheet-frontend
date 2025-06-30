@@ -85,7 +85,7 @@ export default function LoginPage() {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Email */}
           <div className="relative col-span-2">
-            <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${errorMessages?.email ? " text-red-500" : " text-gray-400"}`} />
+            <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400`} />
             <input
               type="email"
               placeholder="Email"
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="relative col-span-2">
-            <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${errorMessages?.password ? " text-red-500" : " text-gray-400"}`} />
+            <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400`} />
 
             <input
               type={showPassword ? "text" : "password"}

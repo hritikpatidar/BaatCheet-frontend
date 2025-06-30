@@ -58,12 +58,26 @@ span.country-name {
   color: gray;
 }
 
+/* Ensure inputs retain your style when autofilled */
 input:-webkit-autofill,
+textarea:-webkit-autofill,
+select:-webkit-autofill,
 input:-webkit-autofill:hover,
+textarea:-webkit-autofill:hover,
+select:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
-input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px white inset !important;
-  -webkit-text-fill-color: #000 !important;
+textarea:-webkit-autofill:focus,
+select:-webkit-autofill:focus {
+  -webkit-text-fill-color: #2e3135 !important;
+  /* Gray-700 from Tailwind */
+  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+  /* White background */
   transition: background-color 5000s ease-in-out 0s;
 }
 
+
+.projectName {
+  font-family: "Caveat", cursive;
+  font-optical-sizing: auto;
+  font-style: normal;
+}

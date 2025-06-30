@@ -179,7 +179,7 @@ export const SignupForm = () => {
                     Create Account 👤
                 </h2>
 
-                <form onSubmit={handleSubmit} autoComplete="off" className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     {/* Full Name */}
                     <div className="relative col-span-2 md:col-span-1">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
