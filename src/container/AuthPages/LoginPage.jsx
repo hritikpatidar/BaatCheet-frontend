@@ -59,9 +59,9 @@ export default function LoginPage() {
     try {
       const response = await dispatch(loginFormData(loginFormDetails));
       if (response?.payload?.status === true) {
+        toast.success(response?.payload?.message);
         const decodedToken = jwtDecode(response?.payload?.token);
         setItemLocalStorage("userRole", "User");
-        toast.success(response?.payload?.message);
         setItemLocalStorage("token", response?.payload?.token);
         await dispatch(profileDetails());
         navigate("/");

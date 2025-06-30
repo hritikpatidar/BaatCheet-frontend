@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { getItemLocalStorage } from "../../../Utils/browserServices";
-import { LoginService, profileDetailsService, SignupService } from "../../../Services/AdminServices";
+import { handleVerifyOtpService, LoginService, profileDetailsService, SignupService } from "../../../Services/AdminServices";
 
 
 const initialState = {
@@ -16,6 +16,14 @@ export const signupForm = createAsyncThunk(
   "auth/signupDetails",
   async (payload) => {
     const response = await SignupService(payload)
+    return response.data
+  }
+)
+
+export const verifyOtp = createAsyncThunk(
+  "auth/verifyOtp",
+  async (payload) => {
+    const response = await handleVerifyOtpService(payload)
     return response.data
   }
 )
@@ -71,6 +79,20 @@ const AuthSlice = createSlice({
       state.loading = false;
       state.token = "";
       state.profileDetails = {};
+      state.error = action.error.message;
+    });
+    //------------------------------------------------------------------
+    builder.addCase(verifyOtp.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(verifyOtp.fulfilled, (state, action) => {
+      state.loading = false;
+      state.token = action.payload?.token || "";
+      state.error = "";
+    });
+    builder.addCase(verifyOtp.rejected, (state, action) => {
+      state.loading = false;
+      state.token = "";
       state.error = action.error.message;
     });
     //------------------------------------------------------------------

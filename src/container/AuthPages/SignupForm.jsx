@@ -5,13 +5,16 @@ import { google, facebook, apple } from "../../assets";
 import { SignUpFormValidation } from '../../Utils/validation';
 import PhoneInput from 'react-phone-input-2';
 import "react-phone-input-2/lib/style.css";
-import { handleVerifyOtpService, SignupService } from '../../Services/AdminServices';
+import { handleVerifyOtpService, resendOTPService, SignupService } from '../../Services/AdminServices';
 import toast from 'react-hot-toast';
 import OtpInput from "react-otp-input";
 import { setItemLocalStorage } from '../../Utils/browserServices';
+import { profileDetails, verifyOtp } from '../../Redux/features/adminAuth/authSlice';
+import { useDispatch } from 'react-redux';
 
 export const SignupForm = () => {
     const navigate = useNavigate()
+    const dispatch = useDispatch()
     const [formDetails, setFormDetails] = useState({
         name: "",
         user_name: "",
@@ -127,10 +130,12 @@ export const SignupForm = () => {
                 email: formDetails?.email,
                 otp: otp
             }
-            const response = await handleVerifyOtpService(payload)
-            if (response?.status === 200) {
-                toast.success(response?.data?.message)
-                setItemLocalStorage("token", response?.data?.token)
+            const response = await dispatch(verifyOtp(payload))
+            if (response?.payload?.status === true) {
+                toast.success(response?.payload?.message)
+                setItemLocalStorage("token", response?.payload?.token)
+                setItemLocalStorage("userRole", "User");
+                await dispatch(profileDetails());
                 navigate('/')
             } else {
                 toast.success(response?.data?.message)
@@ -142,9 +147,26 @@ export const SignupForm = () => {
         }
     };
 
-    const handleResendOtp = () => {
+    const handleForgot = async () => {
+        try {
+            const payload = {
+                email: formDetails?.email,
+            };
+            const response = await resendOTPService(payload);
+            if (response?.status === 200) {
+                toast.success(response?.data?.message);
+            } else {
+                toast.error(response?.data?.message);
+            }
+        } catch (error) {
+            console.error("error", error);
+            toast.error("An error occurred. Please try again.");
+        }
+    };
+
+    const handleResendOtp = async () => {
         if (resendCooldown > 0) return;
-        setResendCooldown(60);
+        setResendCooldown(10);
         const timer = setInterval(() => {
             setResendCooldown(prev => {
                 if (prev <= 1) {
@@ -154,6 +176,7 @@ export const SignupForm = () => {
                 return prev - 1;
             });
         }, 1000);
+        await handleForgot();
     };
 
 

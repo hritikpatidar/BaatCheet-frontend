@@ -9,6 +9,10 @@ export const SignupService = (payload) => {
     return httpServices.post(`${getUrl()}/signup`, payload);
 }
 
+export const resendOTPService = (payload) => {
+    return httpServices.post(`${getUrl()}/resend-otp`, payload)
+}
+
 export const profileDetailsService = () => {
     return httpServices.get(`${getUrl()}/profile`);
 }

@@ -1,6 +1,7 @@
 export {
     LoginService,
     SignupService,
+    resendOTPService,
     profileDetailsService,
     metchPasswordService,
     resetPasswordService,
