@@ -279,7 +279,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           "Online"
                         ) : (
                           <span className="text-sm text-gray-500 font-normal">
-                            {onlineStatus?.lastSeen?.[userDetails?._id] || "Offline"}
+                            {dayjs(onlineStatus?.lastSeen?.[userDetails?._id]).format("DD/MM/YYYY hh:mm A") || "Offline" }
                           </span>
                         )
                       :

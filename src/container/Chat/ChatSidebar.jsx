@@ -270,7 +270,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
         {/* User List */}
         <ul className="space-y-2 overflow-y-auto flex-1">
-          {userList.map((cv, i) => (
+          {userList?.filter((cv) => cv?._id !== profileData?._id).map((cv, i) => (
             <li
               key={i}
               className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
