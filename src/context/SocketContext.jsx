@@ -45,13 +45,12 @@ export const SocketProvider = ({ children }) => {
         transports: ["websocket", "polling"],
       });
 
-      if (location?.pathname === "/") {
+      if (location?.pathname === "/chat") {
         socket.current.on("connect", () => {
           console.log("Connected to socket server");
           socket.current.emit("registerUser", profileData._id);
           socket.current.emit("conversation", profileData._id);
           socket.current.emit("groupConversation", profileData._id);
-
         });
       } else {
         socket.current.on("disconnect", () => {
@@ -69,6 +68,7 @@ export const SocketProvider = ({ children }) => {
     dispatch(clearChatState())
     if (socket.current) {
       socket.current.emit("conversation", profileData._id);
+      socket.current.emit("groupConversation", profileData._id);
       socket.current.emit("getUserList");
     }
   }, [socket])

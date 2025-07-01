@@ -6,18 +6,20 @@ import { PrivateRoute } from './PrivateRoute';
 import NotFound from './components/NotFound';
 import LoginPage from './container/AuthPages/LoginPage';
 import { SignupForm } from './container/AuthPages/SignupForm';
+import DashboardPage from './container/Dashboard/Dashboard';
 
-export default function App() { 
+export default function App() {
   return (
     <Router>
       <SocketProvider>
         <Routes>
           <Route element={<PublicRoute />}>
-             <Route path="/login" element={<LoginPage />} />
-              <Route path="/sign-up" element={<SignupForm />} /> 
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/sign-up" element={<SignupForm />} />
           </Route>
           <Route element={<PrivateRoute />}>
-            <Route path="/" element={<ChatApp />} />
+            <Route path="/" element={<DashboardPage />} />
+            <Route path="/chat" element={<ChatApp />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
