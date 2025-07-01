@@ -204,15 +204,15 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                 </div>
 
                 {/* Name and message */}
-                <div className="flex-1">
-                  <p className="font-medium text-gray-800">{user.name}</p>
-                  <p className="text-xs text-gray-600">
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                    {user.name}
+                  </p>
+                  <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
                     {isYour ? t("you") + ": " : ""}
                     {cv?.lastMessageDetails?.messageType === "file"
                       ? "File"
-                      : cv?.lastMessageDetails?.message?.length > 30
-                        ? cv?.lastMessageDetails?.message.substring(0, 30) + "..."
-                        : cv?.lastMessageDetails?.message || "Start Conversation"}
+                      : cv?.lastMessageDetails?.message || "Start Conversation"}
                   </p>
                 </div>
 
@@ -290,10 +290,14 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   .join("")
                   .toUpperCase()}
               </div>
-              <div className="flex-1">
-                <p className="font-medium text-gray-800">{cv?.name}</p>
-                <p className="text-xs text-gray-600">This theme is awesome!</p>
-              </div>
+               <div className="flex-1 overflow-hidden">
+                  <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                    {cv.name}
+                  </p>
+                  <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                    {"This theme is awesome!"}
+                  </p>
+                </div>
             </li>
           ))}
         </ul>
