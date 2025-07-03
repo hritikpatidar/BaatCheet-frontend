@@ -7,8 +7,19 @@ import NotFound from './components/NotFound';
 import LoginPage from './container/AuthPages/LoginPage';
 import { SignupForm } from './container/AuthPages/SignupForm';
 import DashboardPage from './container/Dashboard/Dashboard';
+import { generateToken, messaging } from "./firebase";
+import { onMessage } from "firebase/messaging";
+import { useEffect } from 'react';
 
 export default function App() {
+
+  // useEffect(() => {
+  //   generateToken();
+  //   onMessage(messaging, (payload) => {
+  //     console.log("payload", payload);
+  //   });
+  // }, []);
+
   return (
     <Router>
       <SocketProvider>

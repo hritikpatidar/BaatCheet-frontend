@@ -38,7 +38,7 @@ const AudioMessagePlayer = ({ audioUrl }) => {
   }, [audioUrl])
 
   return (
-    <div className="flex items-center max-w-xs w-full bg-gray-200 rounded-lg px-3 py-2 mb-4 shadow relative">
+    <>
       {/* <WaveformPlayer audioUrl={`http://localhost:3000/${url}`} /> */}
       <div className="flex items-center gap-4">
         {/* Play/Pause Button */}
@@ -62,7 +62,7 @@ const AudioMessagePlayer = ({ audioUrl }) => {
         </div>
       </div>
 
-    </div>
+    </>
   );
 };
 

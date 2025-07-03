@@ -19,14 +19,20 @@ import {
   Send,
   Mic
 } from "lucide-react";
+import {
+  FaFileAudio,
+  FaFileExcel,
+  FaFilePdf,
+  FaFileWord,
+} from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../context/SocketContext";
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
-import { closeChat, setIsUploading, setSendMessages, setUpdateMessages } from "../../Redux/features/Chat/chatSlice";
+import { closeChat, setFileDownloadProgress, setIsDownloading, setIsUploading, setSendMessages, setUpdateMessages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
 import { checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
-import { uploadFileService } from "../../Services/ChatServices";
+import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 
 
@@ -38,7 +44,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const fileInputRef = useRef(null);
   const messagesContainerRef = useRef(null)
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
-  const { isTyping, selectedUser, ChatMessages, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
+  const { isTyping, selectedUser, ChatMessages, onlineStatus, Downloading, DownloadProgress  } = useSelector((state) => state?.ChatDataSlice);
   const [isUserAtBottom, setIsUserAtBottom] = useState(false)
   const [message, setMessage] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
@@ -317,6 +323,122 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const groupedMessages = groupMessagesByDate(ChatMessages);
 
 
+  const downloadFile = async (url, messageId, index) => {
+    try {
+      dispatch(setIsDownloading(index));
+      dispatch(setFileDownloadProgress(0));
+
+      let fileName = url.split("/").pop();
+      let fileExtension = fileName.split(".").pop().toLowerCase();
+
+      // These formats should open in a new tab
+      const openInNewTabFormats = ["pdf", "txt", "md", "html", "xml", "mp4"];
+
+      if (openInNewTabFormats.includes(fileExtension)) {
+        window.open(url, "_blank"); // Open in a new tab
+      } else {
+        let link = document.createElement("a");
+        link.href = url;
+        link.download = fileName || "downloaded_file";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Simulating download progress
+      let simulatedProgress = 0;
+      const progressInterval = setInterval(() => {
+        simulatedProgress += 10;
+        if (simulatedProgress <= 100) {
+          dispatch(setFileDownloadProgress(simulatedProgress));
+          if (socket.current) socket.current.emit("downloadFile", messageId);
+        } else {
+          clearInterval(progressInterval);
+          dispatch(setFileDownloadProgress(100));
+          dispatch(setIsDownloading(null));
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      dispatch(setIsDownloading(null));
+      dispatch(setFileDownloadProgress(0));
+    }
+  };
+
+  const downloadImages = async (url, index) => {
+    dispatch(setIsDownloading(index));
+    dispatch(setFileDownloadProgress(0));
+    try {
+      const payload = {
+        img: url,
+      };
+      const response = await getDownloadBufferFile(payload);
+
+      const byteArray = new Uint8Array(response.data.data.data);
+      const blob = new Blob([byteArray], { type: "image/png" });
+      const objectURL = URL.createObjectURL(blob);
+      let simulatedProgress = 0;
+      const progressInterval = setInterval(() => {
+        simulatedProgress += 10;
+        if (simulatedProgress <= 100) {
+          dispatch(setFileDownloadProgress(simulatedProgress));
+        } else {
+          clearInterval(progressInterval);
+          dispatch(setFileDownloadProgress(100));
+          dispatch(setIsDownloading(null));
+          let link = document.createElement("a");
+          link.href = objectURL;
+          const fileName = objectURL.split("/").pop();
+          link.download = fileName || "downloaded_file";
+          link.click();
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      dispatch(setIsDownloading(null));
+      dispatch(setFileDownloadProgress(0));
+    }
+  };
+
+  const handlePaste = async (e) => {
+    const clipboardData = e.clipboardData || window.clipboardData;
+    const items = clipboardData.items;
+    const pastedImages = [];
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (item.type.startsWith("image/")) {
+        const file = item.getAsFile();
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = async (event) => {
+            const base64Image = event.target.result;
+            pastedImages.push(base64Image);
+            const formData = new FormData();
+            const fileObject = base64ToFile(
+              base64Image,
+              `image-${Date.now()}.png`
+            );
+            formData.append("img", fileObject);
+            dispatch(setIsUploading(true));
+
+            const response = await uploadFileService(formData, {
+              onUploadProgress: (data) => {
+                const progress = Math.round((100 * data.loaded) / data.total);
+                dispatch(setFileUploadProgress(progress));
+              },
+            });
+            let result = response?.data?.data;
+            setFile((prev) => [...prev, ...result]);
+            dispatch(setIsUploading(false));
+          };
+          reader.readAsDataURL(file);
+          e.preventDefault();
+        }
+      }
+    }
+  };
+
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     const mediaRecorder = new MediaRecorder(stream);
@@ -544,7 +666,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                   />
                                 </div>
                               ) : (
-                                <div className="flex justify-between items-center p-2 border rounded-lg bg-gray-100 w-full cursor-pointer">
+                                <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
                                   <div className="flex items-center gap-2" onClick={() =>
                                     downloadFile(message.fileUrl, message._id, idx)
                                   }>
@@ -568,9 +690,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                               )
                             ) :
                               message.messageType === "audio" ? (
-                                <>
+                                <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
                                   <AudioMessagePlayer audioUrl={`http://localhost:3000/${message.fileUrl}`} />
-                                </>
+                                </div>
                               ) : (
                                 <p className="pr-14 break-words">
                                   {detectURLs(message.message).map((part, i2) =>
