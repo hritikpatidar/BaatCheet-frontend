@@ -16,15 +16,18 @@ import {
   CheckCheck,
   Check,
   Clock3,
-  Send
+  Send,
+  Mic
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../context/SocketContext";
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
-import { closeChat, setSendMessages, setUpdateMessages } from "../../Redux/features/Chat/chatSlice";
+import { closeChat, setIsUploading, setSendMessages, setUpdateMessages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
-import { checkIfImage, detectURLs, isValidURL } from "../../Utils/Auth";
+import { checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
+import { uploadFileService } from "../../Services/ChatServices";
+import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
@@ -42,6 +45,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [userDetails, setUserDetails] = useState()
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
+  const [file, setFile] = useState([]);
+  const [isNewMessage, setIsNewMessage] = useState(false);
+  const [showImage, setShowImage] = useState(false);
+
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const [recording, setRecording] = useState(false);
+  const [isSend, setIsSend] = useState(false);
+  const [audioBlob, setAudioBlob] = useState(null);
 
   useEffect(() => {
     return () => {
@@ -57,38 +69,99 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   }, [selectedUser])
 
 
-  const handleSubmit = (e) => {
+  const onSendMessage = (newMessage) => {
+    dispatch(setSendMessages(newMessage));
+    if (socket) socket.current.emit('sendMessage', newMessage);
+    setMessage('');
+    setFile([]);
+    setIsNewMessage(false);
+    setIsSend(false)
+  }
+
+
+  const handleSubmit = async (e) => {
+    // "text" | "image" | "video" | "file" | "audio" | "link"
+    setIsNewMessage(true);
     e.preventDefault();
-    if (message.trim()) {
-      let msgContent = {};
-      if (selectedUser?.conversationType === "single") {
-        msgContent = {
-          conversationId: selectedUser?._id, //684fc66a067a4fc539d38684 
-          isSenderId: profileData?._id, // sender's user ID
-          isReceiverId: userDetails?._id, //68242db5216d67de02b7f9c0 
-          groupId: "", //68500e1faad63c8b915c5ecc 
+    if (selectedUser?.conversationType === "single") {
+      if (file.length > 0) {
+        for (const [index, singleFile] of file.entries()) {
+          const newMessage = {
+            conversationId: selectedUser?._id,
+            isSenderId: profileData?._id,
+            isReceiverId: userDetails?._id,
+            groupId: "",
+            message: index === 0 ? message : "",
+            fileUrl: singleFile,
+            messageType: "file",
+            status: "",
+            timestamp: index
+          };
+          await onSendMessage(newMessage);
+        }
+      } else if (audioBlob) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Audio = reader.result;
+          const newMessage = {
+            conversationId: selectedUser?._id,
+            isSenderId: profileData?._id,
+            isReceiverId: userDetails?._id,
+            groupId: "",
+            message: "",
+            fileUrl: base64Audio,
+            messageType: "audio",
+            status: "",
+            timestamp: dayjs().format()
+          };
+          await onSendMessage(newMessage);
+          setAudioBlob(null);
+        };
+        reader.readAsDataURL(audioBlob);
+      } else {
+        const newMessage = {
+          conversationId: selectedUser?._id,
+          isSenderId: profileData?._id,
+          isReceiverId: userDetails?._id,
+          groupId: "",
           message: message,
           fileUrl: "",
-          messageType: "text", // "text" | "image" | "video" | "file"
-          status: "",      // "sent" | "delivered" | "read"
+          messageType: isLink(message) ? "link" : "text",
+          status: "",
           timestamp: dayjs().format()
         };
-      } else if (selectedUser?.conversationType === "group") {
-        msgContent = {
-          conversationId: "",
-          isSenderId: profileData?._id, // sender's user ID
-          isReceiverId: "", //68242db5216d67de02b7f9c0 
-          groupId: selectedUser?._id, //68529121c60461b55966150a 
-          message: message,
-          fileUrl: "",
-          messageType: "text", // "text" | "image" | "video" | "file"
-          status: "",      // "sent" | "delivered" | "read"
-          timestamp: dayjs().format()
-        };
+        await onSendMessage(newMessage);
       }
-      dispatch(setSendMessages(msgContent));
-      if (socket) socket.current.emit('sendMessage', msgContent);
-      setMessage('');
+    } else if (selectedUser?.conversationType === "group") {
+      if (file.length > 0) {
+        for (const [index, singleFile] of file.entries()) {
+          const newMessage = {
+            conversationId: "",
+            isSenderId: profileData?._id,
+            isReceiverId: "",
+            groupId: selectedUser?._id,
+            message: index === 0 ? message : "",
+            fileUrl: singleFile,
+            messageType: "file",
+            status: "",
+            timestamp: dayjs().format()
+          };
+          await onSendMessage(newMessage);
+        }
+      } else {
+        const newMessage = {
+          conversationId: "",
+          isSenderId: profileData?._id,
+          isReceiverId: "",
+          groupId: selectedUser?._id,
+          message: message,
+          fileUrl: "",
+          messageType: isLink(message) ? "link" : "text",
+          status: "",
+          timestamp: dayjs().format()
+        };
+        await onSendMessage(newMessage);
+      }
     }
   };
 
@@ -103,11 +176,37 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   };
 
-  const handleFileChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      console.log("Selected file:", file);
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    try {
+      if (files?.length) {
+        const formData = new FormData();
+        files.forEach((file, index) => {
+          formData.append("img", file);
+        });
+        dispatch(setIsUploading(true));
+
+        const response = await uploadFileService(formData, {
+          onUploadProgress: (data) => {
+            const progress = Math.round((100 * data.loaded) / data.total);
+            dispatch(setFileUploadProgress(progress));
+          },
+        });
+        let result = response?.data?.data;
+        setFile((prev) => [...prev, ...result]);
+      }
+    } catch (error) {
+      dispatch(setIsUploading(false));
+      console.error({ error });
+    } finally {
+      dispatch(setIsUploading(false));
+      setIsNewMessage(false);
+      e.target.value = "";
     }
+  };
+
+  const handleRemoveImage = (index) => {
+    setFile((prev) => prev.filter((_, i) => i !== index));
   };
 
   const scrollToBottom = async () => {
@@ -217,6 +316,31 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const groupedMessages = groupMessagesByDate(ChatMessages);
 
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+    audioChunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      audioChunksRef.current.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      setAudioBlob(blob);
+    };
+
+    mediaRecorder.start();
+    setRecording(true);
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current.stop();
+    setRecording(false);
+  };
+
   return (
     <>
       {!selectedUser?.members ? (
@@ -279,7 +403,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           "Online"
                         ) : (
                           <span className="text-sm text-gray-500 font-normal">
-                            {dayjs(onlineStatus?.lastSeen?.[userDetails?._id]).format("DD/MM/YYYY hh:mm A") || "Offline" }
+                            {dayjs(onlineStatus?.lastSeen?.[userDetails?._id]).format("DD/MM/YYYY hh:mm A") || "Offline"}
                           </span>
                         )
                       :
@@ -407,7 +531,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             {message.messageType === "file" ? (
                               checkIfImage(message.fileUrl) ? (
                                 <div
-                                  className="cursor-pointer h-48 w-full sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                  className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
                                   onClick={() => {
                                     dispatch(setViewImages([message.fileUrl]));
                                     setShowImage(true);
@@ -442,25 +566,31 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                   )}
                                 </div>
                               )
-                            ) : (
-                              <p className="pr-14 break-words">
-                                {detectURLs(message.message).map((part, i2) =>
-                                  isValidURL(part) ? (
-                                    <a
-                                      key={i2}
-                                      href={part}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className="text-blue-500 underline"
-                                    >
-                                      {part}
-                                    </a>
-                                  ) : (
-                                    part
-                                  )
-                                )}
-                              </p>
-                            )}
+                            ) :
+                              message.messageType === "audio" ? (
+                                <>
+                                  <AudioMessagePlayer audioUrl={`http://localhost:3000/${message.fileUrl}`} />
+                                </>
+                              ) : (
+                                <p className="pr-14 break-words">
+                                  {detectURLs(message.message).map((part, i2) =>
+                                    isValidURL(part) ? (
+                                      <a
+                                        key={i2}
+                                        href={part}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-500 underline"
+                                      >
+                                        {part}
+                                      </a>
+                                    ) : (
+                                      part
+                                    )
+                                  )}
+                                </p>
+                              )
+                            }
 
                             {/* Timestamp and Status Icon inside bubble */}
                             <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
@@ -494,13 +624,74 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
 
             {/* Input Box */}
-            < form onSubmit={handleSubmit} className="flex items-center gap-2 px-4 py-3 relative" >
-              {/* Paperclip Button with Dropdown */}
-              <div div className="relative" >
+            <form
+              onSubmit={handleSubmit}
+              className="flex flex-wrap items-center gap-2 px-4 py-3 relative bg-white border-t border-gray-300"
+            >
+
+              {/* File Preview Container */}
+              {file?.length > 0 && (
+                <div
+                  className="absolute z-10 -top-[138px] left-0 grid gap-3 bg-white rounded-md shadow-lg p-3 border border-gray-200 max-w-full overflow-y-auto"
+                  style={{
+                    gridTemplateColumns: `repeat(${Math.min(file.length, 4)}, minmax(0, 1fr))`,
+                    width: `${Math.min(file.length, 4) * 8}rem`, // 7.5rem ≈ 120px per image box
+                    maxHeight: "203px"
+                  }}
+                >
+                  {file.slice(0, 4).map((img, index) => {
+                    const fileExtension = img?.split(".").pop().toLowerCase() || "";
+
+                    return (
+                      <div
+                        key={index}
+                        className="relative flex items-center justify-center bg-gray-50 p-2 rounded-md shadow-sm w-24 h-24 sm:w-28 sm:h-28"
+                      >
+                        {/* File Type Icons */}
+                        {fileExtension === "pdf" ? (
+                          <FaFilePdf className="w-16 h-16 text-red-500" />
+                        ) : fileExtension === "xlsx" || fileExtension === "xls" ? (
+                          <FaFileExcel className="w-16 h-16 text-green-500" />
+                        ) : fileExtension === "docx" || fileExtension === "doc" ? (
+                          <FaFileWord className="w-16 h-16 text-blue-500" />
+                        ) : fileExtension === "mp3" ? (
+                          <FaFileAudio className="w-16 h-16 text-blue-500" />
+                        ) : (
+                          <img
+                            src={img}
+                            alt={`Preview ${index}`}
+                            className="w-full h-full object-cover rounded-md border-2 border-gray-300"
+                          />
+                        )}
+
+                        {/* Overlay for more than 4 */}
+                        {index === 3 && file.length > 4 && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center rounded-md text-lg font-semibold">
+                            +{file.length - 4}
+                          </div>
+                        )}
+
+                        {/* Remove Button */}
+                        <button
+                          type="button"
+                          className="absolute top-1 right-1 bg-white text-red-500 rounded-full p-1 hover:text-red-700 shadow-md"
+                          onClick={() => handleRemoveImage(index)}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+
+              {/* File Upload */}
+              <div className="relative">
                 <button
                   type="button"
                   onClick={handleFileClick}
-                  className="rounded-md hover:bg-gray-400 p-2 text-gray-700 transition duration-200 cursor-pointer"
+                  className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
                 >
                   <Paperclip className="w-5 h-5" />
                 </button>
@@ -508,66 +699,50 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   type="file"
                   ref={fileInputRef}
                   onChange={handleFileChange}
+                  multiple
                   className="hidden"
                 />
               </div>
 
-
-
-              {/* Emoji Button with Picker */}
-              {/* <div className="relative">
-              <button
-                type="button"
-                className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
-                onClick={() => setIsEmojiPickerOpen((prev) => !prev)}
-              >
-                <Smile className="w-5 h-5" />
-              </button>
-
-              {isEmojiPickerOpen && (
-                <div className="absolute bottom-full mb-2 -right-30  z-10 w-64 max-w-xs scale-90 origin-bottom-right sm:w-40">
-                  <EmojiPicker className="w-5 h-5" onEmojiClick={handleEmojiClick} />
-                </div>
-              )}
-            </div> */}
-              {/* <Menu as="div" className="relative inline-block text-left">
-              <div>
-                <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
-                  onClick={() => setIsEmojiPickerOpen((prev) => !prev)}
-                >
-                  <Smile aria-hidden="true" className="w-5 h-5" />
-                </MenuButton>
-              </div>
-              {isEmojiPickerOpen && (
-                <MenuItems
-                  transition
-                  className="absolute -right-40 bottom-10 z-10 w-56 sm:ml-20 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                >
-                  <EmojiPicker className="w-5 h-5" onEmojiClick={handleEmojiClick} />
-                </MenuItems>
-              )}
-            </Menu> */}
-
+              {/* Text Input */}
               <input
                 value={message}
                 onChange={(e) => {
-                  setMessage(e.target.value)
-                  socket.current.emit('typing', selectedUser?._id, profileData?._id);
+                  setMessage(e.target.value);
+                  socket.current.emit("typing", selectedUser?._id, profileData?._id);
 
-                  // Clear previous timeout if it exists
-                  if (typingTimeoutRef.current) {
-                    clearTimeout(typingTimeoutRef.current);
-                  }
+                  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-                  // Set new timeout for stopTyping
                   typingTimeoutRef.current = setTimeout(() => {
-                    socket.current.emit('stopTyping', selectedUser?._id, profileData?._id);
+                    socket.current.emit("stopTyping", selectedUser?._id, profileData?._id);
                   }, 2000);
                 }}
                 placeholder="Type a message..."
-                className="flex-1 px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
+                className="flex-1 min-w-[150px] px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
               />
 
+              {/* Voice Recorder */}
+              <div>
+                {recording ? (
+                  <button
+                    type="button"
+                    className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
+                    onClick={stopRecording}
+                  >
+                    <Mic className="w-5 h-5" />
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                    onClick={startRecording}
+                  >
+                    <Mic className="w-5 h-5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Send Button */}
               <button
                 type="submit"
                 className="bg-gray-600 text-white px-5 py-2 rounded-md hover:bg-gray-700 cursor-pointer"
