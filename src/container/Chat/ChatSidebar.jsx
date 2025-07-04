@@ -84,45 +84,45 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               >
                 {/* Profile Section */}
                 <button
-                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Profile clicked")}
                 >
-                  <User className="w-5 h-5 text-gray-700" />
+                  <User className="w-5 h-5" />
                   Profile
                 </button>
                 <button
-                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Account Settings clicked")}
                 >
-                  <Settings className="w-5 h-5 text-gray-700" />
+                  <Settings className="w-5 h-5" />
                   Account Settings
                 </button>
                 <button
-                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Theme Toggle clicked")}
                 >
-                  <SunMoon className="w-5 h-5 text-gray-700" />
+                  <SunMoon className="w-5 h-5" />
                   Theme: Light/Dark
                 </button>
                 <button
-                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Notifications clicked")}
                 >
-                  <Bell className="w-5 h-5 text-gray-700" />
+                  <Bell className="w-5 h-5" />
                   Notifications
                 </button>
                 <button
-                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Support clicked")}
                 >
-                  <LifeBuoy className="w-5 h-5 text-gray-700" />
+                  <LifeBuoy className="w-5 h-5" />
                   Support
                 </button>
 
                 {/* Logout */}
                 <button
-                  className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
-                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                  onClick={() => console.log("Delete Chat clicked")}
                 >
                   <LogOut className="w-5 h-5 text-red-600" />
                   <span className="text-red-600 font-medium">Logout</span>
@@ -164,7 +164,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             : groupConversationList
           )?.length === 0 ? (
             <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
-             {selectedChatType === "single" ? "No user found" : "No group found"} 
+              {selectedChatType === "single" ? "No user found" : "No group found"}
             </li>
           ) : (
             (selectedChatType === "single"
