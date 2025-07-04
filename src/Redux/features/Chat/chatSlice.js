@@ -1,6 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getConversationService, getUserListService } from "../../../Services/ChatServices";
-import { createConversationService } from "../../../Services/ChatServices/chatServices";
+import { getUserListService } from "../../../Services/ChatServices";
 
 // Initial state
 const initialState = {
@@ -32,23 +31,6 @@ export const getUserList = createAsyncThunk(
     return response.data || [];
   }
 );
-
-// export const createConversation = createAsyncThunk(
-//   "chat/createConversation",
-//   async (payload) => {
-//     const response = await createConversationService(payload);
-//     return response.data || {};
-//   }
-// );
-// export const getConversation = createAsyncThunk(
-//   "chat/getConversation",
-//   async () => {
-//     const response = await getConversationService();
-//     return response.data || [];
-//   }
-// );
-
-
 
 
 // Create chat slice using createSlice

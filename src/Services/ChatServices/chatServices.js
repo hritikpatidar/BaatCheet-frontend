@@ -20,3 +20,7 @@ export const createConversationService = (payload) => {
 export const getConversationService = () => {
     return httpServices.get(`${getUrl()}/get-conversations`);
 }
+
+export const getaudioUrl = (url) => {
+    return httpServices.get(`${getUrl()}/view-audio/${url}`);
+}

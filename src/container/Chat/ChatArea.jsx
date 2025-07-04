@@ -28,7 +28,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../context/SocketContext";
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
-import { closeChat, setFileDownloadProgress, setIsDownloading, setIsUploading, setSendMessages, setUpdateMessages } from "../../Redux/features/Chat/chatSlice";
+import { closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setSendMessages, setUpdateMessages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
 import { checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
@@ -44,7 +44,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const fileInputRef = useRef(null);
   const messagesContainerRef = useRef(null)
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
-  const { isTyping, selectedUser, ChatMessages, onlineStatus, Downloading, DownloadProgress  } = useSelector((state) => state?.ChatDataSlice);
+  const { isTyping, selectedUser, ChatMessages, onlineStatus, Downloading, DownloadProgress } = useSelector((state) => state?.ChatDataSlice);
   const [isUserAtBottom, setIsUserAtBottom] = useState(false)
   const [message, setMessage] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
@@ -691,7 +691,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             ) :
                               message.messageType === "audio" ? (
                                 <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                  <AudioMessagePlayer audioUrl={`http://localhost:3000/${message.fileUrl}`} />
+                                  <AudioMessagePlayer audioUrl={message.fileUrl} />
                                 </div>
                               ) : (
                                 <p className="pr-14 break-words">
