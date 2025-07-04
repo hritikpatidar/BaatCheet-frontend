@@ -17,7 +17,6 @@ const AudioMessagePlayer = ({ audioUrl }) => {
   const fetchUrl = async (url) => {
     try {
       const response = await getaudioUrl(url);
-      debugger;
       // Convert base64 to Blob
       const byteCharacters = atob(response?.data?.base64);
       const byteNumbers = Array.from(byteCharacters).map(char => char.charCodeAt(0));
