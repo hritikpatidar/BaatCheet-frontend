@@ -19,7 +19,8 @@ import {
   Send,
   Mic,
   Play,
-  Pause
+  Pause,
+  CornerDownLeft
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -38,6 +39,7 @@ import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatSer
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 import AudioRecorderUI from "../../components/chatComponent/AudioRecorderUI";
 import WaveSurfer from 'wavesurfer.js';
+import ImageLightbox from "../../components/imagePreview";
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
@@ -978,6 +980,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             </div>
           </div>
         )
+      }
+
+      {
+        showImage &&
+        <ImageLightbox
+          setShowImage={setShowImage}
+          downloadImages={downloadImages}
+        />
       }
 
     </>

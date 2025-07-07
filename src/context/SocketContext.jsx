@@ -116,6 +116,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       socket.current.on("receiveMessage", (messages) => {
+        debugger
         socket.current.emit("groupConversation", profileData._id);
         socket.current.emit("conversation", profileData._id);
         const payload = { ...selectedUser, profile: selectedUser?.image }

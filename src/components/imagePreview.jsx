@@ -38,13 +38,14 @@ const ImageLightbox = ({ downloadImages,setShowImage }) => {
 
     return (
         <div
-            className="fixed z-[1000] top-0 left-0 h-[100vh] w-[100vw] flex flex-col items-center justify-center backdrop-brightness-50"
+            className="fixed z-[1000] top-0 left-0 h-[100vh] w-[100vw] flex flex-col items-center justify-center backdrop-brightness-0"
             onWheel={handleWheel}
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseUp}
             style={{ cursor }}
         >
+            
             {/* 🔹 Modal Header */}
             <div className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-gray-900 text-white shadow-md z-50">
                 <h2 className="text-xl font-semibold">Image Viewer</h2>
