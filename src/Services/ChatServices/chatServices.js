@@ -24,3 +24,7 @@ export const getConversationService = () => {
 export const getaudioUrl = (url) => {
     return httpServices.get(`${getUrl()}/view-audio/${url}`);
 }
+
+export const getImageUrl = (url) => {
+    return httpServices.get(`${getUrl()}/view-image/${url}`);
+}
