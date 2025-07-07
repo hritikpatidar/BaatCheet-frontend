@@ -17,7 +17,9 @@ import {
   Check,
   Clock3,
   Send,
-  Mic
+  Mic,
+  Play,
+  Pause
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -34,6 +36,8 @@ import dayjs from "dayjs";
 import { checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
 import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
+import AudioRecorderUI from "../../components/chatComponent/AudioRecorderUI";
+import WaveSurfer from 'wavesurfer.js';
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
@@ -60,6 +64,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [recording, setRecording] = useState(false);
   const [isSend, setIsSend] = useState(false);
   const [audioBlob, setAudioBlob] = useState(null);
+  const isSendDisabled = !message && file.length === 0 && !audioBlob;
 
   useEffect(() => {
     return () => {
@@ -82,6 +87,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     setFile([]);
     setIsNewMessage(false);
     setIsSend(false)
+    setAudioBlob(null);
+    setRecording(false);
   }
 
 
@@ -451,7 +458,13 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
     mediaRecorder.onstop = () => {
       const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-      setAudioBlob(blob);
+      // Append to existing blob
+      if (audioBlob) {
+        const combinedBlob = new Blob([audioBlob, blob], { type: "audio/webm" });
+        setAudioBlob(combinedBlob);
+      } else {
+        setAudioBlob(blob);
+      }
     };
 
     mediaRecorder.start();
@@ -462,6 +475,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     mediaRecorderRef.current.stop();
     setRecording(false);
   };
+
+  const handleDeleteAudio = () => {
+    setAudioBlob(null);
+    setRecording(false);
+  };
+
+  const handlePlayPauseAudio = () => {
+    mediaRecorderRef.current.stop();
+  }
 
   return (
     <>
@@ -629,12 +651,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             <div
               ref={messagesContainerRef}
               onScroll={handleScroll}
-              className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 bg-gray-100 space-y-3"
+              className="flex-1 overflow-y-auto px-4 sm:px-6 py-0 pt-4 bg-gray-100 space-y-3"
             >
               {Object.keys(groupedMessages).length > 0 ? (
                 Object.keys(groupedMessages).map((date, index) => (
                   <div key={index} className="mb-4">
-                    <div className="text-center text-sm text-gray-500 font-medium">
+                    <div className="text-center text-sm text-gray-500 pb-3 font-medium">
                       {dayjs(date, "DD/MM/YYYY").isSame(dayjs(), "day") ? "Today" : date}
                     </div>
                     {groupedMessages[date].map((message, idx) => {
@@ -748,7 +770,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             {/* Input Box */}
             <form
               onSubmit={handleSubmit}
-              className="flex flex-wrap items-center gap-2 px-4 py-3 relative bg-white border-t border-gray-300"
+              className="flex items-center justify-end gap-2 px-4 py-3 relative bg-white border-t border-gray-300"
             >
 
               {/* File Preview Container */}
@@ -757,7 +779,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   className="absolute z-10 -top-[138px] left-0 grid gap-3 bg-white rounded-md shadow-lg p-3 border border-gray-200 max-w-full overflow-y-auto"
                   style={{
                     gridTemplateColumns: `repeat(${Math.min(file.length, 4)}, minmax(0, 1fr))`,
-                    width: `${Math.min(file.length, 4) * 8}rem`, // 7.5rem ≈ 120px per image box
+                    width: `${Math.min(file.length, 4) * 8.5}rem`, // 7.5rem ≈ 120px per image box
                     maxHeight: "203px"
                   }}
                 >
@@ -807,72 +829,105 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               )}
 
+              {(recording || audioBlob) ? (
+                <div className="flex items-center gap-2 w-full max-w-[500px]">
+                  {/* Audio Player */}
+                  {audioBlob instanceof Blob && (
+                    <audio
+                      controls
+                      src={URL.createObjectURL(audioBlob)}
+                      className="flex-1 rounded-md w-0  h-10"
+                    />
+                  )}
 
-              {/* File Upload */}
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={handleFileClick}
-                  className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                >
-                  <Paperclip className="w-5 h-5" />
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  onChange={handleFileChange}
-                  multiple
-                  className="hidden"
-                />
-              </div>
+                  {/* Delete Button */}
+                  <button
+                    type="button"
+                    className="rounded-md hover:bg-gray-200 p-2 text-red-600 transition duration-200"
+                    onClick={handleDeleteAudio}
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                  {!audioBlob &&
+                    <button
+                      type="button"
+                      className="rounded-md hover:bg-gray-200 p-2 text-red-600 transition duration-200"
+                      onClick={handlePlayPauseAudio}
+                    >
+                      {recording ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                    </button>
+                  }
+                </div>
 
-              {/* Text Input */}
-              <input
-                value={message}
-                onChange={(e) => {
-                  setMessage(e.target.value);
-                  socket.current.emit("typing", selectedUser?._id, profileData?._id);
+              ) : (
+                <>
+                  {/* File Upload */}
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={handleFileClick}
+                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                    >
+                      <Paperclip className="w-5 h-5" />
+                    </button>
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      multiple
+                      className="hidden"
+                    />
+                  </div>
+                  <input
+                    value={message}
+                    onChange={(e) => {
+                      setMessage(e.target.value);
+                      socket.current.emit("typing", selectedUser?._id, profileData?._id);
+                      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                      typingTimeoutRef.current = setTimeout(() => {
+                        socket.current.emit("stopTyping", selectedUser?._id, profileData?._id);
+                      }, 2000);
+                    }}
+                    placeholder="Type a message..."
+                    className="flex-1 min-w-[150px] px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
+                  />
+                </>
 
-                  if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-
-                  typingTimeoutRef.current = setTimeout(() => {
-                    socket.current.emit("stopTyping", selectedUser?._id, profileData?._id);
-                  }, 2000);
-                }}
-                placeholder="Type a message..."
-                className="flex-1 min-w-[150px] px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
-              />
+              )}
 
               {/* Voice Recorder */}
               <div>
-                {recording ? (
-                  <button
-                    type="button"
-                    className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
-                    onClick={stopRecording}
-                  >
-                    <Mic className="w-5 h-5" />
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                    onClick={startRecording}
-                  >
-                    <Mic className="w-5 h-5" />
-                  </button>
-                )}
+                {
+                  isSendDisabled ? (
+                    recording ? (
+                      <button
+                        type="button"
+                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
+                        onClick={stopRecording}
+                      >
+                        <Mic className="w-5 h-5" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                        onClick={startRecording}
+                      >
+                        <Mic className="w-5 h-5" />
+                      </button>
+                    )) : (
+                    <button
+                      type="submit"
+                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                      disabled={isSendDisabled}
+                    >
+                      <Send className="w-5 h-5" />
+                    </button>
+                  )
+                }
               </div>
-
-              {/* Send Button */}
-              <button
-                type="submit"
-                className="bg-gray-600 text-white px-5 py-2 rounded-md hover:bg-gray-700 cursor-pointer"
-              >
-                Send
-              </button>
             </form>
-          </div>
+          </div >
         </>
       )
       }
