@@ -11,6 +11,7 @@ const initialState = {
   ChatMessages: [],
   onlineStatus: [],
   isTyping: false,
+  selectedFiles:[], // selectedFile ke liye
   isUploading: false,
   isDownloading: false,
   fileUploadProgress: 0,
@@ -79,18 +80,12 @@ const chatSlice = createSlice({
     setIsTyping: (state, action) => {
       state.isTyping = action.payload
     },
-    setupdateMessageValue: (state, action) => {
-      if (!Array.isArray(action.payload)) {
-        action.payload = [action.payload]; // 🛠 Single message ko array me convert kar diya
-      }
-
-      action.payload.forEach((newMessage) => {
-        const index = state.ChatMessages.findIndex((msg) => msg.message_id === newMessage.message_id);
-
-        if (index !== -1) {
-          state.ChatMessages[index] = { ...state.ChatMessages[index], ...newMessage };
-        }
-      });
+    setSelectedFiles: (state, action) => {
+      state.selectedFiles = [...state.selectedFiles, ...action.payload];
+    },
+    setRemoveSelectedFiles: (state, action) => {
+      const index = action.payload;
+      state.selectedFiles = state.selectedFiles.filter((_, i) => i !== index);
     },
     setupdateOneMessage: (state, action) => {
       const { _id } = action.payload;
@@ -203,6 +198,8 @@ export const {
   addMessage,
   onlineStatusData,
   setIsTyping,
+  setSelectedFiles,
+  setRemoveSelectedFiles,
   setIsUserDetails,
   setFilesList,
   updateFilesList,

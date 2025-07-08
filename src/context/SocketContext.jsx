@@ -12,8 +12,6 @@ import {
   setSendMessages,
   setSendMessageUpdate,
   setSingleConversationList,
-  setUpdateMessages,
-  setupdateMessageValue,
   setUserList,
   updateFilesList,
   updatelinksList

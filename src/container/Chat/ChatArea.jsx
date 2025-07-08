@@ -20,7 +20,7 @@ import {
   Mic,
   Play,
   Pause,
-  CornerDownLeft
+  ChevronsDown
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -31,42 +31,51 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../context/SocketContext";
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
-import { closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
+import { closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setRemoveSelectedFiles, setSelectedFiles, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
-import { checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
+import { base64ToFile, checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
 import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
-import AudioRecorderUI from "../../components/chatComponent/AudioRecorderUI";
-import WaveSurfer from 'wavesurfer.js';
 import ImageLightbox from "../../components/imagePreview";
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const dispatch = useDispatch();
-  const typingTimeoutRef = useRef(null);
-
+  //global states
   const { socket, fetchMessages, page, setPage, messageLoading } = useSocket()
-  const fileInputRef = useRef(null);
-  const messagesContainerRef = useRef(null)
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
-  const { isTyping, selectedUser, ChatMessages, onlineStatus, Downloading, DownloadProgress } = useSelector((state) => state?.ChatDataSlice);
-  const [isUserAtBottom, setIsUserAtBottom] = useState(false)
-  const [message, setMessage] = useState('');
-  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-  const [userDetails, setUserDetails] = useState()
+  const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
+
+  //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
+  const [userDetails, setUserDetails] = useState()
+
+  //message container states
+  const messagesContainerRef = useRef(null)
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
-  const [file, setFile] = useState([]);
-  const [isNewMessage, setIsNewMessage] = useState(false);
+  const [isUserAtBottom, setIsUserAtBottom] = useState(false)
   const [showImage, setShowImage] = useState(false);
 
+  //form states
+  const fileInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const [message, setMessage] = useState('');
+  const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [recording, setRecording] = useState(false);
-  const [isSend, setIsSend] = useState(false);
+  const [file, setFile] = useState([]);
   const [audioBlob, setAudioBlob] = useState(null);
   const isSendDisabled = !message && file.length === 0 && !audioBlob;
+
+
+  //useEffect hooks
+  //header useEffect
+  useEffect(() => {
+    const payload = { ...selectedUser, profile: selectedUser?.image }
+    setUserDetails(selectedUser?.conversationType === "single" ? selectedUser?.members?.find(item => item._id !== profileData?._id) : payload)
+  }, [selectedUser])
 
   useEffect(() => {
     return () => {
@@ -76,10 +85,359 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     };
   }, []);
 
+
+  //message container functions
+  //scroll functions
+  const scrollToBottom = async () => {
+    const container = messagesContainerRef.current;
+    if (container) {
+      setPrevScrollHeight(container.scrollHeight);
+      container.scrollTop = container.scrollHeight;
+    }
+  };
+
+  const handleScroll = async () => {
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    const atTop = container.scrollTop === 0;
+    if (atTop) {
+      const nextPage = page + 1;
+      await fetchMessages(nextPage, selectedUser);
+      setPage(nextPage);
+    }
+
+    const nearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+    setIsUserAtBottom(nearBottom);
+  };
+
   useEffect(() => {
-    const payload = { ...selectedUser, profile: selectedUser?.image }
-    setUserDetails(selectedUser?.conversationType === "single" ? selectedUser?.members?.find(item => item._id !== profileData?._id) : payload)
-  }, [selectedUser])
+    if (isUserAtBottom) {
+      scrollToBottom();
+    } else {
+      const container = messagesContainerRef.current;
+      if (!container) return;
+      setPrevScrollHeight(container.scrollHeight);
+      const atTop = container.scrollTop === 0;
+      if (atTop) {
+        setTimeout(() => {
+          const newScrollHeight = container.scrollHeight;
+          container.scrollTop = newScrollHeight - prevScrollHeight;
+        }, 0);
+        return
+      }
+    }
+  }, [ChatMessages]);
+
+  // message container functions
+  // socket functions for message view and delivery status
+  useEffect(() => {
+    if (socket.current) {
+      socket.current.emit("conversation", profileData._id);
+      socket.current.off("deliveredResult");
+      socket.current.off("viewResult");
+
+      socket.current.on("deliveredResult", (data) => {
+        const updatedMessages = ChatMessages.map((message) => {
+          if (data?.message_id === message?._id) {
+            return { ...message, status: "delivered" };
+          }
+          return message;
+        });
+        dispatch(setUpdateMessages(updatedMessages));
+      });
+
+      socket.current.on("viewResult", (data) => {
+        const updatedMessages = ChatMessages.map((message) => {
+          if (data?.message_id === message?._id) {
+            return { ...message, status: "read" };
+          }
+          return message;
+        });
+        dispatch(setUpdateMessages(updatedMessages));
+      });
+    }
+  }, [socket, ChatMessages]);
+
+  const formatDateKey = (date) => {
+    const d = dayjs(date);
+    if (d.isSame(dayjs(), 'day')) return 'Today';
+    if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return 'Yesterday';
+    if (d.isSame(dayjs(), 'week')) return d.format('dddd'); // ex. Monday, ..., Sunday
+    return d.format('DD/MM/YYYY');
+  };
+
+
+  const groupMessagesByDate = (messages) => {
+    return messages.reduce((acc, message) => {
+      if (
+        socket.current &&
+        message?.status === "sent" &&
+        message?.isSenderId !== profileData?._id
+      ) {
+        socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType);
+      }
+
+      if (
+        socket.current &&
+        message?.status === "delivered" &&
+        message?.isSenderId !== profileData?._id
+      ) {
+        socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
+      }
+
+      const key = formatDateKey(message.createdAt);
+      if (!acc[key]) acc[key] = [];
+      acc[key].push(message);
+      return acc;
+    }, {});
+  };
+
+  const groupedMessages = groupMessagesByDate(ChatMessages);
+
+  const downloadFile = async (url, messageId, index) => {
+    try {
+      dispatch(setIsDownloading(index));
+      dispatch(setFileDownloadProgress(0));
+
+      let fileName = url.split("/").pop();
+      let fileExtension = fileName.split(".").pop().toLowerCase();
+
+      // These formats should open in a new tab
+      const openInNewTabFormats = ["pdf", "txt", "md", "html", "xml", "mp4"];
+
+      if (openInNewTabFormats.includes(fileExtension)) {
+        window.open(url, "_blank"); // Open in a new tab
+      } else {
+        let link = document.createElement("a");
+        link.href = url;
+        link.download = fileName || "downloaded_file";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      // Simulating download progress
+      let simulatedProgress = 0;
+      const progressInterval = setInterval(() => {
+        simulatedProgress += 10;
+        if (simulatedProgress <= 100) {
+          dispatch(setFileDownloadProgress(simulatedProgress));
+          if (socket.current) socket.current.emit("downloadFile", messageId);
+        } else {
+          clearInterval(progressInterval);
+          dispatch(setFileDownloadProgress(100));
+          dispatch(setIsDownloading(null));
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      dispatch(setIsDownloading(null));
+      dispatch(setFileDownloadProgress(0));
+    }
+  };
+
+  const downloadImages = async (url, index) => {
+    dispatch(setIsDownloading(index));
+    dispatch(setFileDownloadProgress(0));
+    try {
+      const payload = {
+        img: url,
+      };
+      const response = await getDownloadBufferFile(payload);
+
+      const byteArray = new Uint8Array(response.data.data.data);
+      const blob = new Blob([byteArray], { type: "image/png" });
+      const objectURL = URL.createObjectURL(blob);
+      let simulatedProgress = 0;
+      const progressInterval = setInterval(() => {
+        simulatedProgress += 10;
+        if (simulatedProgress <= 100) {
+          dispatch(setFileDownloadProgress(simulatedProgress));
+        } else {
+          clearInterval(progressInterval);
+          dispatch(setFileDownloadProgress(100));
+          dispatch(setIsDownloading(null));
+          let link = document.createElement("a");
+          link.href = objectURL;
+          const fileName = objectURL.split("/").pop();
+          link.download = fileName || "downloaded_file";
+          link.click();
+        }
+      }, 100);
+    } catch (error) {
+      console.error("Error downloading file:", error);
+      dispatch(setIsDownloading(null));
+      dispatch(setFileDownloadProgress(0));
+    }
+  };
+
+  //form functions
+
+  const startRecording = async () => {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream);
+    mediaRecorderRef.current = mediaRecorder;
+    audioChunksRef.current = [];
+
+    mediaRecorder.ondataavailable = (e) => {
+      audioChunksRef.current.push(e.data);
+    };
+
+    mediaRecorder.onstop = () => {
+      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+      // Append to existing blob
+      if (audioBlob) {
+        const combinedBlob = new Blob([audioBlob, blob], { type: "audio/webm" });
+        setAudioBlob(combinedBlob);
+      } else {
+        setAudioBlob(blob);
+      }
+    };
+
+    mediaRecorder.start();
+    setRecording(true);
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current.stop();
+    setRecording(false);
+  };
+
+  const handleDeleteAudio = () => {
+    setAudioBlob(null);
+    setRecording(false);
+  };
+
+  const handlePlayPauseAudio = () => {
+    mediaRecorderRef.current.stop();
+  }
+
+  const handleEmojiClick = (emojiObject) => {
+    setMessage((prevText) => prevText + emojiObject.emoji);
+  };
+
+  const handleFileClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files);
+    try {
+      if (files?.length) {
+        const formData = new FormData();
+        files.forEach((file, index) => {
+          formData.append("img", file);
+        });
+        dispatch(setIsUploading(true));
+
+        const response = await uploadFileService(formData, {
+          onUploadProgress: (data) => {
+            const progress = Math.round((100 * data.loaded) / data.total);
+            dispatch(setFileUploadProgress(progress));
+          },
+        });
+        let result = response?.data?.data;
+        // await dispatch(setSelectedFiles(result));
+        setFile((prev) => [...prev, ...result]);
+      }
+    } catch (error) {
+      dispatch(setIsUploading(false));
+      console.error({ error });
+    } finally {
+      dispatch(setIsUploading(false));
+      e.target.value = "";
+    }
+  };
+
+  const handleRemoveImage = async (index) => {
+    // await dispatch(setRemoveSelectedFiles(index));
+    setFile((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handlePaste = async (e) => {
+    const clipboardData = e.clipboardData || window.clipboardData;
+    const items = clipboardData.items;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+
+      // Accept both images and document types
+      if (item.kind === "file") {
+        const file = item.getAsFile();
+        if (file) {
+          const allowedTypes = [
+            "image/png",
+            "image/jpeg",
+            "image/webp",
+            "image/gif",
+            "application/pdf",
+            "application/msword",                     // .doc
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // .docx
+            "application/vnd.ms-excel", // .xls
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" // .xlsx
+          ];
+
+          if (allowedTypes.includes(file.type)) {
+            const formData = new FormData();
+            formData.append("img", file); // you might want to rename 'img' to 'file' for clarity
+            dispatch(setIsUploading(true));
+
+            try {
+              const response = await uploadFileService(formData, {
+                onUploadProgress: (data) => {
+                  const progress = Math.round((100 * data.loaded) / data.total);
+                  dispatch(setFileUploadProgress(progress));
+                },
+              });
+
+              const result = response?.data?.data;
+              setFile((prev) => [...prev, ...result]);
+            } finally {
+              dispatch(setIsUploading(false));
+            }
+
+            e.preventDefault();
+          }
+        }
+      }
+    }
+  };
+
+
+  const handleDrop = async (e) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    const imageFiles = files.filter(file => file.type.startsWith("image/"));
+
+    for (const file of imageFiles) {
+      const reader = new FileReader();
+      reader.onload = async (event) => {
+        const base64Image = event.target.result;
+        const formData = new FormData();
+        const fileObject = base64ToFile(base64Image, `image-${Date.now()}.png`);
+        formData.append("img", fileObject);
+        dispatch(setIsUploading(true));
+
+        try {
+          const response = await uploadFileService(formData, {
+            onUploadProgress: (data) => {
+              const progress = Math.round((100 * data.loaded) / data.total);
+              dispatch(setFileUploadProgress(progress));
+            },
+          });
+          const result = response?.data?.data;
+          setFile((prev) => [...prev, ...result]);
+        } finally {
+          dispatch(setIsUploading(false));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
 
   const onSendMessage = (newMessage) => {
@@ -87,8 +445,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     if (socket) socket.current.emit('sendMessage', newMessage);
     setMessage('');
     setFile([]);
-    setIsNewMessage(false);
-    setIsSend(false)
     setAudioBlob(null);
     setRecording(false);
   }
@@ -96,7 +452,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const handleSubmit = async (e) => {
     // "text" | "image" | "video" | "file" | "audio" | "link"
-    setIsNewMessage(true);
     e.preventDefault();
     if (selectedUser?.conversationType === "single") {
       if (file.length > 0) {
@@ -181,312 +536,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   };
 
 
-  const handleEmojiClick = (emojiObject) => {
-    setMessage((prevText) => prevText + emojiObject.emoji);
-  };
-
-  const handleFileClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-    try {
-      if (files?.length) {
-        const formData = new FormData();
-        files.forEach((file, index) => {
-          formData.append("img", file);
-        });
-        dispatch(setIsUploading(true));
-
-        const response = await uploadFileService(formData, {
-          onUploadProgress: (data) => {
-            const progress = Math.round((100 * data.loaded) / data.total);
-            dispatch(setFileUploadProgress(progress));
-          },
-        });
-        let result = response?.data?.data;
-        setFile((prev) => [...prev, ...result]);
-      }
-    } catch (error) {
-      dispatch(setIsUploading(false));
-      console.error({ error });
-    } finally {
-      dispatch(setIsUploading(false));
-      setIsNewMessage(false);
-      e.target.value = "";
-    }
-  };
-
-  const handleRemoveImage = (index) => {
-    setFile((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const scrollToBottom = async () => {
-    const container = messagesContainerRef.current;
-    if (container) {
-      setPrevScrollHeight(container.scrollHeight);
-      container.scrollTop = container.scrollHeight;
-    }
-  };
-
-  const handleScroll = async () => {
-    const container = messagesContainerRef.current;
-    if (!container) return;
-
-    const atTop = container.scrollTop === 0;
-    if (atTop) {
-      const nextPage = page + 1;
-      await fetchMessages(nextPage, selectedUser);
-      setPage(nextPage);
-    }
-
-    const nearBottom =
-      container.scrollHeight - container.scrollTop - container.clientHeight < 100;
-    setIsUserAtBottom(nearBottom);
-  };
-
-  useEffect(() => {
-    if (isUserAtBottom) {
-      scrollToBottom();
-    } else {
-      const container = messagesContainerRef.current;
-      if (!container) return;
-      setPrevScrollHeight(container.scrollHeight);
-      const atTop = container.scrollTop === 0;
-      if (atTop) {
-        setTimeout(() => {
-          const newScrollHeight = container.scrollHeight;
-          container.scrollTop = newScrollHeight - prevScrollHeight;
-        }, 0);
-        return
-      }
-    }
-  }, [ChatMessages]);
-
-  // message container functions
-  useEffect(() => {
-    if (socket.current) {
-      socket.current.emit("conversation", profileData._id);
-      socket.current.off("deliveredResult");
-      socket.current.off("viewResult");
-
-      socket.current.on("deliveredResult", (data) => {
-        const updatedMessages = ChatMessages.map((message) => {
-          if (data?.message_id === message?._id) {
-            return { ...message, status: "delivered" };
-          }
-          return message;
-        });
-        dispatch(setUpdateMessages(updatedMessages));
-      });
-
-      socket.current.on("viewResult", (data) => {
-        const updatedMessages = ChatMessages.map((message) => {
-          if (data?.message_id === message?._id) {
-            return { ...message, status: "read" };
-          }
-          return message;
-        });
-        dispatch(setUpdateMessages(updatedMessages));
-      });
-    }
-  }, [socket, ChatMessages]);
-
-  const formatDateKey = (date) => {
-    const d = dayjs(date);
-    if (d.isSame(dayjs(), 'day')) return 'Today';
-    if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return 'Yesterday';
-    if (d.isSame(dayjs(), 'week')) return d.format('dddd'); // जैसे Monday, ..., Sunday
-    return d.format('DD/MM/YYYY');
-  };
-
-
-  const groupMessagesByDate = (messages) => {
-    return messages.reduce((acc, message) => {
-      if (
-        socket.current &&
-        message?.status === "sent" &&
-        message?.isSenderId !== profileData?._id
-      ) {
-        socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType);
-      }
-
-      if (
-        socket.current &&
-        message?.status === "delivered" &&
-        message?.isSenderId !== profileData?._id
-      ) {
-        socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
-      }
-
-      const key = formatDateKey(message.createdAt);
-      if (!acc[key]) acc[key] = [];
-      acc[key].push(message);
-      return acc;
-    }, {});
-  };
-
-  const groupedMessages = groupMessagesByDate(ChatMessages);
-
-
-  const downloadFile = async (url, messageId, index) => {
-    try {
-      dispatch(setIsDownloading(index));
-      dispatch(setFileDownloadProgress(0));
-
-      let fileName = url.split("/").pop();
-      let fileExtension = fileName.split(".").pop().toLowerCase();
-
-      // These formats should open in a new tab
-      const openInNewTabFormats = ["pdf", "txt", "md", "html", "xml", "mp4"];
-
-      if (openInNewTabFormats.includes(fileExtension)) {
-        window.open(url, "_blank"); // Open in a new tab
-      } else {
-        let link = document.createElement("a");
-        link.href = url;
-        link.download = fileName || "downloaded_file";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-
-      // Simulating download progress
-      let simulatedProgress = 0;
-      const progressInterval = setInterval(() => {
-        simulatedProgress += 10;
-        if (simulatedProgress <= 100) {
-          dispatch(setFileDownloadProgress(simulatedProgress));
-          if (socket.current) socket.current.emit("downloadFile", messageId);
-        } else {
-          clearInterval(progressInterval);
-          dispatch(setFileDownloadProgress(100));
-          dispatch(setIsDownloading(null));
-        }
-      }, 100);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      dispatch(setIsDownloading(null));
-      dispatch(setFileDownloadProgress(0));
-    }
-  };
-
-  const downloadImages = async (url, index) => {
-    dispatch(setIsDownloading(index));
-    dispatch(setFileDownloadProgress(0));
-    try {
-      const payload = {
-        img: url,
-      };
-      const response = await getDownloadBufferFile(payload);
-
-      const byteArray = new Uint8Array(response.data.data.data);
-      const blob = new Blob([byteArray], { type: "image/png" });
-      const objectURL = URL.createObjectURL(blob);
-      let simulatedProgress = 0;
-      const progressInterval = setInterval(() => {
-        simulatedProgress += 10;
-        if (simulatedProgress <= 100) {
-          dispatch(setFileDownloadProgress(simulatedProgress));
-        } else {
-          clearInterval(progressInterval);
-          dispatch(setFileDownloadProgress(100));
-          dispatch(setIsDownloading(null));
-          let link = document.createElement("a");
-          link.href = objectURL;
-          const fileName = objectURL.split("/").pop();
-          link.download = fileName || "downloaded_file";
-          link.click();
-        }
-      }, 100);
-    } catch (error) {
-      console.error("Error downloading file:", error);
-      dispatch(setIsDownloading(null));
-      dispatch(setFileDownloadProgress(0));
-    }
-  };
-
-  const handlePaste = async (e) => {
-    const clipboardData = e.clipboardData || window.clipboardData;
-    const items = clipboardData.items;
-    const pastedImages = [];
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      if (item.type.startsWith("image/")) {
-        const file = item.getAsFile();
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = async (event) => {
-            const base64Image = event.target.result;
-            pastedImages.push(base64Image);
-            const formData = new FormData();
-            const fileObject = base64ToFile(
-              base64Image,
-              `image-${Date.now()}.png`
-            );
-            formData.append("img", fileObject);
-            dispatch(setIsUploading(true));
-
-            const response = await uploadFileService(formData, {
-              onUploadProgress: (data) => {
-                const progress = Math.round((100 * data.loaded) / data.total);
-                dispatch(setFileUploadProgress(progress));
-              },
-            });
-            let result = response?.data?.data;
-            setFile((prev) => [...prev, ...result]);
-            dispatch(setIsUploading(false));
-          };
-          reader.readAsDataURL(file);
-          e.preventDefault();
-        }
-      }
-    }
-  };
-
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    mediaRecorderRef.current = mediaRecorder;
-    audioChunksRef.current = [];
-
-    mediaRecorder.ondataavailable = (e) => {
-      audioChunksRef.current.push(e.data);
-    };
-
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-      // Append to existing blob
-      if (audioBlob) {
-        const combinedBlob = new Blob([audioBlob, blob], { type: "audio/webm" });
-        setAudioBlob(combinedBlob);
-      } else {
-        setAudioBlob(blob);
-      }
-    };
-
-    mediaRecorder.start();
-    setRecording(true);
-  };
-
-  const stopRecording = () => {
-    mediaRecorderRef.current.stop();
-    setRecording(false);
-  };
-
-  const handleDeleteAudio = () => {
-    setAudioBlob(null);
-    setRecording(false);
-  };
-
-  const handlePlayPauseAudio = () => {
-    mediaRecorderRef.current.stop();
-  }
-
   return (
     <>
       {!selectedUser?.members ? (
@@ -521,6 +570,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           {/* Main Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Header */}
+            {/* <ChatHeader
+              userDetails={userDetails}
+              setShowSidebar={setShowSidebar}
+              isUserDetailsView={isUserDetailsView}
+              setIsUserDetailsView={setIsUserDetailsView}
+            /> */}
             <div className="bg-gray-300 px-6 py-2 shadow-sm flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <button
@@ -579,7 +634,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   </button>
                 </div>
 
-                <Menu as="div" className="relative inline-block text-left ">
+                <Menu as="div" className="relative inline-block text-left z-20">
                   <div>
                     <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                       <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
@@ -655,11 +710,31 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               onScroll={handleScroll}
               className="flex-1 overflow-y-auto px-4 sm:px-6 py-0 pt-4 bg-gray-100 space-y-3"
             >
+              {!isUserAtBottom && (
+                <div
+                  className="absolute bottom-20 right-4 p-2 bg-gray-200 text-gray-700 rounded-full cursor-pointer z-40 flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow"
+                  onClick={scrollToBottom}
+                  style={{ width: "40px", height: "40px" }}
+                >
+                  <ChevronsDown size={20} />
+                </div>
+              )}
+              {/* {messageLoading && (
+                <div
+                  className="absolute left-1/2 top-5 -translate-x-1/2 z-50
+                         p-2 bg-gray-200 text-gray-700 rounded-full 
+                          flex items-center justify-center 
+                         hover:bg-gray-500/20 transition duration-300 shadow"
+                  style={{ width: "40px", height: "40px" }}
+                >
+                  <Spinner className="h-5 w-5 text-secondary/50" />
+                </div>
+              )} */}
               {Object.keys(groupedMessages).length > 0 ? (
                 Object.keys(groupedMessages).map((date, index) => (
                   <div key={index} className="mb-4">
-                    <div className="text-center text-sm text-gray-500 pb-3 font-medium">
-                      {dayjs(date, "DD/MM/YYYY").isSame(dayjs(), "day") ? "Today" : date}
+                    <div className="sticky top-0 z-10 text-center text-sm text-gray-500 pb-3 font-medium">
+                      <span className="bg-gray-300 p-1 rounded-md">{date}</span>
                     </div>
                     {groupedMessages[date].map((message, idx) => {
                       const isSender = message.isSenderId === profileData?._id;
@@ -726,7 +801,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                         href={part}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-blue-500 underline"
+                                        className="hover:text-blue-300 underline"
                                       >
                                         {part}
                                       </a>
@@ -772,6 +847,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             {/* Input Box */}
             <form
               onSubmit={handleSubmit}
+
+              onDrop={handleDrop}
+              onDragOver={(e) => e.preventDefault()}
+              onDragEnter={(e) => e.preventDefault()}
               className="flex items-center justify-end gap-2 px-4 py-3 relative bg-white border-t border-gray-300"
             >
 
@@ -883,12 +962,23 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   <input
                     value={message}
                     onChange={(e) => {
-                      setMessage(e.target.value);
+                      const inputText = e.target.value;
+                      const words = inputText.split(" ");
+                      if (words.length > 0 && words[0]) {
+                        words[0] = words[0][0].toUpperCase() + words[0].slice(1);
+                      }
+                      setMessage(words.join(" "));
                       socket.current.emit("typing", selectedUser?._id, profileData?._id);
                       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                       typingTimeoutRef.current = setTimeout(() => {
                         socket.current.emit("stopTyping", selectedUser?._id, profileData?._id);
                       }, 2000);
+                    }}
+                    onPaste={handlePaste}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && messageText.trim()) {
+                        handleSendButtonClick();
+                      }
                     }}
                     placeholder="Type a message..."
                     className="flex-1 min-w-[150px] px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
@@ -929,6 +1019,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 }
               </div>
             </form>
+
           </div >
         </>
       )
