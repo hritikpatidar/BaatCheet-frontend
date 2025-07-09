@@ -66,9 +66,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
   const [recording, setRecording] = useState(false);
   const [file, setFile] = useState([]);
+  const [blobFiles, setBlobFiles] = useState([]);
   const [audioBlob, setAudioBlob] = useState(null);
   const isSendDisabled = !message && file.length === 0 && !audioBlob;
-
 
   //useEffect hooks
   //header useEffect
@@ -165,7 +165,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     if (d.isSame(dayjs(), 'day')) return 'Today';
     if (d.isSame(dayjs().subtract(1, 'day'), 'day')) return 'Yesterday';
     if (d.isSame(dayjs(), 'week')) return d.format('dddd'); // ex. Monday, ..., Sunday
-    return d.format('DD/MM/YYYY');
+    return d.format('D MMMM YYYY');
   };
 
 
@@ -324,38 +324,103 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   };
 
-  const handleFileChange = async (e) => {
-    const files = Array.from(e.target.files);
-    try {
-      if (files?.length) {
-        const formData = new FormData();
-        files.forEach((file, index) => {
-          formData.append("img", file);
-        });
-        dispatch(setIsUploading(true));
+  // const handleFileChange = async (e) => {
+  //   const files = Array.from(e.target.files);
+  //   try {
+  //     if (files?.length) {
+  //       const formData = new FormData();
+  //       files.forEach((file, index) => {
+  //         formData.append("img", file);
+  //       });
+  //       dispatch(setIsUploading(true));
 
-        const response = await uploadFileService(formData, {
-          onUploadProgress: (data) => {
-            const progress = Math.round((100 * data.loaded) / data.total);
-            dispatch(setFileUploadProgress(progress));
-          },
+  //       const response = await uploadFileService(formData, {
+  //         onUploadProgress: (data) => {
+  //           const progress = Math.round((100 * data.loaded) / data.total);
+  //           dispatch(setFileUploadProgress(progress));
+  //         },
+  //       });
+  //       let result = response?.data?.data;
+  //       // await dispatch(setSelectedFiles(result));
+  //       setFile((prev) => [...prev, ...result]);
+  //     }
+  //   } catch (error) {
+  //     dispatch(setIsUploading(false));
+  //     console.error({ error });
+  //   } finally {
+  //     dispatch(setIsUploading(false));
+  //     e.target.value = "";
+  //   }
+  // };
+
+  // const handleFileChange = (e) => {
+  //   const files = Array.from(e.target.files);
+
+  //   if (files?.length) {
+  //     const convertToBase64 = (file) => {
+  //       return new Promise((resolve, reject) => {
+  //         const reader = new FileReader();
+  //         reader.onloadend = () => resolve(reader.result); // base64 data
+  //         reader.onerror = reject;
+  //         reader.readAsDataURL(file); // convert to base64
+  //       });
+  //     };
+
+  //     Promise.all(files.map(convertToBase64))
+  //       .then((base64Files) => {
+  //         setFile((prev) => [...prev, ...base64Files]);
+  //       })
+  //       .catch((error) => {
+  //         console.error("Error converting files to base64:", error);
+  //       });
+  //   }
+
+  //   e.target.value = ""; // reset input
+  // };
+
+  // const handleFileChange = (e) => {
+  //   const files = Array.from(e.target.files);
+
+  //   if (files?.length) {
+  //     const blobs = files.map(file => new Blob([file], { type: file.type }));
+  //     setFile((prev) => [...prev, ...blobs]);
+  //   }
+
+  //   e.target.value = ""; // reset input
+  // };
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+
+    if (files?.length) {
+      const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result); // base64 data
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
         });
-        let result = response?.data?.data;
-        // await dispatch(setSelectedFiles(result));
-        setFile((prev) => [...prev, ...result]);
-      }
-    } catch (error) {
-      dispatch(setIsUploading(false));
-      console.error({ error });
-    } finally {
-      dispatch(setIsUploading(false));
-      e.target.value = "";
+      };
+
+      Promise.all(files.map(convertToBase64))
+        .then((base64Files) => {
+          // base64Files = [base64String1, base64String2, ...]
+          setFile((prev) => [...prev, ...base64Files]);
+          setBlobFiles((prev) => [...prev, ...files]); // store Blob (File) objects
+        })
+        .catch((error) => {
+          console.error("Error converting files to base64:", error);
+        });
     }
+
+    e.target.value = ""; // reset input
   };
+
 
   const handleRemoveImage = async (index) => {
     // await dispatch(setRemoveSelectedFiles(index));
     setFile((prev) => prev.filter((_, i) => i !== index));
+    setBlobFiles((prev) => prev.filter((_, i) => i !== index));
+
   };
 
   const handlePaste = async (e) => {
@@ -445,6 +510,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     if (socket) socket.current.emit('sendMessage', newMessage);
     setMessage('');
     setFile([]);
+    setBlobFiles([]);
     setAudioBlob(null);
     setRecording(false);
   }
@@ -454,19 +520,24 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     // "text" | "image" | "video" | "file" | "audio" | "link"
     e.preventDefault();
     if (selectedUser?.conversationType === "single") {
-      if (file.length > 0) {
-        for (const [index, singleFile] of file.entries()) {
+      if (blobFiles.length > 0) {
+        for (const [index, singleFile] of blobFiles.entries()) {
+          const formData = new FormData();
+          formData.append("files", singleFile); // Append the file to the FormData
+
+          const imageUrl = await uploadFileService(formData); // ✅ Upload file
+          const fileURl = imageUrl?.data?.data
+          if (imageUrl.status !== 200) return
           const newMessage = {
-            conversationId: selectedUser?._id,
             isSenderId: profileData?._id,
-            isReceiverId: userDetails?._id,
-            groupId: "",
+            isReceiverId: selectedUser?.conversationType === "single" ? userDetails?._id : "",
+            groupId: selectedUser?.conversationType === "group" ? selectedUser?._id : "",
             message: index === 0 ? message : "",
-            fileUrl: singleFile,
+            fileUrl: fileURl,
             messageType: "file",
-            status: "",
-            timestamp: index
+            timestamp: dayjs().format()
           };
+
           await onSendMessage(newMessage);
         }
       } else if (audioBlob) {
@@ -474,14 +545,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         reader.onloadend = async () => {
           const base64Audio = reader.result;
           const newMessage = {
-            conversationId: selectedUser?._id,
             isSenderId: profileData?._id,
             isReceiverId: userDetails?._id,
             groupId: "",
             message: "",
             fileUrl: base64Audio,
             messageType: "audio",
-            status: "",
             timestamp: dayjs().format()
           };
           await onSendMessage(newMessage);
@@ -490,44 +559,38 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         reader.readAsDataURL(audioBlob);
       } else {
         const newMessage = {
-          conversationId: selectedUser?._id,
           isSenderId: profileData?._id,
           isReceiverId: userDetails?._id,
           groupId: "",
           message: message,
           fileUrl: "",
           messageType: isLink(message) ? "link" : "text",
-          status: "",
           timestamp: dayjs().format()
         };
         await onSendMessage(newMessage);
       }
     } else if (selectedUser?.conversationType === "group") {
-      if (file.length > 0) {
-        for (const [index, singleFile] of file.entries()) {
+      if (blobFiles.length > 0) {
+        for (const [index, singleFile] of blobFiles.entries()) {
           const newMessage = {
-            conversationId: "",
             isSenderId: profileData?._id,
             isReceiverId: "",
             groupId: selectedUser?._id,
             message: index === 0 ? message : "",
             fileUrl: singleFile,
             messageType: "file",
-            status: "",
             timestamp: dayjs().format()
           };
           await onSendMessage(newMessage);
         }
       } else {
         const newMessage = {
-          conversationId: "",
           isSenderId: profileData?._id,
           isReceiverId: "",
           groupId: selectedUser?._id,
           message: message,
           fileUrl: "",
           messageType: isLink(message) ? "link" : "text",
-          status: "",
           timestamp: dayjs().format()
         };
         await onSendMessage(newMessage);
@@ -733,8 +796,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               {Object.keys(groupedMessages).length > 0 ? (
                 Object.keys(groupedMessages).map((date, index) => (
                   <div key={index} className="mb-4">
-                    <div className="sticky top-0 z-10 text-center text-sm text-gray-500 pb-3 font-medium">
-                      <span className="bg-gray-300 p-1 rounded-md">{date}</span>
+                    <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                      <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
                     </div>
                     {groupedMessages[date].map((message, idx) => {
                       const isSender = message.isSenderId === profileData?._id;
@@ -787,6 +850,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                   )}
                                 </div>
                               )
+                              // <></>
                             ) :
                               message.messageType === "audio" ? (
                                 <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
@@ -860,7 +924,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   className="absolute z-10 -top-[138px] left-0 grid gap-3 bg-white rounded-md shadow-lg p-3 border border-gray-200 max-w-full overflow-y-auto"
                   style={{
                     gridTemplateColumns: `repeat(${Math.min(file.length, 4)}, minmax(0, 1fr))`,
-                    width: `${Math.min(file.length, 4) * 8.5}rem`, // 7.5rem ≈ 120px per image box
+                    width: `${Math.min(file.length, 4) * 8.5}rem`,
                     maxHeight: "203px"
                   }}
                 >
@@ -872,7 +936,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         key={index}
                         className="relative flex items-center justify-center bg-gray-50 p-2 rounded-md shadow-sm w-24 h-24 sm:w-28 sm:h-28"
                       >
-                        {/* File Type Icons */}
                         {fileExtension === "pdf" ? (
                           <FaFilePdf className="w-16 h-16 text-red-500" />
                         ) : fileExtension === "xlsx" || fileExtension === "xls" ? (
@@ -889,14 +952,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           />
                         )}
 
-                        {/* Overlay for more than 4 */}
                         {index === 3 && file.length > 4 && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center rounded-md text-lg font-semibold">
                             +{file.length - 4}
                           </div>
                         )}
 
-                        {/* Remove Button */}
                         <button
                           type="button"
                           className="absolute top-1 right-1 bg-white text-red-500 rounded-full p-1 hover:text-red-700 shadow-md"
@@ -976,8 +1037,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     }}
                     onPaste={handlePaste}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && messageText.trim()) {
-                        handleSendButtonClick();
+                      if (e.key === "Enter" && message.trim()) {
+                        handleSubmit(e);
                       }
                     }}
                     placeholder="Type a message..."
@@ -1028,7 +1089,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       {
         isUserDetailsView && (
           <div
-            className={`fixed z-20 top-0 right-0 h-full w-96 bg-gray-200 border-l border-gray-300 p-4 overflow-y-auto transform transition-transform duration-300 ease-in-out
+            className={`fixed z-20 top-0 right-0 h-full  w-full sm:w-96 bg-gray-200 border-l border-gray-300 p-4 overflow-y-auto transform transition-transform duration-300 ease-in-out
             ${isUserDetailsView ? "translate-x-0" : "translate-x-full"} sm:relative sm:translate-x-0`}
           >          <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-800">User Info</h2>

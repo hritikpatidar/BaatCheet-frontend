@@ -194,15 +194,16 @@ export const SocketProvider = ({ children }) => {
     setMessageLoading(true);
     if (socket.current) {
       const conversation_id = contact?._id
-      if (conversation_id) {
+      const senderId = profileData?._id
+      const receiverId = contact?.members?.find(item => item._id !== senderId)?._id
+      if (conversation_id || (senderId && receiverId)) {
         if (socket.current) {
           socket.current.emit("getuserFiles", conversation_id);
-          socket.current.emit("getMessages", conversation_id, pageNum, pageSize, contact?.conversationType);
+          socket.current.emit("getMessages", conversation_id, senderId, receiverId, pageNum, pageSize, contact?.conversationType);
         }
       } else {
         setMessageLoading(false);
       }
-
     }
   };
 
