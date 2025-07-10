@@ -42,7 +42,6 @@ export const SocketProvider = ({ children }) => {
         query: { userId: profileData._id },
         transports: ["websocket", "polling"],
       });
-
       if (location?.pathname === "/chat") {
         socket.current.on("connect", () => {
           console.log("Connected to socket server");
@@ -60,7 +59,7 @@ export const SocketProvider = ({ children }) => {
         socket.current = null;
       };
     }
-  }, [profileData, dispatch, location]);
+  }, [profileData, dispatch, location?.pathname]);
 
   useEffect(() => {
     dispatch(clearChatState())
@@ -69,7 +68,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.emit("groupConversation", profileData._id);
       socket.current.emit("getUserList");
     }
-  }, [socket])
+  }, [socket, location?.pathname])
 
 
   useEffect(() => {

@@ -1,3 +1,4 @@
+import { getImageUrl } from "../Services/ChatServices/chatServices"
 import { getItemLocalStorage } from "./browserServices"
 
 export const isLogin = () => {
@@ -48,3 +49,29 @@ export const base64ToFile = (base64Data, fileName) => {
     }
     return new File([u8arr], fileName, { type: mime });
 };
+
+
+const convertBlobToBase64 = (blob) => {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(blob);
+    });
+};
+
+export const getImage = async (fileUrl) => {
+    if (!fileUrl) return null;
+    try {
+        const response = await getImageUrl(fileUrl);
+        // const contentType = response.headers['content-type'] || 'image/png';
+        // const blob = new Blob([response.data], { type: contentType });
+        // console.log("blob", blob)
+        // const base64 = await convertBlobToBase64(blob);
+        // return base64; // ready to use in <img src={...} />
+        return response.data; 
+    } catch (error) {
+        console.error("Error fetching image:", error);
+        return null; // Handle error gracefully
+    }
+}

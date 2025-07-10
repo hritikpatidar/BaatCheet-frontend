@@ -34,7 +34,7 @@ import { Menu, MenuButton, MenuItems } from '@headlessui/react'
 import { closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setRemoveSelectedFiles, setSelectedFiles, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
-import { base64ToFile, checkIfImage, detectURLs, isLink, isValidURL } from "../../Utils/Auth";
+import { base64ToFile, checkIfImage, detectURLs, getImage, isLink, isValidURL } from "../../Utils/Auth";
 import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 import ImageLightbox from "../../components/imagePreview";
@@ -69,6 +69,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [blobFiles, setBlobFiles] = useState([]);
   const [audioBlob, setAudioBlob] = useState(null);
   const isSendDisabled = !message && file.length === 0 && !audioBlob;
+  const [fetchedImages, setFetchedImages] = useState({});
 
   //useEffect hooks
   //header useEffect
@@ -167,6 +168,28 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     if (d.isSame(dayjs(), 'week')) return d.format('dddd'); // ex. Monday, ..., Sunday
     return d.format('D MMMM YYYY');
   };
+
+
+  useEffect(() => {
+    const fetchAllImages = async () => {
+      const imageMap = {};
+
+      for (const msg of ChatMessages) {
+        if (msg.messageType === "file" && checkIfImage(msg.fileUrl)) {
+          const imageData = await getImage(msg.fileUrl);
+          if (imageData) {
+            imageMap[msg._id] = imageData; // response.data
+          }
+        }
+      }
+
+      setFetchedImages(imageMap);
+    };
+
+    if (ChatMessages.length > 0) {
+      fetchAllImages();
+    }
+  }, [ChatMessages]);
 
 
   const groupMessagesByDate = (messages) => {
@@ -324,70 +347,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   };
 
-  // const handleFileChange = async (e) => {
-  //   const files = Array.from(e.target.files);
-  //   try {
-  //     if (files?.length) {
-  //       const formData = new FormData();
-  //       files.forEach((file, index) => {
-  //         formData.append("img", file);
-  //       });
-  //       dispatch(setIsUploading(true));
-
-  //       const response = await uploadFileService(formData, {
-  //         onUploadProgress: (data) => {
-  //           const progress = Math.round((100 * data.loaded) / data.total);
-  //           dispatch(setFileUploadProgress(progress));
-  //         },
-  //       });
-  //       let result = response?.data?.data;
-  //       // await dispatch(setSelectedFiles(result));
-  //       setFile((prev) => [...prev, ...result]);
-  //     }
-  //   } catch (error) {
-  //     dispatch(setIsUploading(false));
-  //     console.error({ error });
-  //   } finally {
-  //     dispatch(setIsUploading(false));
-  //     e.target.value = "";
-  //   }
-  // };
-
-  // const handleFileChange = (e) => {
-  //   const files = Array.from(e.target.files);
-
-  //   if (files?.length) {
-  //     const convertToBase64 = (file) => {
-  //       return new Promise((resolve, reject) => {
-  //         const reader = new FileReader();
-  //         reader.onloadend = () => resolve(reader.result); // base64 data
-  //         reader.onerror = reject;
-  //         reader.readAsDataURL(file); // convert to base64
-  //       });
-  //     };
-
-  //     Promise.all(files.map(convertToBase64))
-  //       .then((base64Files) => {
-  //         setFile((prev) => [...prev, ...base64Files]);
-  //       })
-  //       .catch((error) => {
-  //         console.error("Error converting files to base64:", error);
-  //       });
-  //   }
-
-  //   e.target.value = ""; // reset input
-  // };
-
-  // const handleFileChange = (e) => {
-  //   const files = Array.from(e.target.files);
-
-  //   if (files?.length) {
-  //     const blobs = files.map(file => new Blob([file], { type: file.type }));
-  //     setFile((prev) => [...prev, ...blobs]);
-  //   }
-
-  //   e.target.value = ""; // reset input
-  // };
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
 
@@ -793,6 +752,11 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   <Spinner className="h-5 w-5 text-secondary/50" />
                 </div>
               )} */}
+              {/* <img
+                className="h-full w-full object-cover"
+                src={fetchedImages["686f93ff2083217b8356a7b5"]}
+                alt="Sent Image"
+              /> */}
               {Object.keys(groupedMessages).length > 0 ? (
                 Object.keys(groupedMessages).map((date, index) => (
                   <div key={index} className="mb-4">
@@ -801,7 +765,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     </div>
                     {groupedMessages[date].map((message, idx) => {
                       const isSender = message.isSenderId === profileData?._id;
-
+                      const imageUrl = fetchedImages[message._id]; // ✅ get from state
                       return (
                         <div
                           key={idx}
@@ -823,7 +787,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                 >
                                   <img
                                     className="h-full w-full object-cover"
-                                    src={message.fileUrl}
+                                    src={`"${imageUrl?.data}"`}
                                     alt="Sent Image"
                                   />
                                 </div>
