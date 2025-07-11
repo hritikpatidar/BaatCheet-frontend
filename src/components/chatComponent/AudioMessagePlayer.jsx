@@ -8,28 +8,28 @@ const AudioMessagePlayer = ({ audioUrl }) => {
   const waveSurfer = useRef(null)
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [audioBlob, setAudioBlob] = useState(null)
+  const [audioBlob, setAudioBlob] = useState(audioUrl)
 
-  useEffect(() => {
-    fetchUrl(audioUrl)
-  }, [audioUrl])
+  // useEffect(() => {
+  //   fetchUrl(audioUrl)
+  // }, [audioUrl])
 
-  const fetchUrl = async (url) => {
-    try {
-      const response = await getaudioUrl(url);
-      // Convert base64 to Blob
-      const byteCharacters = atob(response?.data?.base64);
-      const byteNumbers = Array.from(byteCharacters).map(char => char.charCodeAt(0));
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: response?.data?.contentType });
+  // const fetchUrl = async (url) => {
+  //   try {
+  //     const response = await getaudioUrl(url);
+  //     // Convert base64 to Blob
+  //     const byteCharacters = atob(response?.data?.base64);
+  //     const byteNumbers = Array.from(byteCharacters).map(char => char.charCodeAt(0));
+  //     const byteArray = new Uint8Array(byteNumbers);
+  //     const blob = new Blob([byteArray], { type: response?.data?.contentType });
 
-      // Create a blob URL and set it
-      const blobUrl = URL.createObjectURL(blob);
-      setAudioBlob(blobUrl);
-    } catch (error) {
-      console.error("Error fetching audio URL:", error);
-    }
-  }
+  //     // Create a blob URL and set it
+  //     const blobUrl = URL.createObjectURL(blob);
+  //     setAudioBlob(blobUrl);
+  //   } catch (error) {
+  //     console.error("Error fetching audio URL:", error);
+  //   }
+  // }
 
 
   useEffect(() => {

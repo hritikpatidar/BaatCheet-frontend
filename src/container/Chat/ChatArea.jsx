@@ -69,7 +69,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [blobFiles, setBlobFiles] = useState([]);
   const [audioBlob, setAudioBlob] = useState(null);
   const isSendDisabled = !message && file.length === 0 && !audioBlob;
-  const [fetchedImages, setFetchedImages] = useState({});
 
   //useEffect hooks
   //header useEffect
@@ -168,29 +167,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     if (d.isSame(dayjs(), 'week')) return d.format('dddd'); // ex. Monday, ..., Sunday
     return d.format('D MMMM YYYY');
   };
-
-
-  useEffect(() => {
-    const fetchAllImages = async () => {
-      const imageMap = {};
-
-      for (const msg of ChatMessages) {
-        if (msg.messageType === "file" && checkIfImage(msg.fileUrl)) {
-          const imageData = await getImage(msg.fileUrl);
-          if (imageData) {
-            imageMap[msg._id] = imageData; // response.data
-          }
-        }
-      }
-
-      setFetchedImages(imageMap);
-    };
-
-    if (ChatMessages.length > 0) {
-      fetchAllImages();
-    }
-  }, [ChatMessages]);
-
 
   const groupMessagesByDate = (messages) => {
     return messages.reduce((acc, message) => {
@@ -592,12 +568,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           {/* Main Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Header */}
-            {/* <ChatHeader
-              userDetails={userDetails}
-              setShowSidebar={setShowSidebar}
-              isUserDetailsView={isUserDetailsView}
-              setIsUserDetailsView={setIsUserDetailsView}
-            /> */}
             <div className="bg-gray-300 px-6 py-2 shadow-sm flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <button
@@ -752,11 +722,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   <Spinner className="h-5 w-5 text-secondary/50" />
                 </div>
               )} */}
-              {/* <img
-                className="h-full w-full object-cover"
-                src={fetchedImages["686f93ff2083217b8356a7b5"]}
-                alt="Sent Image"
-              /> */}
               {Object.keys(groupedMessages).length > 0 ? (
                 Object.keys(groupedMessages).map((date, index) => (
                   <div key={index} className="mb-4">
@@ -765,7 +730,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     </div>
                     {groupedMessages[date].map((message, idx) => {
                       const isSender = message.isSenderId === profileData?._id;
-                      const imageUrl = fetchedImages[message._id]; // ✅ get from state
                       return (
                         <div
                           key={idx}
@@ -785,11 +749,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                     setShowImage(true);
                                   }}
                                 >
-                                  <img
-                                    className="h-full w-full object-cover"
-                                    src={`"${imageUrl?.data}"`}
-                                    alt="Sent Image"
-                                  />
+                                  {(message.fileUrl) ? (
+                                    <img
+                                      className="h-full w-full object-cover"
+                                      src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                      alt="Sent Image"
+                                    />
+                                  ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center ">
+                                      <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
+                                    </div>
+                                  )}
                                 </div>
                               ) : (
                                 <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
