@@ -54,7 +54,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   //message container states
   const messagesContainerRef = useRef(null)
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
-  const [isUserAtBottom, setIsUserAtBottom] = useState(false)
+  const [isUserAtBottom, setIsUserAtBottom] = useState(true)
   const [showImage, setShowImage] = useState(false);
 
   //form states
