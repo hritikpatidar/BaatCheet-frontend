@@ -61,14 +61,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const fileInputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
   const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
   const [message, setMessage] = useState('');
   const [isEmojiPickerOpen, setIsEmojiPickerOpen] = useState(false);
-  const [recording, setRecording] = useState(false);
   const [file, setFile] = useState([]);
   const [blobFiles, setBlobFiles] = useState([]);
-  const [audioBlob, setAudioBlob] = useState(null);
-  const isSendDisabled = !message && file.length === 0 && !audioBlob;
+
+  const [isRecording, setIsRecording] = useState(false);
+  const [audioChunks, setAudioChunks] = useState([]);
+  const [mergedAudioBlob, setMergedAudioBlob] = useState(null);
+  const isSendDisabled = !message && file.length === 0 && !mergedAudioBlob;
 
   //useEffect hooks
   //header useEffect
@@ -276,37 +277,40 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const startRecording = async () => {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mediaRecorder = new MediaRecorder(stream);
-    mediaRecorderRef.current = mediaRecorder;
-    audioChunksRef.current = [];
+    const recorder = new MediaRecorder(stream);
+    const chunks = [];
 
-    mediaRecorder.ondataavailable = (e) => {
-      audioChunksRef.current.push(e.data);
+    recorder.ondataavailable = (e) => {
+      if (e.data.size > 0) chunks.push(e.data);
     };
 
-    mediaRecorder.onstop = () => {
-      const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-      // Append to existing blob
-      if (audioBlob) {
-        const combinedBlob = new Blob([audioBlob, blob], { type: "audio/webm" });
-        setAudioBlob(combinedBlob);
-      } else {
-        setAudioBlob(blob);
-      }
+    recorder.onstop = () => {
+      const newBlob = new Blob(chunks, { type: "audio/webm" });
+
+      setAudioChunks((prevChunks) => {
+        const updatedChunks = [...prevChunks, newBlob];
+        const merged = new Blob(updatedChunks, { type: "audio/webm" });
+        setMergedAudioBlob(merged);
+        return updatedChunks;
+      });
     };
 
-    mediaRecorder.start();
-    setRecording(true);
+    mediaRecorderRef.current = recorder;
+    recorder.start();
+    setIsRecording(true);
   };
 
   const stopRecording = () => {
-    mediaRecorderRef.current.stop();
-    setRecording(false);
+    if (mediaRecorderRef.current?.state === "recording") {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+    }
   };
 
   const handleDeleteAudio = () => {
-    setAudioBlob(null);
-    setRecording(false);
+    setIsRecording(false);
+    setAudioChunks([]);
+    setMergedAudioBlob(null);
   };
 
   const handlePlayPauseAudio = () => {
@@ -446,8 +450,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     setMessage('');
     setFile([]);
     setBlobFiles([]);
-    setAudioBlob(null);
-    setRecording(false);
+    setIsRecording(false);
+    setAudioChunks([]);
+    setMergedAudioBlob(null);
   }
 
 
@@ -475,7 +480,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
           await onSendMessage(newMessage);
         }
-      } else if (audioBlob) {
+      } else if (mergedAudioBlob) {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64Audio = reader.result;
@@ -489,9 +494,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             timestamp: dayjs().format()
           };
           await onSendMessage(newMessage);
-          setAudioBlob(null);
         };
-        reader.readAsDataURL(audioBlob);
+        reader.readAsDataURL(mergedAudioBlob);
       } else {
         const newMessage = {
           isSenderId: profileData?._id,
@@ -905,13 +909,13 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               )}
 
-              {(recording || audioBlob) ? (
+              {(isRecording || mergedAudioBlob) ? (
                 <div className="flex items-center gap-2 w-full max-w-[500px]">
                   {/* Audio Player */}
-                  {audioBlob instanceof Blob && (
+                  {mergedAudioBlob instanceof Blob && (
                     <audio
                       controls
-                      src={URL.createObjectURL(audioBlob)}
+                      src={URL.createObjectURL(mergedAudioBlob)}
                       className="flex-1 rounded-md w-0  h-10"
                     />
                   )}
@@ -924,14 +928,33 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
-                  {!audioBlob &&
+                  {!mergedAudioBlob &&
                     <button
                       type="button"
                       className="rounded-md hover:bg-gray-200 p-2 text-red-600 transition duration-200"
                       onClick={handlePlayPauseAudio}
                     >
-                      {recording ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                      {isRecording ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
                     </button>
+                  }
+                  {
+                    isRecording ? (
+                      <button
+                        type="button"
+                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
+                        onClick={stopRecording}
+                      >
+                        <Mic className="w-5 h-5" />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                        onClick={startRecording}
+                      >
+                        <Mic className="w-5 h-5" />
+                      </button>
+                    )
                   }
                 </div>
 
@@ -986,7 +1009,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               <div>
                 {
                   isSendDisabled ? (
-                    recording ? (
+                    isRecording ? (
                       <button
                         type="button"
                         className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"

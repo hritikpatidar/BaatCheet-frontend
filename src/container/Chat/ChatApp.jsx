@@ -13,7 +13,6 @@ const ChatApp = () => {
         <ChatSidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
       </>
       <ChatArea showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
-      {/* <AudioRecorder /> */}
     </div >
   );
 };
