@@ -290,12 +290,19 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           container: waveformRef.current,
           height: 40,
           responsive: true,
-          plugins: [MicrophonePlugin.create()],
-          progressColor: '#2f2f2f',
-          waveColor: '#4a74a8',
-          cursorColor: '#4a74a5',
+          waveColor: '#d1d5db',          // Light gray for the wave
+          progressColor: 'gray',      // Blue for progress
+          cursorColor: '#ef4444',        // Red for cursor
+          barWidth: 3,                   // Thickness of bars
+          barRadius: 3,                  // Rounded bars
+          barGap: 2,                     // Space between bars
+          cursorWidth: 2,                // Width of the cursor
+          barHeight: 1,                  // (optional) to control vertical wave style
+          normalize: true,               // Normalize audio peaks
+          plugins: [MicrophonePlugin.create()]
         },
       );
+      wavesurfer.current.zoom(40);
     }
   };
 
