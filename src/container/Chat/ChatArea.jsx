@@ -38,6 +38,8 @@ import { base64ToFile, checkIfImage, detectURLs, getImage, isLink, isValidURL } 
 import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 import ImageLightbox from "../../components/imagePreview";
+import WaveSurfer from "wavesurfer.js";
+import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js'
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
@@ -66,10 +68,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [file, setFile] = useState([]);
   const [blobFiles, setBlobFiles] = useState([]);
 
-  const [isRecording, setIsRecording] = useState(false);
-  const [audioChunks, setAudioChunks] = useState([]);
-  const [mergedAudioBlob, setMergedAudioBlob] = useState(null);
-  const isSendDisabled = !message && file.length === 0 && !mergedAudioBlob;
+  const waveformRef = useRef(null);
+  const wavesurfer = useRef(null);
+  const mediaRecorder = useRef(null);
+  const [audioChunks, setAudioChunks] = useState([]);//store old audio
+  const [isFinish, setIsFinish] = useState(true);
+  const [isPlayButton, setIsPlayButton] = useState(true);
+  const [isPlay, setIsPlay] = useState(false)
+  const [recordedBlob, setRecordedBlob] = useState(null);
+  const isSendDisabled = !message && file.length === 0 && !recordedBlob;
+
+
 
   //useEffect hooks
   //header useEffect
@@ -274,48 +283,106 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   };
 
   //form functions
+  const initializeWaveSurferWithMicrophone = () => {
+    if (waveformRef.current) {
+      wavesurfer.current = WaveSurfer.create(
+        {
+          container: waveformRef.current,
+          height: 40,
+          responsive: true,
+          plugins: [MicrophonePlugin.create()],
+          progressColor: '#2f2f2f',
+          waveColor: '#4a74a8',
+          cursorColor: '#4a74a5',
+        },
+      );
+    }
+  };
 
-  const startRecording = async () => {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const recorder = new MediaRecorder(stream);
-    const chunks = [];
+  const startRecording = (e) => {
+    e.preventDefault()
+    setRecordedBlob(new Blob([]));
+    setIsPlayButton(false)
 
-    recorder.ondataavailable = (e) => {
-      if (e.data.size > 0) chunks.push(e.data);
-    };
+    if (waveformRef.current) {
+      waveformRef.current.innerHTML = '';
+    }
+    navigator.mediaDevices.getUserMedia({ audio: true }).then((stream) => {
+      mediaRecorder.current = new MediaRecorder(stream);
+      const chunks = [];
 
-    recorder.onstop = () => {
-      const newBlob = new Blob(chunks, { type: "audio/webm" });
-
-      setAudioChunks((prevChunks) => {
-        const updatedChunks = [...prevChunks, newBlob];
-        const merged = new Blob(updatedChunks, { type: "audio/webm" });
-        setMergedAudioBlob(merged);
-        return updatedChunks;
+      mediaRecorder.current.addEventListener('dataavailable', (event) => {
+        chunks.push(event.data);
       });
-    };
 
-    mediaRecorderRef.current = recorder;
-    recorder.start();
-    setIsRecording(true);
+      mediaRecorder.current.addEventListener('stop', () => {
+        const recordedBlobUpdate = new Blob(chunks, { type: 'audio/wav' });
+        // setRecordedBlob(recordedBlobUpdate);
+        setAudioChunks((prevChunks) => {
+          const updatedChunks = [...prevChunks, recordedBlobUpdate];
+          const merged = new Blob(updatedChunks, { type: "audio/webm" });
+          setRecordedBlob(merged);
+          return updatedChunks;
+        });
+      });
+
+      mediaRecorder.current.start();
+      initializeWaveSurferWithMicrophone();
+      if (wavesurfer.current) {
+        wavesurfer.current?.microphone.start();
+        setIsFinish(false)
+
+      }
+    })
+      .catch((error) => {
+        console.error('Error accessing microphone:', error);
+      });
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current?.state === "recording") {
-      mediaRecorderRef.current.stop();
-      setIsRecording(false);
+    setIsFinish(true)
+    setIsPlayButton(true)
+    mediaRecorder.current?.stop();
+    wavesurfer.current?.microphone.stop();
+  };
+
+  useEffect(() => {
+    if (wavesurfer.current && recordedBlob) {
+      const audioUrl = URL.createObjectURL(recordedBlob);
+      wavesurfer.current.load(audioUrl);
+    }
+  }, [recordedBlob]);
+
+  const playRecording = () => {
+    if (recordedBlob && wavesurfer.current) {
+      const audioUrl = URL.createObjectURL(recordedBlob);
+      wavesurfer.current.load(audioUrl);
+      wavesurfer.current.on('ready', () => {
+        setIsPlay(true);
+        wavesurfer.current?.play();
+      });
+      wavesurfer.current.on('finish', () => {
+        setIsPlay(false);
+      });
+    }
+  };
+
+  const StopPlayRecording = () => {
+    if (recordedBlob && wavesurfer.current) {
+      const audioUrl = URL.createObjectURL(recordedBlob);
+      wavesurfer.current.load(audioUrl);
+      wavesurfer.current.on('ready', () => {
+        wavesurfer.current?.stop();
+        setIsPlay(false)
+        wavesurfer.current?.microphone.stop();
+      });
     }
   };
 
   const handleDeleteAudio = () => {
-    setIsRecording(false);
     setAudioChunks([]);
-    setMergedAudioBlob(null);
+    setRecordedBlob(null);
   };
-
-  const handlePlayPauseAudio = () => {
-    mediaRecorderRef.current.stop();
-  }
 
   const handleEmojiClick = (emojiObject) => {
     setMessage((prevText) => prevText + emojiObject.emoji);
@@ -450,15 +517,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     setMessage('');
     setFile([]);
     setBlobFiles([]);
-    setIsRecording(false);
     setAudioChunks([]);
-    setMergedAudioBlob(null);
+    setRecordedBlob(null);
   }
 
 
   const handleSubmit = async (e) => {
     // "text" | "image" | "video" | "file" | "audio" | "link"
-    e.preventDefault();
+    debugger
+    e.preventDefault()
     if (selectedUser?.conversationType === "single") {
       if (blobFiles.length > 0) {
         for (const [index, singleFile] of blobFiles.entries()) {
@@ -480,7 +547,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
           await onSendMessage(newMessage);
         }
-      } else if (mergedAudioBlob) {
+      } else if (recordedBlob) {
         const reader = new FileReader();
         reader.onloadend = async () => {
           const base64Audio = reader.result;
@@ -495,7 +562,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           };
           await onSendMessage(newMessage);
         };
-        reader.readAsDataURL(mergedAudioBlob);
+        reader.readAsDataURL(recordedBlob);
       } else {
         const newMessage = {
           isSenderId: profileData?._id,
@@ -537,12 +604,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   };
 
+  const handlecheck = () => {
+    alert("true")
+  }
+
 
   return (
     <>
       {!selectedUser?.members ? (
         <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-gray-200 px-6 py-10">
           <button
+            type="button"
             onClick={() => setShowSidebar(true)}
             className="absolute top-4 left-4 sm:hidden p-2 rounded-md hover:bg-gray-400 transition text-gray-700  cursor-pointer"
           >
@@ -575,6 +647,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             <div className="bg-gray-300 px-6 py-2 shadow-sm flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <button
+                  type="button"
                   className="sm:hidden text-2xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
                   onClick={() => setShowSidebar(true)}
                 >
@@ -616,13 +689,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
               <div className="flex items-center gap-2 px-1 -mr-[10px]">
                 <div className="hidden xl:flex items-center gap-3">
-                  <button className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                  <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                     <Phone className="w-5 h-5" />
                   </button>
-                  <button className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                  <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                     <Video className="w-5 h-5" />
                   </button>
                   <button
+                    type="button"
                     className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer "
                     onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                   >
@@ -642,6 +716,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                   >
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
                       onClick={() => console.log("Archive clicked")}
                     >
@@ -649,6 +724,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       Voice Call
                     </button>
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
                       onClick={() => console.log("Archive clicked")}
                     >
@@ -656,6 +732,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       Video Call
                     </button>
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
                       onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                     >
@@ -665,6 +742,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
                     {/* New Options */}
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                       onClick={() => console.log("Archive clicked")}
                     >
@@ -673,6 +751,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     </button>
 
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                       onClick={() => console.log("Mute clicked")}
                     >
@@ -681,6 +760,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     </button>
 
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                       onClick={() => dispatch(closeChat())}
                     >
@@ -689,6 +769,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     </button>
 
                     <button
+                      type="button"
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
                       onClick={() => console.log("Delete Chat clicked")}
                     >
@@ -849,7 +930,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             {/* Input Box */}
             <form
               onSubmit={handleSubmit}
-
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
               onDragEnter={(e) => e.preventDefault()}
@@ -909,16 +989,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               )}
 
-              {(isRecording || mergedAudioBlob) ? (
-                <div className="flex items-center gap-2 w-full max-w-[500px]">
+              {(recordedBlob) ? (
+                <div className="flex justify-center gap-2 w-full max-w-[500px]">
                   {/* Audio Player */}
-                  {mergedAudioBlob instanceof Blob && (
-                    <audio
-                      controls
-                      src={URL.createObjectURL(mergedAudioBlob)}
-                      className="flex-1 rounded-md w-0  h-10"
-                    />
-                  )}
 
                   {/* Delete Button */}
                   <button
@@ -928,25 +1001,21 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
-                  {!mergedAudioBlob &&
+                  {isPlayButton &&
                     <button
                       type="button"
-                      className="rounded-md hover:bg-gray-200 p-2 text-red-600 transition duration-200"
-                      onClick={handlePlayPauseAudio}
+                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                      onClick={!isPlay ? playRecording : StopPlayRecording}
                     >
-                      {isRecording ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5" />}
+                      {!isPlay ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
                     </button>
                   }
+                  <div
+                    className="h-10 w-52"
+                    ref={waveformRef}
+                  />
                   {
-                    isRecording ? (
-                      <button
-                        type="button"
-                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
-                        onClick={stopRecording}
-                      >
-                        <Mic className="w-5 h-5" />
-                      </button>
-                    ) : (
+                    isFinish ? (
                       <button
                         type="button"
                         className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
@@ -954,10 +1023,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       >
                         <Mic className="w-5 h-5" />
                       </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
+                        onClick={stopRecording}
+                      >
+                        <Mic className="w-5 h-5" />
+                      </button>
                     )
                   }
                 </div>
-
               ) : (
                 <>
                   {/* File Upload */}
@@ -995,7 +1071,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     onPaste={handlePaste}
                     onKeyDown={(e) => {
                       if (e.key === "Enter" && message.trim()) {
-                        handleSubmit(e);
+                        e.preventDefault();
+                        // handleSubmit(e);
                       }
                     }}
                     placeholder="Type a message..."
@@ -1009,19 +1086,20 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               <div>
                 {
                   isSendDisabled ? (
-                    isRecording ? (
+                    isFinish ? (
                       <button
-                        type="button"
-                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
-                        onClick={stopRecording}
+                        type="button" // ✅ prevents <form> submission
+                        onClick={startRecording}
+                        className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
                       >
                         <Mic className="w-5 h-5" />
                       </button>
                     ) : (
+
                       <button
                         type="button"
-                        className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                        onClick={startRecording}
+                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
+                        onClick={stopRecording}
                       >
                         <Mic className="w-5 h-5" />
                       </button>
@@ -1051,6 +1129,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           >          <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold text-gray-800">User Info</h2>
               <button
+                type="button"
                 className=" text-xl text-gray-700 cursor-pointer hover:bg-gray-400 p-2 rounded-md"
                 onClick={() => setIsUserDetailsView(false)}
               >
