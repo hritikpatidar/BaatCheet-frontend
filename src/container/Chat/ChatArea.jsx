@@ -531,7 +531,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const handleSubmit = async (e) => {
     // "text" | "image" | "video" | "file" | "audio" | "link"
-    debugger
     e.preventDefault()
     if (selectedUser?.conversationType === "single") {
       if (blobFiles.length > 0) {
