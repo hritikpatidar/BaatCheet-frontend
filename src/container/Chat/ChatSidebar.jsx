@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
 import { clearChatState, setChatMessagesClear, setSelectedChatType, setSelectUser } from "../../Redux/features/Chat/chatSlice";
 import { useSocket } from "../../context/SocketContext";
-import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Search, Settings, SunMoon, User, X } from 'lucide-react';
+import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Plus, Search, Settings, SunMoon, User, Users, X } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserServices";
 import dummyImage from "../../assets/dummyImage.png"
@@ -12,6 +12,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import LogOutModal from "../../components/logoutModal";
+import GroupCreateModal from "../../components/groupCreateModle";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -22,7 +23,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const { t } = useTranslation();
 
   const { socket, userListModal, setUserListModal, fetchMessages, setHasMore, setPage } = useSocket();
-
+  const [openCreateGroupModle, setOpenCreateGroupModle] = useState(false)
   // const [isListLoading, setIsListLoading] = useState(false);
   // const userLists = useSelector((state) => state?.ChatDataSlice?.userList);
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
@@ -59,22 +60,49 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
           <div className="flex items-center gap-2">
             <button
-              className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
+              className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md group"
               onClick={() => setIsUserListOpen(!isUserListOpen)}
             >
               <MessageSquarePlus className="w-5 h-5" />
+
+              {/* Tooltip */}
+              <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                Add User
+              </span>
             </button>
-            <button
-              className="sm:hidden text-xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
-              onClick={() => setShowSidebar(false)}
-            >
-              <X className="w-5 h-5" />
-            </button>
+
+            {selectedChatType === "group" &&
+              <button
+                className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md group"
+                onClick={() => setOpenCreateGroupModle(true)}
+              >
+                {/* Main Users Icon */}
+                <Users className="w-5 h-5" />
+
+                {/* Positioned Plus Icon */}
+                <Plus className="w-3 h-3 absolute top-2 -right-0 text-gray-700 bg-transparent rounded-full shadow" />
+
+                {/* Tooltip */}
+                <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                  Create Group
+                </span>
+              </button>
+            }
 
             <Menu as="div" className="relative inline-block text-left">
               <div>
                 <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
-                  <EllipsisVertical className="w-5 h-5" aria-hidden="true" />
+                  {/* <EllipsisVertical className="w-5 h-5" aria-hidden=" " /> */}
+                  <div
+                    className="relative text-xl text-gray-700 hover:bg-gray-400  cursor-pointer rounded-md group"
+                  >
+                    <EllipsisVertical className="w-5 h-5" />
+
+                    {/* Tooltip */}
+                    <span className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                      Manu
+                    </span>
+                  </div>
                 </MenuButton>
               </div>
 
@@ -84,13 +112,39 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               >
                 {/* Profile Section */}
                 <button
+                  type="button"
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Profile clicked")}
                 >
                   <User className="w-5 h-5" />
                   Profile
                 </button>
+
                 <button
+                  type="button"
+                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                  onClick={() => setIsUserListOpen(!isUserListOpen)}
+                >
+                  <MessageSquarePlus className="w-5 h-5" />
+                  Add User
+                </button>
+                <button
+                  type="button"
+                  className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                  onClick={() => setOpenCreateGroupModle(true)}
+                >
+                  {/* Users Icon with Plus on top-right */}
+                  <span className="relative">
+                    <Users className="w-5 h-5" />
+                    <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 bg-transparent rounded-full shadow" />
+                  </span>
+
+                  Create Group
+                </button>
+
+
+                <button
+                  type="button"
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Account Settings clicked")}
                 >
@@ -98,6 +152,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   Account Settings
                 </button>
                 <button
+                  type="button"
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Theme Toggle clicked")}
                 >
@@ -105,6 +160,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   Theme: Light/Dark
                 </button>
                 <button
+                  type="button"
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Notifications clicked")}
                 >
@@ -112,6 +168,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   Notifications
                 </button>
                 <button
+                  type="button"
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                   onClick={() => console.log("Support clicked")}
                 >
@@ -121,6 +178,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                 {/* Logout */}
                 <button
+                  type="button"
                   className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
                   onClick={() => setIsLogoutModalOpen(true)}
                 >
@@ -129,6 +187,14 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                 </button>
               </MenuItems>
             </Menu>
+
+            <button
+              className="sm:hidden text-xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
+              onClick={() => setShowSidebar(false)}
+            >
+              <X className="w-5 h-5" />
+            </button>
+
           </div>
         </h3>
         {/* Search */}
@@ -216,7 +282,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     ) : (
                       user?.name
                         ?.split(" ")
-                        .map((word) => word[0])
+                        .filter((_, index) => index === 0 || index === 1)
+                        .map(n => n[0])
                         .join("")
                         .toUpperCase()
                     )}
@@ -339,6 +406,12 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
       {isLogoutModalOpen && (
         <LogOutModal setIsLogoutModalOpen={setIsLogoutModalOpen} loading={loading} setLoading={setLoading} />
       )}
+
+      {
+        openCreateGroupModle && (
+          <GroupCreateModal setOpenCreateGroupModle={setOpenCreateGroupModle} />
+        )
+      }
     </>
   );
 };

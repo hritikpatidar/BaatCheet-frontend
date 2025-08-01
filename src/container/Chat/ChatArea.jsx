@@ -519,6 +519,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
 
   const onSendMessage = (newMessage) => {
+    debugger
     dispatch(setSendMessages(newMessage));
     if (socket) socket.current.emit('sendMessage', newMessage);
     setMessage('');
@@ -663,7 +664,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   {userDetails?.profile ? (
                     <img src={dummyImage} alt={"No Image"} className="w-12 h-12 rounded-full" />
                   ) : userDetails?.name?.split(" ")
-                    .map((word) => word[0])
+                    .filter((_, index) => index === 0 || index === 1)
+                    .map(n => n[0])
                     .join("")
                     .toUpperCase()}
                 </div>

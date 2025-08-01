@@ -81,3 +81,36 @@ select:-webkit-autofill:focus {
   font-optical-sizing: auto;
   font-style: normal;
 }
+
+.custom-checkbox {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #cbd5e0; /* Tailwind's gray-300 */
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.custom-checkbox:hover {
+  border-color: #a0aec0; /* Tailwind's gray-400 */
+}
+
+.custom-checkbox:checked {
+  background-color: #767677; /* Tailwind's blue-500 */
+  border-color: #767677;
+}
+
+.custom-checkbox:checked::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 5px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}

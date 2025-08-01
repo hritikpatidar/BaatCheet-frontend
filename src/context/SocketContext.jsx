@@ -31,7 +31,7 @@ export const SocketProvider = ({ children }) => {
   const [userListModal, setUserListModal] = useState(false);
   const [messageLoading, setMessageLoading] = useState(false);
   const profileData = useSelector(state => state?.authReducer?.AuthSlice?.profileDetails)
-  const { selectedUser, ChatMessages, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
+  const { selectedUser, ChatMessages, onlineStatus, selectedChatType } = useSelector((state) => state?.ChatDataSlice);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
 

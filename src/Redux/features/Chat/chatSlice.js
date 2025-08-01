@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { getUserListService } from "../../../Services/ChatServices";
+import { createGroupService, getUserListService } from "../../../Services/ChatServices";
 
 // Initial state
 const initialState = {
@@ -11,7 +11,7 @@ const initialState = {
   ChatMessages: [],
   onlineStatus: [],
   isTyping: false,
-  selectedFiles:[], // selectedFile ke liye
+  selectedFiles: [], // selectedFile ke liye
   isUploading: false,
   isDownloading: false,
   fileUploadProgress: 0,
@@ -29,6 +29,14 @@ export const getUserList = createAsyncThunk(
   "chat/getUserList",
   async (role) => {
     const response = await getUserListService(role);
+    return response.data || [];
+  }
+);
+
+export const createGroup = createAsyncThunk(
+  "chat/createGroup",
+  async (data) => {
+    const response = await createGroupService(data);
     return response.data || [];
   }
 );
@@ -171,6 +179,26 @@ const chatSlice = createSlice({
         state.userList = [];
         state.error = action.error.message;
       })
+      //---------------------------------------------------
+      .addCase(createGroup.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(createGroup.fulfilled, (state, action) => {
+        state.loading = false;
+        if(action.payload.data){
+          state.groupConversationList = [action.payload.data, ...state.groupConversationList] || [];
+        }else{
+          state.groupConversationList = state.groupConversationList || [];
+        }
+        state.error = "";
+      })
+      .addCase(createGroup.rejected, (state, action) => {
+        state.loading = false;
+        state.groupConversationList = [];
+        state.error = action.error.message;
+      })
+    //---------------------------------------------------
 
   },
 });

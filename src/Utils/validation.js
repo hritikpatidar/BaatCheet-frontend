@@ -166,6 +166,7 @@ export const SignUpFormValidation = (userData) => {
   return { errors, isValid };
 };
 
+
 export const MatchPasswordValidation = (userData) => {
   let errors = {};
   let isValid = true;
@@ -257,6 +258,7 @@ export const ProfileValidation = (userData, t) => {
   return { errors, isValid };
 };
 
+
 export const ResandPasswordValidation = (userData, t) => {
   let errors = {};
   let isValid = true;
@@ -290,6 +292,7 @@ export const ResandPasswordValidation = (userData, t) => {
 
   return { errors, isValid };
 };
+
 
 export const HelpFormValidation = (formData, t) => {
   let errors = {};
@@ -327,3 +330,27 @@ export const HelpFormValidation = (formData, t) => {
 
   return { errors, isValid };
 };
+
+
+export const groupCreateValidation = (userData) => {
+  let errors = {};
+  let isValid = true;
+
+  if (userData.groupName !== undefined && !userData.groupName) {
+    errors.groupName = "required";
+    isValid = false;
+  } else if (userData?.groupName) {
+    errors.groupName = "";
+  }
+
+  if (userData.invites !== undefined && userData?.invites?.length === 0) {
+    errors.invites = "required";
+    isValid = false;
+  } else if (userData?.invites?.length >= 0) {
+    errors.invites = "";
+  }
+
+
+  return { errors, isValid };
+
+}

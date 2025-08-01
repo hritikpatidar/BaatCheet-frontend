@@ -2,5 +2,6 @@ export {
     getUserListService,
     uploadFileService,
     getDownloadBufferFile,
-    getConversationService
+    getConversationService,
+    createGroupService
 } from './chatServices';

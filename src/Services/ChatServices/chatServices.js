@@ -28,3 +28,7 @@ export const getaudioUrl = (url) => {
 export const getImageUrl = (url) => {
     return httpServices.get(`${getUrl()}/view-image/${url}`);
 }
+
+export const createGroupService = (data) => {
+    return httpServices.post(`${getUrl()}/create-group`, data);
+}
