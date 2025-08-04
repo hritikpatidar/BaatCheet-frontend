@@ -93,7 +93,6 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
             ...errorMessages,
             ...errors,
         });
-        console.log("error", errors, isValid)
         if (!isValid) return;
         setLoading(true);
         try {
@@ -101,7 +100,7 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
             data.append('name', formData.groupName);
             data.append('image', formData.image);
 
-            ["68235633216d67de02b7f862", "68242db5216d67de02b7f9c0"].forEach((user) => {
+            formData.invites.forEach((user) => {
                 data.append(`invites`, user);
             });
 

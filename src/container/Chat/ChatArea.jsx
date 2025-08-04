@@ -20,7 +20,8 @@ import {
   Mic,
   Play,
   Pause,
-  ChevronsDown
+  ChevronsDown,
+  Lock
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -40,6 +41,7 @@ import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlaye
 import ImageLightbox from "../../components/imagePreview";
 import WaveSurfer from "wavesurfer.js";
 import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js'
+import { Spinner } from "@material-tailwind/react";
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
@@ -48,6 +50,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const { socket, fetchMessages, page, setPage, messageLoading } = useSocket()
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
+  const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
 
   //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
@@ -76,8 +79,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [isPlayButton, setIsPlayButton] = useState(true);
   const [isPlay, setIsPlay] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState(null);
-  const isSendDisabled = !message && file.length === 0 && !recordedBlob;
-
+  const isSendDisabled = (!message && file.length === 0 && !recordedBlob) ? true : false;
 
 
   //useEffect hooks
@@ -519,7 +521,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
 
   const onSendMessage = (newMessage) => {
-    debugger
     dispatch(setSendMessages(newMessage));
     if (socket) socket.current.emit('sendMessage', newMessage);
     setMessage('');
@@ -685,108 +686,128 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           </span>
                         )
                       :
-                      `${selectedUser?.members.filter(user =>
-                        onlineStatus.onlineUsers.includes(user?._id)
-                      ).length} members | active now`
-                    }
+                      (() => {
+                        const activeUsers = selectedUser?.members.filter(
+                          user => onlineStatus?.onlineUsers?.includes(user._id)
+                        );
+                        const currentUserActive = onlineStatus?.onlineUsers?.includes(profileData?._id);
+                        const members = selectedUser?.members || [];
+                        const displayedNames = members
+                          .slice(0, 5)
+                          .map(user =>
+                            user._id === profileData._id ? "You" : user?.name?.split(" ")[0]
+                          )
+                          .join(", ");
 
-                    {/* "5 members | active now" */}
+                        const extraCount = members.length - 5;
+
+                        if (activeUsers.length >= 2 && currentUserActive) {
+                          return (`${selectedUser?.members.filter(user =>
+                            onlineStatus.onlineUsers.includes(user?._id)
+                          ).length} members | active now`)
+                        } else if (activeUsers.length <= 1) {
+                          return `${displayedNames}${extraCount > 0 ? `...` : ""}`;
+                        }
+                      })()
+                    }
                   </p>
                 </div>
               </div>
-
-              <div className="flex items-center gap-2 px-1 -mr-[10px]">
-                <div className="hidden xl:flex items-center gap-3">
-                  <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
-                    <Phone className="w-5 h-5" />
-                  </button>
-                  <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
-                    <Video className="w-5 h-5" />
-                  </button>
-                  <button
-                    type="button"
-                    className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer "
-                    onClick={() => setIsUserDetailsView(!isUserDetailsView)}
-                  >
-                    <User className="w-5 h-5" />
-                  </button>
-                </div>
-
-                <Menu as="div" className="relative inline-block text-left z-20">
-                  <div>
-                    <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
-                      <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
-                    </MenuButton>
-                  </div>
-
-                  <MenuItems
-                    transition
-                    className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                  >
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                      onClick={() => console.log("Archive clicked")}
-                    >
+              {selectedUser?.conversationType === "single" ?
+                <div className="flex items-center gap-2 px-1 -mr-[10px]">
+                  <div className="hidden xl:flex items-center gap-3">
+                    <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                       <Phone className="w-5 h-5" />
-                      Voice Call
                     </button>
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                      onClick={() => console.log("Archive clicked")}
-                    >
+                    <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
                       <Video className="w-5 h-5" />
-                      Video Call
                     </button>
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                      className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer "
                       onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                     >
                       <User className="w-5 h-5" />
-                      View details
                     </button>
+                  </div>
 
-                    {/* New Options */}
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                      onClick={() => console.log("Archive clicked")}
-                    >
-                      <Archive className="w-5 h-5" />
-                      Archive
-                    </button>
+                  <Menu as="div" className="relative inline-block text-left z-20">
+                    <div>
+                      <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                        <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
+                      </MenuButton>
+                    </div>
 
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                      onClick={() => console.log("Mute clicked")}
+                    <MenuItems
+                      transition
+                      className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                     >
-                      <VolumeX className="w-5 h-5" />
-                      Mute
-                    </button>
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                        onClick={() => console.log("Archive clicked")}
+                      >
+                        <Phone className="w-5 h-5" />
+                        Voice Call
+                      </button>
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                        onClick={() => console.log("Archive clicked")}
+                      >
+                        <Video className="w-5 h-5" />
+                        Video Call
+                      </button>
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                        onClick={() => setIsUserDetailsView(!isUserDetailsView)}
+                      >
+                        <User className="w-5 h-5" />
+                        View details
+                      </button>
 
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                      onClick={() => dispatch(closeChat())}
-                    >
-                      <MessageSquareX className="w-5 h-5" />
-                      Clear Conversation
-                    </button>
+                      {/* New Options */}
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                        onClick={() => console.log("Archive clicked")}
+                      >
+                        <Archive className="w-5 h-5" />
+                        Archive
+                      </button>
 
-                    <button
-                      type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                      onClick={() => console.log("Delete Chat clicked")}
-                    >
-                      <Trash2 className="w-5 h-5 text-red-600" />
-                      Delete Chat
-                    </button>
-                  </MenuItems>
-                </Menu>
-              </div>
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                        onClick={() => console.log("Mute clicked")}
+                      >
+                        <VolumeX className="w-5 h-5" />
+                        Mute
+                      </button>
+
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                        onClick={() => dispatch(closeChat())}
+                      >
+                        <MessageSquareX className="w-5 h-5" />
+                        Clear Conversation
+                      </button>
+
+                      <button
+                        type="button"
+                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                        onClick={() => console.log("Delete Chat clicked")}
+                      >
+                        <Trash2 className="w-5 h-5 text-red-600" />
+                        Delete Chat
+                      </button>
+                    </MenuItems>
+                  </Menu>
+                </div> :
+                <>group details panding</>
+              }
             </div>
 
             {/* Message Container */}
@@ -804,23 +825,25 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   <ChevronsDown size={20} />
                 </div>
               )}
-              {/* {messageLoading && (
-                <div
-                  className="absolute left-1/2 top-5 -translate-x-1/2 z-50
-                         p-2 bg-gray-200 text-gray-700 rounded-full 
-                          flex items-center justify-center 
-                         hover:bg-gray-500/20 transition duration-300 shadow"
-                  style={{ width: "40px", height: "40px" }}
-                >
-                  <Spinner className="h-5 w-5 text-secondary/50" />
-                </div>
-              )} */}
-              {Object.keys(groupedMessages).length > 0 ? (
+
+              {/* {Object.keys(groupedMessages).length > 0 ? (
                 Object.keys(groupedMessages).map((date, index) => (
                   <div key={index} className="mb-4">
                     <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
                       <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
                     </div>
+                    {index === 0 && (
+                      <div className="flex-1 flex items-center justify-center p-4">
+                        <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
+                          <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
+                            <Lock />
+                          </span>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                          </p>
+                        </div>
+                      </div>
+                    )}
                     {groupedMessages[date].map((message, idx) => {
                       const isSender = message.isSenderId === profileData?._id;
                       return (
@@ -832,7 +855,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md rounded-xl break-words ${isSender ? "bg-gray-500 text-white self-end" : "bg-white text-gray-800"
                               }`}
                           >
-                            {/* Message or Media */}
                             {message.messageType === "file" ? (
                               checkIfImage(message.fileUrl) ? (
                                 <div
@@ -904,7 +926,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                               )
                             }
 
-                            {/* Timestamp and Status Icon inside bubble */}
                             <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
                               <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
                               {isSender && (
@@ -928,10 +949,376 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   </div>
                 ))
               ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  {!messageLoading && <p className="text-gray-500 text-center">No Message Found</p>}
-                </div>
+                messageLoading ? (
+                  <div
+                    className="absolute left-240 top-27 -translate-x-1/2 z-50
+                         p-2 bg-gray-200 text-gray-700 rounded-full 
+                          flex items-center justify-center 
+                         hover:bg-gray-500/20 transition duration-300 shadow"
+                    style={{ width: "40px", height: "40px" }}
+                  >
+                    <Spinner className="h-5 w-5 text-secondary/50" />
+                  </div>
+                ) :
+                  selectedUser.conversationType === "single" ?
+                    <div className="flex-1 flex items-center justify-center">
+                      {!messageLoading && <p className="text-gray-500 text-center">No Message Found</p>}
+                    </div>
+                    : (invite ? (
+                      <>
+                        <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                          <span className="bg-gray-300/80 p-1 rounded-md">24/06/2025</span>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center p-4">
+                          <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
+                            <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
+                              <Lock />
+                            </span>
+                            <p className="text-sm text-gray-600 leading-relaxed">
+                              Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex-1 flex items-center justify-center p-4">
+                          <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 space-y-4">
+                            <div className="bg-gray-50 p-4 rounded-xl text-center space-y-3">
+                              <p className="text-sm text-gray-600">You’ve been invited to the group</p>
+                              <h2 className="text-xl font-semibold text-gray-900">{userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}</h2>
+                              <p className="text-sm text-gray-600">by</p>
+                              <div className="flex justify-center">
+                                <div className="w-16 h-16 flex items-center justify-center rounded-full border-4 border-gray-500 bg-gray-400 text-white font-semibold">
+                                  {invite.invitedBy?.profile ? (
+                                    <img src={invite.invitedBy.profile} alt="Profile" className="w-12 h-12 rounded-full" />
+                                  ) : invite.invitedBy?.name?.split(" ")
+                                    .filter((_, index) => index === 0 || index === 1)
+                                    .map(n => n[0])
+                                    .join("")
+                                    .toUpperCase()}
+
+                                </div>
+                              </div>
+                              <p className="text-lg font-bold text-gray-800">{invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}</p>
+
+                              <div className="flex justify-center gap-4 pt-2">
+                                <button className="flex items-center gap-1 px-5 py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition">
+                                  ✔️ Accept
+                                </button>
+                                <button className="flex items-center gap-1 px-5 py-2 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition">
+                                  ❌ Decline
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </>
+                    )
+                      :
+                      <div className="flex-1 flex items-center justify-center">
+
+                        {!messageLoading && <p className="text-gray-500 text-center">No Message Found</p>}
+                      </div>
+                    )
+              )} */}
+              {selectedUser.conversationType === "single" ? (
+                Object.keys(groupedMessages).length > 0 ? (
+                  Object.keys(groupedMessages).map((date, index) => (
+                    <div key={index} className="mb-4">
+                      <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                        <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
+                      </div>
+                      {groupedMessages[date].map((message, idx) => {
+                        const isSender = message.isSenderId === profileData?._id;
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                          >
+                            <div
+                              className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md rounded-xl break-words ${isSender ? "bg-gray-500 text-white self-end" : "bg-white text-gray-800"
+                                }`}
+                            >
+                              {message.messageType === "file" ? (
+                                checkIfImage(message.fileUrl) ? (
+                                  <div
+                                    className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                    onClick={() => {
+                                      dispatch(setViewImages([message.fileUrl]));
+                                      setShowImage(true);
+                                    }}
+                                  >
+                                    {(message.fileUrl) ? (
+                                      <img
+                                        className="h-full w-full object-cover"
+                                        src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                        alt="Sent Image"
+                                      />
+                                    ) : (
+                                      <div className="absolute inset-0 flex items-center justify-center ">
+                                        <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
+                                      </div>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
+                                    <div className="flex items-center gap-2" onClick={() =>
+                                      downloadFile(message.fileUrl, message._id, idx)
+                                    }>
+                                      <FileArchive className="text-gray-600 text-3xl" />
+                                      <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
+                                        {message.fileUrl.split("/").pop()}
+                                      </span>
+                                    </div>
+                                    {!message.isDownload && message.isReceiverId === profileData?._id && (
+                                      <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
+                                        {Downloading === idx ? (
+                                          <span className="text-sm font-medium text-gray-700">
+                                            {DownloadProgress}%
+                                          </span>
+                                        ) : (
+                                          <ArrowDownToLine className="text-gray-500" />
+                                        )}
+                                      </span>
+                                    )}
+                                  </div>
+                                )
+                                // <></>
+                              ) :
+                                message.messageType === "audio" ? (
+                                  <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
+                                    <AudioMessagePlayer audioUrl={message.fileUrl} />
+                                  </div>
+                                ) : (
+                                  <p className="pr-14 break-words">
+                                    {detectURLs(message.message).map((part, i2) =>
+                                      isValidURL(part) ? (
+                                        <a
+                                          key={i2}
+                                          href={part}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="hover:text-blue-300 underline"
+                                        >
+                                          {part}
+                                        </a>
+                                      ) : (
+                                        part
+                                      )
+                                    )}
+                                  </p>
+                                )
+                              }
+
+                              <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
+                                <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
+                                {isSender && (
+                                  <>
+                                    {message.status === "" ? (
+                                      <Clock3 size={12} />
+                                    ) : message.status === "delivered" ? (
+                                      <CheckCheck size={12} />
+                                    ) : message.status === "read" ? (
+                                      <CheckCheck size={12} className="text-blue-500" />
+                                    ) : (
+                                      <Check size={12} />
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))
+                ) : messageLoading ? (
+                  <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
+                    <Spinner className="h-5 w-5 text-secondary/50" />
+                  </div>
+                ) : (
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-gray-500 text-center">No Message Found</p>
+                  </div>
+                )
+              ) : (
+                // ---- GROUP CHAT ----
+                invite ? (
+                  <>
+                    <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                      <span className="bg-gray-300/80 p-1 rounded-md">24/06/2025</span>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center p-4">
+                      <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
+                        <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
+                          <Lock />
+                        </span>
+                        <p className="text-sm text-gray-600 leading-relaxed">
+                          Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex items-center justify-center p-4">
+                      <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 space-y-4">
+                        <div className="bg-gray-50 p-4 rounded-xl text-center space-y-3">
+                          <p className="text-sm text-gray-600">You’ve been invited to the group</p>
+                          <h2 className="text-xl font-semibold text-gray-900">{userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}</h2>
+                          <p className="text-sm text-gray-600">by</p>
+                          <div className="flex justify-center">
+                            <div className="w-16 h-16 flex items-center justify-center rounded-full border-4 border-gray-500 bg-gray-400 text-white font-semibold">
+                              {invite.invitedBy?.profile ? (
+                                <img src={invite.invitedBy.profile} alt="Profile" className="w-12 h-12 rounded-full" />
+                              ) : invite.invitedBy?.name?.split(" ").filter((_, index) => index === 0 || index === 1).map(n => n[0]).join("").toUpperCase()}
+                            </div>
+                          </div>
+                          <p className="text-lg font-bold text-gray-800">{invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}</p>
+                          <div className="flex justify-center gap-4 pt-2">
+                            <button className="flex items-center gap-1 px-5 py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition">
+                              ✔️ Accept
+                            </button>
+                            <button className="flex items-center gap-1 px-5 py-2 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition">
+                              ❌ Decline
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  // ✅ Show group messages
+                  Object.keys(groupedMessages).length > 0 ? (
+                    Object.keys(groupedMessages).map((date, index) => (
+                      <div key={index} className="mb-4">
+                        <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                          <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
+                        </div>
+                        {index === 0 && (
+                          <div className="flex-1 flex items-center justify-center p-4">
+                            <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
+                              <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
+                                <Lock />
+                              </span>
+                              <p className="text-sm text-gray-600 leading-relaxed">
+                                Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                              </p>
+                            </div>
+                          </div>
+                        )}
+                        {groupedMessages[date].map((message, idx) => {
+                          const isSender = message.isSenderId === profileData?._id;
+                          return (
+                            <div
+                              key={idx}
+                              className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                            >
+                              <div
+                                className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md rounded-xl break-words ${isSender ? "bg-gray-500 text-white self-end" : "bg-white text-gray-800"
+                                  }`}
+                              >
+                                {message.messageType === "file" ? (
+                                  checkIfImage(message.fileUrl) ? (
+                                    <div
+                                      className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                      onClick={() => {
+                                        dispatch(setViewImages([message.fileUrl]));
+                                        setShowImage(true);
+                                      }}
+                                    >
+                                      {(message.fileUrl) ? (
+                                        <img
+                                          className="h-full w-full object-cover"
+                                          src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                          alt="Sent Image"
+                                        />
+                                      ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center ">
+                                          <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
+                                      <div className="flex items-center gap-2" onClick={() =>
+                                        downloadFile(message.fileUrl, message._id, idx)
+                                      }>
+                                        <FileArchive className="text-gray-600 text-3xl" />
+                                        <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
+                                          {message.fileUrl.split("/").pop()}
+                                        </span>
+                                      </div>
+                                      {!message.isDownload && message.isReceiverId === profileData?._id && (
+                                        <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
+                                          {Downloading === idx ? (
+                                            <span className="text-sm font-medium text-gray-700">
+                                              {DownloadProgress}%
+                                            </span>
+                                          ) : (
+                                            <ArrowDownToLine className="text-gray-500" />
+                                          )}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )
+                                  // <></>
+                                ) :
+                                  message.messageType === "audio" ? (
+                                    <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
+                                      <AudioMessagePlayer audioUrl={message.fileUrl} />
+                                    </div>
+                                  ) : (
+                                    <p className="pr-14 break-words">
+                                      {detectURLs(message.message).map((part, i2) =>
+                                        isValidURL(part) ? (
+                                          <a
+                                            key={i2}
+                                            href={part}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-blue-300 underline"
+                                          >
+                                            {part}
+                                          </a>
+                                        ) : (
+                                          part
+                                        )
+                                      )}
+                                    </p>
+                                  )
+                                }
+
+                                <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
+                                  <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
+                                  {isSender && (
+                                    <>
+                                      {message.status === "" ? (
+                                        <Clock3 size={12} />
+                                      ) : message.status === "delivered" ? (
+                                        <CheckCheck size={12} />
+                                      ) : message.status === "read" ? (
+                                        <CheckCheck size={12} className="text-blue-500" />
+                                      ) : (
+                                        <Check size={12} />
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))
+                  ) : messageLoading ? (
+                    <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
+                      <Spinner className="h-5 w-5 text-secondary/50" />
+                    </div>
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                      <p className="text-gray-500 text-center">No Message Found</p>
+                    </div>
+                  )
+                )
               )}
+
+
             </div>
 
 
@@ -1062,6 +1449,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     />
                   </div>
                   <input
+                    type="text"
                     value={message}
                     onChange={(e) => {
                       const inputText = e.target.value;
@@ -1078,8 +1466,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     }}
                     onPaste={handlePaste}
                     onKeyDown={(e) => {
-                      if (e.key === "Enter" && message.trim()) {
+                      if (e.key === "Enter" && !message.trim()) {
                         e.preventDefault();
+                        e.stopPropagation();
                         // handleSubmit(e);
                       }
                     }}
@@ -1115,7 +1504,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     <button
                       type="submit"
                       className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                      disabled={isSendDisabled}
+                      disabled={isSendDisabled || invite}
                     >
                       <Send className="w-5 h-5" />
                     </button>
