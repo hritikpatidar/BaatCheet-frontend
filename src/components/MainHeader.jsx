@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Bell, EllipsisVertical, Grip, Image, LifeBuoy, LogOut, MessageCircle, Phone, Settings, SunMoon, User, Video } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { dummyImage } from '../assets';
-import LogOutModal from './logoutModal';
+import LogOutModal from './LogOutModalPage';
 
 const MainHeader = () => {
     const navigate = useNavigate();

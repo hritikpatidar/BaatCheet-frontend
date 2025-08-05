@@ -11,7 +11,7 @@ import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import LogOutModal from "../../components/logoutModal";
+import LogOutModal from "../../components/LogOutModalPage";
 import GroupCreateModal from "../../components/groupCreateModle";
 
 dayjs.extend(utc);
