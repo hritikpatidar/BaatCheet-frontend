@@ -163,7 +163,7 @@ export default function LoginPage() {
         <p className="text-center text-sm text-gray-600">
           Don’t have an account?{" "}
           <button
-            onClick={() => navigate("/sign-up")}
+            // onClick={() => navigate("/sign-up")}
             className="text-gray-700 font-semibold hover:underline"
           >
             Sign up
