@@ -17,8 +17,8 @@ export default function LoginPage() {
   const dispatch = useDispatch();
   const [isChecked, setIsChecked] = useState(false);
   const [loginFormDetails, setLoginFormDetails] = useState({
-    email: "",
-    password: "",
+    email: "ritik.patidar@saviesainfotech.com",
+    password: "Asdf@123",
   });
 
   const [errorMessages, setErrorMessages] = useState({});
