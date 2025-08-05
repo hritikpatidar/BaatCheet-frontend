@@ -100,7 +100,8 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
             data.append('name', formData.groupName);
             data.append('image', formData.image);
 
-            formData.invites.forEach((user) => {
+            // formData.invites.forEach((user) => {
+            ["685f8deaade9a93c4b95d58b","685e40e52723ae09d190cae2","685fb590b4ef045200c052e6","6885ec81138d8a0aa92c60d1"].forEach((user) => {
                 data.append(`invites`, user);
             });
 
