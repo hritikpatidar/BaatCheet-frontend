@@ -413,7 +413,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                       ],
                       status: "sent",
                       isChatDisabled: false,
-                      conversationType: "single",
                     };
                     dispatch(setSelectUser(payload));
                     setIsUserListOpen(false);
