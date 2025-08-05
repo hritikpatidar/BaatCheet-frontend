@@ -59,7 +59,7 @@ export const SocketProvider = ({ children }) => {
         socket.current = null;
       };
     }
-  }, [profileData, dispatch, location?.pathname]);
+  }, [profileData, dispatch]);
 
   useEffect(() => {
     dispatch(clearChatState())
@@ -68,7 +68,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.emit("groupConversation", profileData._id);
       socket.current.emit("getUserList");
     }
-  }, [socket, location?.pathname])
+  }, [socket])
 
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export const SocketProvider = ({ children }) => {
       });
 
       socket.current.on("conversationCreateResult", (userData) => {
-        if (userData) {
+        if (selectedUser !== null && userData?._id === selectedUser?._id) {
           dispatch(setSelectUser(userData));
         }
       });
@@ -99,8 +99,6 @@ export const SocketProvider = ({ children }) => {
       socket.current.on("groupConversationResults", (groupConversation) => {
         if (groupConversation?.value?.length > 0) {
           dispatch(setGroupConversationList(groupConversation?.value));
-        } else {
-          dispatch(setGroupConversationList([]));
         }
       });
 
@@ -117,19 +115,18 @@ export const SocketProvider = ({ children }) => {
         socket.current.emit("conversation", profileData._id);
         const payload = { ...selectedUser, profile: selectedUser?.image }
         const receiverDetails = selectedUser?.conversationType === "single" ? selectedUser?.members?.find(item => item._id !== profileData?._id) : payload
-
-        if (messages?.isSenderId === profileData?._id) {//sender ka message set karne ke liye
+        if (messages?.isSenderId?._id === profileData?._id) {//sender ka message set karne ke liye
           dispatch(setSendMessageUpdate(messages));
         }
 
-        if (selectedUser.conversationType === "single") {
-          if (messages?.isSenderId === receiverDetails?._id && messages?.conversation_id === selectedUser?._id) { // receiver ka message set karne ke liye
+        if (selectedUser?.conversationType === "single") {
+          if (messages?.isSenderId?._id === receiverDetails?._id && messages?.conversation_id === selectedUser?._id) { // receiver ka message set karne ke liye
             dispatch(setSendMessages(messages));
             socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType);
           }
           if (onlineStatus?.onlineUsers?.includes(messages?.isReceiverId)) socket.current.emit("deliveredMessage", messages?._id, selectedUser?.conversationType);
-        } else if (selectedUser.conversationType === "group") {
-          if (messages?.groupId === receiverDetails?._id && messages?.isSenderId !== profileData?._id) { // receiver ka message set karne ke liye
+        } else if (selectedUser?.conversationType === "group") {
+          if (messages?.groupId === receiverDetails?._id && messages?.isSenderId?._id !== profileData?._id) { // receiver ka message set karne ke liye
             dispatch(setSendMessages(messages));
             socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType);
           }

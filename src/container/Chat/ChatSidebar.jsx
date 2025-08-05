@@ -67,7 +67,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
               {/* Tooltip */}
               <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                Add User
+                Add user
               </span>
             </button>
 
@@ -84,108 +84,137 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                 {/* Tooltip */}
                 <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                  Create Group
+                  Create group
                 </span>
               </button>
             }
 
-            <Menu as="div" className="relative inline-block text-left">
-              <div>
-                <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
-                  {/* <EllipsisVertical className="w-5 h-5" aria-hidden=" " /> */}
-                  <div
-                    className="relative text-xl text-gray-700 hover:bg-gray-400  cursor-pointer rounded-md group"
-                  >
-                    <EllipsisVertical className="w-5 h-5" />
+            <Menu as="div" className="relative inline-block text-left z-10">
+              {({ close }) => (
+                <>
+                  <div>
+                    <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                      {/* <EllipsisVertical className="w-5 h-5" aria-hidden=" " /> */}
+                      <div
+                        className="relative text-xl text-gray-700 hover:bg-gray-400  cursor-pointer rounded-md group"
+                      >
+                        <EllipsisVertical className="w-5 h-5" />
 
-                    {/* Tooltip */}
-                    <span className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                      Manu
-                    </span>
+                        {/* Tooltip */}
+                        <span className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                          Manu
+                        </span>
+                      </div>
+                    </MenuButton>
                   </div>
-                </MenuButton>
-              </div>
 
-              <MenuItems
-                transition
-                className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-              >
-                {/* Profile Section */}
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                  onClick={() => console.log("Profile clicked")}
-                >
-                  <User className="w-5 h-5" />
-                  Profile
-                </button>
+                  <MenuItems
+                    transition
+                    className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                  >
+                    {/* Profile Section */}
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      onClick={() => {
+                        console.log("Profile clicked")
+                        close();
+                      }}
+                    >
+                      <User className="w-5 h-5" />
+                      User profile
+                    </button>
 
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                  onClick={() => setIsUserListOpen(!isUserListOpen)}
-                >
-                  <MessageSquarePlus className="w-5 h-5" />
-                  Add User
-                </button>
-                <button
-                  type="button"
-                  className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
-                  onClick={() => setOpenCreateGroupModle(true)}
-                >
-                  {/* Users Icon with Plus on top-right */}
-                  <span className="relative">
-                    <Users className="w-5 h-5" />
-                    <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 bg-transparent rounded-full shadow" />
-                  </span>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                      onClick={() => {
+                        setIsUserListOpen(!isUserListOpen)
+                        close();
+                      }}
+                    >
+                      <MessageSquarePlus className="w-5 h-5" />
+                      Add users
+                    </button>
+                    <button
+                      type="button"
+                      className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      onClick={() => {
+                        setOpenCreateGroupModle(true)
+                        close();
+                      }}
+                    >
+                      {/* Users Icon with Plus on top-right */}
+                      <span className="relative">
+                        <Users className="w-5 h-5" />
+                        <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 bg-transparent rounded-full shadow" />
+                      </span>
 
-                  Create Group
-                </button>
+                      Create group
+                    </button>
 
 
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                  onClick={() => console.log("Account Settings clicked")}
-                >
-                  <Settings className="w-5 h-5" />
-                  Account Settings
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                  onClick={() => console.log("Theme Toggle clicked")}
-                >
-                  <SunMoon className="w-5 h-5" />
-                  Theme: Light/Dark
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                  onClick={() => console.log("Notifications clicked")}
-                >
-                  <Bell className="w-5 h-5" />
-                  Notifications
-                </button>
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                  onClick={() => console.log("Support clicked")}
-                >
-                  <LifeBuoy className="w-5 h-5" />
-                  Support
-                </button>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      onClick={() => {
+                        console.log("Account Settings clicked")
+                        close();
+                      }}
+                    >
+                      <Settings className="w-5 h-5" />
+                      Account settings
+                    </button>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      onClick={() => {
+                        console.log("Theme Toggle clicked")
+                        close();
+                      }}
+                    >
+                      <SunMoon className="w-5 h-5" />
+                      Theme: light/dark
+                    </button>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      onClick={() => {
+                        console.log("Notifications clicked")
+                        close();
+                      }}
+                    >
+                      <Bell className="w-5 h-5" />
+                      Notifications
+                    </button>
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      onClick={() => {
+                        console.log("Support clicked")
+                        close();
+                      }}
+                    >
+                      <LifeBuoy className="w-5 h-5" />
+                      Support
+                    </button>
 
-                {/* Logout */}
-                <button
-                  type="button"
-                  className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                  onClick={() => setIsLogoutModalOpen(true)}
-                >
-                  <LogOut className="w-5 h-5 text-red-600" />
-                  <span className="text-red-600 font-medium">Logout</span>
-                </button>
-              </MenuItems>
+                    {/* Logout */}
+                    <button
+                      type="button"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                      onClick={() => {
+                        setIsLogoutModalOpen(true)
+                        close();
+                      }}
+                    >
+                      <LogOut className="w-5 h-5 text-red-600" />
+                      <span className="text-red-600 font-medium">Logout</span>
+                    </button>
+                  </MenuItems>
+                </>
+              )}
+
             </Menu>
 
             <button
@@ -247,7 +276,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                 user.messageType = cv?.lastMessageDetails?.messageType
                 user.time = cv?.lastMessageDetails?.timestamp
               } else {
-                user.senderId = cv?.lastMessageDetails?.isSenderId
+                user.senderId = cv?.lastMessageDetails?.isSenderId?._id
                 user.name = cv.name
                 user.profile = dummyImage
                 user.message = cv?.lastMessageDetails?.message
@@ -263,10 +292,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     } hover:bg-gray-300 shadow-sm`}
                   onClick={() => {
                     if (cv?._id === selectedUser?._id) return
+                    setShowSidebar(false)
                     dispatch(setSelectUser(cv))
                     dispatch(setChatMessagesClear([]))
                     setHasMore(true)
-                    setShowSidebar(false)
                     setPage(1)
                     fetchMessages(1, cv)
                   }}
@@ -295,10 +324,21 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                       {user.name}
                     </p>
                     <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {isYour ? t("you") + ": " : ""}
-                      {cv?.lastMessageDetails?.messageType === "file"
-                        ? "File"
-                        : cv?.lastMessageDetails?.message || "Start Conversation"}
+                      {selectedChatType === "single" ?
+                        <>
+                          {isYour ? t("you") + ": " : ""}
+                          {cv?.lastMessageDetails?.messageType === "file"
+                            ? "File"
+                            : cv?.lastMessageDetails?.message || "Start Conversation"}
+                        </>
+                        :
+                        <>
+                          {isYour ? "you" + ": " : cv?.lastMessageDetails?.isSenderId?.name + ": "}
+                          {cv?.lastMessageDetails?.messageType === "file"
+                            ? "File"
+                            : cv?.lastMessageDetails?.message || "Start Conversation"}
+                        </>
+                      }
                     </p>
                   </div>
 
@@ -377,6 +417,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     };
                     dispatch(setSelectUser(payload));
                     setIsUserListOpen(false);
+                    setShowSidebar(false)
                     dispatch(setChatMessagesClear([]));
                     fetchMessages(1, payload)
                   }}

@@ -21,7 +21,9 @@ import {
   Play,
   Pause,
   ChevronsDown,
-  Lock
+  Lock,
+  Users,
+  Plus
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -185,7 +187,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       if (
         socket.current &&
         message?.status === "sent" &&
-        message?.isSenderId !== profileData?._id
+        message?.isSenderId?._id !== profileData?._id
       ) {
         socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType);
       }
@@ -193,7 +195,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       if (
         socket.current &&
         message?.status === "delivered" &&
-        message?.isSenderId !== profileData?._id
+        message?.isSenderId?._id !== profileData?._id
       ) {
         socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
       }
@@ -544,7 +546,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           const fileURl = imageUrl?.data?.data
           if (imageUrl.status !== 200) return
           const newMessage = {
-            isSenderId: profileData?._id,
+            isSenderId: { _id: profileData?._id },
             isReceiverId: selectedUser?.conversationType === "single" ? userDetails?._id : "",
             groupId: selectedUser?.conversationType === "group" ? selectedUser?._id : "",
             message: index === 0 ? message : "",
@@ -560,7 +562,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         reader.onloadend = async () => {
           const base64Audio = reader.result;
           const newMessage = {
-            isSenderId: profileData?._id,
+            isSenderId: { _id: profileData?._id },
             isReceiverId: userDetails?._id,
             groupId: "",
             message: "",
@@ -573,7 +575,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         reader.readAsDataURL(recordedBlob);
       } else {
         const newMessage = {
-          isSenderId: profileData?._id,
+          isSenderId: { _id: profileData?._id },
           isReceiverId: userDetails?._id,
           groupId: "",
           message: message,
@@ -587,7 +589,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       if (blobFiles.length > 0) {
         for (const [index, singleFile] of blobFiles.entries()) {
           const newMessage = {
-            isSenderId: profileData?._id,
+            isSenderId: { _id: profileData?._id },
             isReceiverId: "",
             groupId: selectedUser?._id,
             message: index === 0 ? message : "",
@@ -599,7 +601,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         }
       } else {
         const newMessage = {
-          isSenderId: profileData?._id,
+          isSenderId: { _id: profileData?._id },
           isReceiverId: "",
           groupId: selectedUser?._id,
           message: message,
@@ -612,10 +614,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   };
 
-  const handlecheck = () => {
-    alert("true")
-  }
-
 
   return (
     <>
@@ -624,7 +622,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           <button
             type="button"
             onClick={() => setShowSidebar(true)}
-            className="absolute top-4 left-4 sm:hidden p-2 rounded-md hover:bg-gray-400 transition text-gray-700  cursor-pointer"
+            className="absolute top-4 left-4 sm:hidden p-2 rounded-md hover:bg-gray-400 transition text-gray-700  cursor-pointer z-11"
           >
             <AlignJustify className="w-6 h-6" />
           </button>
@@ -732,81 +730,187 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   </div>
 
                   <Menu as="div" className="relative inline-block text-left z-20">
-                    <div>
-                      <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
-                        <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
-                      </MenuButton>
-                    </div>
+                    {({ close }) => (
+                      <>
+                        <div>
+                          <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                            <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
+                          </MenuButton>
+                        </div>
 
-                    <MenuItems
-                      transition
-                      className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
-                    >
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                        onClick={() => console.log("Archive clicked")}
-                      >
-                        <Phone className="w-5 h-5" />
-                        Voice Call
-                      </button>
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                        onClick={() => console.log("Archive clicked")}
-                      >
-                        <Video className="w-5 h-5" />
-                        Video Call
-                      </button>
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                        onClick={() => setIsUserDetailsView(!isUserDetailsView)}
-                      >
-                        <User className="w-5 h-5" />
-                        View details
-                      </button>
+                        <MenuItems
+                          transition
+                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                        >
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            onClick={() => {
+                              console.log("Archive clicked")
+                              close();
+                            }}
+                          >
+                            <Phone className="w-5 h-5" />
+                            Voice call
+                          </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            onClick={() => {
+                              console.log("Archive clicked")
+                              close();
+                            }}
+                          >
+                            <Video className="w-5 h-5" />
+                            Video call
+                          </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            onClick={() => {
+                              setIsUserDetailsView(!isUserDetailsView);
+                              close();
+                            }}
+                          >
+                            <User className="w-5 h-5" />
+                            View details
+                          </button>
 
-                      {/* New Options */}
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                        onClick={() => console.log("Archive clicked")}
-                      >
-                        <Archive className="w-5 h-5" />
-                        Archive
-                      </button>
+                          {/* New Options */}
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={() => {
+                              console.log("Archive clicked")
+                              close();
+                            }}
+                          >
+                            <Archive className="w-5 h-5" />
+                            Archive
+                          </button>
 
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                        onClick={() => console.log("Mute clicked")}
-                      >
-                        <VolumeX className="w-5 h-5" />
-                        Mute
-                      </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={() => {
+                              console.log("Mute clicked")
+                              close();
+                            }}
+                          >
+                            <VolumeX className="w-5 h-5" />
+                            Mute notifications
+                          </button>
 
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                        onClick={() => dispatch(closeChat())}
-                      >
-                        <MessageSquareX className="w-5 h-5" />
-                        Clear Conversation
-                      </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={() => {
+                              dispatch(closeChat())
+                              close();
+                            }}
+                          >
+                            <MessageSquareX className="w-5 h-5" />
+                            Clear conversation
+                          </button>
 
-                      <button
-                        type="button"
-                        className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                        onClick={() => console.log("Delete Chat clicked")}
-                      >
-                        <Trash2 className="w-5 h-5 text-red-600" />
-                        Delete Chat
-                      </button>
-                    </MenuItems>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                            onClick={() => {
+                              console.log("Delete Chat clicked")
+                              close();
+                            }}
+                          >
+                            <Trash2 className="w-5 h-5 text-red-600" />
+                            Delete chat
+                          </button>
+                        </MenuItems>
+                      </>
+                    )}
                   </Menu>
                 </div> :
-                <>group details panding</>
+                <>
+                  <Menu as="div" className="relative inline-block text-left z-20">
+                    {({ close }) => (
+                      <>
+                        <div>
+                          <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                            <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
+                          </MenuButton>
+                        </div>
+
+                        <MenuItems
+                          transition
+                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                        >
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            onClick={() => {
+                              setIsUserDetailsView(!isUserDetailsView)
+                              close();
+                            }}
+                          >
+                            <Users className="w-5 h-5" />
+                            Group info
+                          </button>
+
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={() => {
+                              console.log("Mute clicked")
+                              close();
+                            }}
+                          >
+                            <VolumeX className="w-5 h-5" />
+                            Mute notification
+                          </button>
+                          <button
+                            type="button"
+                            className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                            onClick={() => {
+                              setOpenCreateGroupModle(true)
+                              close();
+                            }}
+                          >
+                            {/* Users Icon with Plus on top-right */}
+                            <span className="relative">
+                              <Users className="w-5 h-5" />
+                              <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 bg-transparent rounded-full shadow" />
+                            </span>
+
+                            Add members
+                          </button>
+
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={() => {
+                              dispatch(closeChat())
+                              close();
+                            }}
+                          >
+                            <MessageSquareX className="w-5 h-5" />
+                            Clear conversation
+                          </button>
+
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                            onClick={() => {
+                              console.log("Delete Chat clicked")
+                              close();
+                            }}
+                          >
+                            <Trash2 className="w-5 h-5 text-red-600" />
+                            Delete group
+                          </button>
+                        </MenuItems>
+                      </>
+                    )}
+                  </Menu>
+                </>
               }
             </div>
 
@@ -1027,14 +1131,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
                       </div>
                       {groupedMessages[date].map((message, idx) => {
-                        const isSender = message.isSenderId === profileData?._id;
+                        const isSender = message.isSenderId?._id === profileData?._id;
                         return (
                           <div
                             key={idx}
                             className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
                           >
                             <div
-                              className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md rounded-xl break-words ${isSender ? "bg-gray-500 text-white self-end" : "bg-white text-gray-800"
+                              className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
+                                  ${isSender
+                                  ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+                                  : "bg-white text-gray-800 rounded-tr-xl rounded-tl-xl rounded-br-xl"
                                 }`}
                             >
                               {message.messageType === "file" ? (
@@ -1203,16 +1310,52 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           </div>
                         )}
                         {groupedMessages[date].map((message, idx) => {
-                          const isSender = message.isSenderId === profileData?._id;
+                          const isSender = message.isSenderId?._id === profileData?._id;
                           return (
                             <div
                               key={idx}
-                              className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                              className={`relative flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
                             >
+                              {!isSender && (
+                                <div className="absolute -left-2 top-5 text-xs text-gray-500 font-medium mb-1">
+                                  {!message.isSenderId?.profile ? (
+                                    // Show initials inside a styled circle when no profile image
+                                    <div className="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center mt-1 text-[10px] font-semibold">
+                                      {message.isSenderId?.name
+                                        ?.split(" ")
+                                        .filter((_, index) => index === 0 || index === 1)
+                                        .map(n => n[0])
+                                        .join("")
+                                        .toUpperCase()}
+                                    </div>
+                                  ) : (
+                                    // Show profile image if available
+                                    <img
+                                      src={message.isSenderId.profile}
+                                      alt="User"
+                                      className="w-8 h-8 rounded-full object-cover mt-1"
+                                    />
+                                  )}
+                                </div>
+                              )}
+
                               <div
-                                className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md rounded-xl break-words ${isSender ? "bg-gray-500 text-white self-end" : "bg-white text-gray-800"
+                                className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
+                                          ${isSender
+                                    ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+                                    : "bg-white text-gray-800 ms-7 rounded-tr-xl rounded-tl-xl rounded-br-xl"
                                   }`}
                               >
+                                {!isSender && (
+                                  <div className="flex items-start gap-2">
+
+                                    {/* <div className="bg-gray-100 px-4 py-2 rounded-xl max-w-xs sm:max-w-md relative"> */}
+                                    <div className="text-xs text-gray-500 font-medium mb-1">
+                                      {message.isSenderId?.name || "Unknown"}
+                                    </div>
+                                    {/* </div> */}
+                                  </div>
+                                )}
                                 {message.messageType === "file" ? (
                                   checkIfImage(message.fileUrl) ? (
                                     <div
