@@ -126,7 +126,6 @@ export const SocketProvider = ({ children }) => {
       });
 
       socket.current.on("conversationResults", (singleConversation) => {
-        debugger
         if (singleConversation?.value?.length > 0) {
           dispatch(setSingleConversationList(singleConversation?.value));
         } else {

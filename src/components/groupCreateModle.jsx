@@ -22,7 +22,7 @@ const usersList = [
 const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
     const dispatch = useDispatch()
     const { socket } = useSocket()
-    const { groupCreateLoading } = useSelector((state) => state?.ChatDataSlice);
+    const { groupCreateLoading, userList } = useSelector((state) => state?.ChatDataSlice);
     const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [errorMessages, setErrorMessages] = useState({});
@@ -74,11 +74,10 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
     };
 
     const handleInviteSelect = (selectedUser) => {
-        const alreadyInvited = formData.invites.some((u) => u.id === selectedUser.id);
+        const alreadyInvited = formData.invites.some((u) => u === selectedUser._id);
         const updatedInvites = alreadyInvited
-            ? formData.invites.filter((u) => u.id !== selectedUser.id)
-            : [...formData.invites, selectedUser];
-
+            ? formData.invites.filter((u) => u !== selectedUser._id)
+            : [...formData.invites, selectedUser?._id];
         const e = {
             target: {
                 name: "invites",
@@ -206,11 +205,15 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
 
                     {dropdownOpen && (
                         <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto text-sm">
-                            {usersList.map((user) => {
-                                const isSelected = formData.invites.some((u) => u.id === user.id);
+                            {userList?.filter((cv) => cv?._id !== profileData?._id).length === 0 ?
+                                <p className="p-2 text-gray-500">No users available</p>
+                                :
+                            userList?.filter((cv) => cv?._id !== profileData?._id).map((user) => {
+                                console.log("user", user)
+                                const isSelected = formData.invites.some((u) => u === user._id);
                                 return (
                                     <div
-                                        key={user.id}
+                                        key={user._id}
                                         onClick={() => handleInviteSelect(user)}
                                         className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-100'
                                             }`}
@@ -238,10 +241,10 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                                             {/* Name & Status */}
                                             <div className="flex flex-col overflow-hidden">
                                                 <p className="font-medium text-gray-800 truncate whitespace-nowrap">
-                                                    {user.name}
+                                                    {user?.name}
                                                 </p>
                                                 <p className="text-xs text-gray-600 truncate whitespace-nowrap">
-                                                    {user.status}
+                                                    {user?.status}
                                                 </p>
                                             </div>
                                         </div>
