@@ -52,8 +52,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const { socket, fetchMessages, page, setPage, messageLoading } = useSocket()
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
-  const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
-
+  const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id ? false : true);
+  console.log("invite", invite);
   //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [userDetails, setUserDetails] = useState()
