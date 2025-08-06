@@ -40,30 +40,34 @@ export const SocketProvider = ({ children }) => {
   const [openCreateGroupModle, setOpenCreateGroupModle] = useState(false)
 
   useEffect(() => {
-    if (profileData && !socket.current) {
-      socket.current = io(import.meta.env.VITE_SOCKET_URL, {
-        withCredentials: true,
-        query: { userId: profileData._id },
-        transports: ["websocket", "polling"],
-      });
-      if (location?.pathname === "/chat") {
-        socket.current.on("connect", () => {
-          console.log("Connected to socket server");
-          socket.current.emit("registerUser", profileData._id);
-          socket.current.emit("conversation", profileData._id);
-          socket.current.emit("groupConversation", profileData._id);
-        });
-      } else {
-        socket.current.on("disconnect", () => {
-          console.log("Socket disconnected");
-        });
-      }
-      return () => {
-        socket.current.disconnect();
-        socket.current = null;
-      };
+  if (profileData && !socket.current) {
+    socket.current = io(import.meta.env.VITE_SOCKET_URL, {
+      withCredentials: true,
+      query: { userId: profileData._id },
+      transports: ["websocket", "polling"],
+    });
+
+    socket.current.on("connect", () => {
+      console.log("✅ Socket connected");
+      socket.current.emit("registerUser", profileData._id);
+      socket.current.emit("conversation", profileData._id);
+      socket.current.emit("groupConversation", profileData._id);
+      socket.current.emit("getUserList");
+    });
+
+    socket.current.on("disconnect", () => {
+      console.log("❌ Socket disconnected");
+    });
+  }
+
+  return () => {
+    if (socket.current) {
+      socket.current.disconnect();
+      socket.current = null;
+      console.log("🧹 Socket cleanup");
     }
-  }, [socket, dispatch, location?.pathname]);
+  };
+}, [profileData]);
 
   useEffect(() => {
     if (profileData?._id && socket.current) {
