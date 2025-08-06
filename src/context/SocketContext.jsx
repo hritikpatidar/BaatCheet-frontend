@@ -59,7 +59,7 @@ export const SocketProvider = ({ children }) => {
         socket.current = null;
       };
     }
-  }, [profileData, dispatch]);
+  }, [profileData, dispatch, location?.pathname]);
 
   useEffect(() => {
     dispatch(clearChatState())
@@ -68,7 +68,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.emit("groupConversation", profileData._id);
       socket.current.emit("getUserList");
     }
-  }, [socket])
+  }, [socket, location?.pathname])
 
 
   useEffect(() => {
