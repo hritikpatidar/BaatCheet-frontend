@@ -34,7 +34,7 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../context/SocketContext";
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
-import { closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setRemoveSelectedFiles, setSelectedFiles, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
+import { acceptAndRejectInvite, closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setRemoveSelectedFiles, setSelectedFiles, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
 import { base64ToFile, checkIfImage, detectURLs, getImage, isLink, isValidURL } from "../../Utils/Auth";
@@ -52,8 +52,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const { socket, fetchMessages, page, setPage, messageLoading } = useSocket()
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
-  const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id ? false : true);
-  console.log("invite", invite);
+  const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
+
   //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [userDetails, setUserDetails] = useState()
@@ -614,6 +614,22 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     }
   };
 
+  const handleAcceptAndRejectInvitation = async (type) => {
+    try {
+      const response = await dispatch(acceptAndRejectInvite({ _id: selectedUser?._id, type }));
+      if(response?.payload?.status === true) {
+        if (socket.current) {
+          socket.current.emit("groupConversation", profileData._id);
+        }
+        if(type === "declined") {
+          dispatch(closeChat());
+          setShowSidebar(false);
+        }
+      }
+    } catch (error) {
+      console.error("Error accepting or rejecting invitation:", error);
+    }
+  }
 
   return (
     <>
@@ -930,199 +946,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               )}
 
-              {/* {Object.keys(groupedMessages).length > 0 ? (
-                Object.keys(groupedMessages).map((date, index) => (
-                  <div key={index} className="mb-4">
-                    <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                      <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
-                    </div>
-                    {index === 0 && (
-                      <div className="flex-1 flex items-center justify-center p-4">
-                        <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
-                          <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
-                            <Lock />
-                          </span>
-                          <p className="text-sm text-gray-600 leading-relaxed">
-                            Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
-                          </p>
-                        </div>
-                      </div>
-                    )}
-                    {groupedMessages[date].map((message, idx) => {
-                      const isSender = message.isSenderId === profileData?._id;
-                      return (
-                        <div
-                          key={idx}
-                          className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
-                        >
-                          <div
-                            className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md rounded-xl break-words ${isSender ? "bg-gray-500 text-white self-end" : "bg-white text-gray-800"
-                              }`}
-                          >
-                            {message.messageType === "file" ? (
-                              checkIfImage(message.fileUrl) ? (
-                                <div
-                                  className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
-                                  onClick={() => {
-                                    dispatch(setViewImages([message.fileUrl]));
-                                    setShowImage(true);
-                                  }}
-                                >
-                                  {(message.fileUrl) ? (
-                                    <img
-                                      className="h-full w-full object-cover"
-                                      src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
-                                      alt="Sent Image"
-                                    />
-                                  ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center ">
-                                      <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
-                                    </div>
-                                  )}
-                                </div>
-                              ) : (
-                                <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
-                                  <div className="flex items-center gap-2" onClick={() =>
-                                    downloadFile(message.fileUrl, message._id, idx)
-                                  }>
-                                    <FileArchive className="text-gray-600 text-3xl" />
-                                    <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
-                                      {message.fileUrl.split("/").pop()}
-                                    </span>
-                                  </div>
-                                  {!message.isDownload && message.isReceiverId === profileData?._id && (
-                                    <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
-                                      {Downloading === idx ? (
-                                        <span className="text-sm font-medium text-gray-700">
-                                          {DownloadProgress}%
-                                        </span>
-                                      ) : (
-                                        <ArrowDownToLine className="text-gray-500" />
-                                      )}
-                                    </span>
-                                  )}
-                                </div>
-                              )
-                              // <></>
-                            ) :
-                              message.messageType === "audio" ? (
-                                <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                  <AudioMessagePlayer audioUrl={message.fileUrl} />
-                                </div>
-                              ) : (
-                                <p className="pr-14 break-words">
-                                  {detectURLs(message.message).map((part, i2) =>
-                                    isValidURL(part) ? (
-                                      <a
-                                        key={i2}
-                                        href={part}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="hover:text-blue-300 underline"
-                                      >
-                                        {part}
-                                      </a>
-                                    ) : (
-                                      part
-                                    )
-                                  )}
-                                </p>
-                              )
-                            }
-
-                            <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
-                              <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
-                              {isSender && (
-                                <>
-                                  {message.status === "" ? (
-                                    <Clock3 size={12} />
-                                  ) : message.status === "delivered" ? (
-                                    <CheckCheck size={12} />
-                                  ) : message.status === "read" ? (
-                                    <CheckCheck size={12} className="text-blue-500" />
-                                  ) : (
-                                    <Check size={12} />
-                                  )}
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))
-              ) : (
-                messageLoading ? (
-                  <div
-                    className="absolute left-240 top-27 -translate-x-1/2 z-50
-                         p-2 bg-gray-200 text-gray-700 rounded-full 
-                          flex items-center justify-center 
-                         hover:bg-gray-500/20 transition duration-300 shadow"
-                    style={{ width: "40px", height: "40px" }}
-                  >
-                    <Spinner className="h-5 w-5 text-secondary/50" />
-                  </div>
-                ) :
-                  selectedUser.conversationType === "single" ?
-                    <div className="flex-1 flex items-center justify-center">
-                      {!messageLoading && <p className="text-gray-500 text-center">No Message Found</p>}
-                    </div>
-                    : (invite ? (
-                      <>
-                        <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                          <span className="bg-gray-300/80 p-1 rounded-md">24/06/2025</span>
-                        </div>
-                        <div className="flex-1 flex items-center justify-center p-4">
-                          <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
-                            <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
-                              <Lock />
-                            </span>
-                            <p className="text-sm text-gray-600 leading-relaxed">
-                              Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex-1 flex items-center justify-center p-4">
-                          <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 space-y-4">
-                            <div className="bg-gray-50 p-4 rounded-xl text-center space-y-3">
-                              <p className="text-sm text-gray-600">You’ve been invited to the group</p>
-                              <h2 className="text-xl font-semibold text-gray-900">{userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}</h2>
-                              <p className="text-sm text-gray-600">by</p>
-                              <div className="flex justify-center">
-                                <div className="w-16 h-16 flex items-center justify-center rounded-full border-4 border-gray-500 bg-gray-400 text-white font-semibold">
-                                  {invite.invitedBy?.profile ? (
-                                    <img src={invite.invitedBy.profile} alt="Profile" className="w-12 h-12 rounded-full" />
-                                  ) : invite.invitedBy?.name?.split(" ")
-                                    .filter((_, index) => index === 0 || index === 1)
-                                    .map(n => n[0])
-                                    .join("")
-                                    .toUpperCase()}
-
-                                </div>
-                              </div>
-                              <p className="text-lg font-bold text-gray-800">{invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}</p>
-
-                              <div className="flex justify-center gap-4 pt-2">
-                                <button className="flex items-center gap-1 px-5 py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition">
-                                  ✔️ Accept
-                                </button>
-                                <button className="flex items-center gap-1 px-5 py-2 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition">
-                                  ❌ Decline
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      </>
-                    )
-                      :
-                      <div className="flex-1 flex items-center justify-center">
-
-                        {!messageLoading && <p className="text-gray-500 text-center">No Message Found</p>}
-                      </div>
-                    )
-              )} */}
               {selectedUser.conversationType === "single" ? (
                 Object.keys(groupedMessages).length > 0 ? (
                   Object.keys(groupedMessages).map((date, index) => (
@@ -1278,10 +1101,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           </div>
                           <p className="text-lg font-bold text-gray-800">{invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}</p>
                           <div className="flex justify-center gap-4 pt-2">
-                            <button className="flex items-center gap-1 px-5 py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition">
+                            <button type="button" onClick={() => handleAcceptAndRejectInvitation("accepted")} className="flex items-center gap-1 px-5 py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition">
                               ✔️ Accept
                             </button>
-                            <button className="flex items-center gap-1 px-5 py-2 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition">
+                            <button type="button" onClick={() => handleAcceptAndRejectInvitation("declined")} className="flex items-center gap-1 px-5 py-2 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition">
                               ❌ Decline
                             </button>
                           </div>

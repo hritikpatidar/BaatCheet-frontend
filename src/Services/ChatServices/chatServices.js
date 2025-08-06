@@ -32,3 +32,7 @@ export const getImageUrl = (url) => {
 export const createGroupService = (data) => {
     return httpServices.post(`${getUrl()}/create-group`, data);
 }
+
+export const groupInviteAcceptAndReject = (data) => {
+    return httpServices.get(`${getUrl()}/accept-or-decline-group-request?group_id=${data?._id}&status=${data?.type}`);
+}

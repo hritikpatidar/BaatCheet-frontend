@@ -21,23 +21,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-
-  const { socket, userListModal, setUserListModal, fetchMessages, setHasMore, setPage } = useSocket();
-  const [openCreateGroupModle, setOpenCreateGroupModle] = useState(false)
-  // const [isListLoading, setIsListLoading] = useState(false);
-  // const userLists = useSelector((state) => state?.ChatDataSlice?.userList);
+  const { socket, userListModal, setUserListModal, fetchMessages, setHasMore, setPage, openCreateGroupModle, setOpenCreateGroupModle } = useSocket();
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { userList, singleConversationList, groupConversationList, selectedChatType, selectedUser } = useSelector((state) => state?.ChatDataSlice);
-  // const selectedUserDetails = useSelector((state) => state?.ChatDataSlice?.selectChatUSer);
-  // const [searchValue, setSearchValue] = useState("")
-  // const [searchConversationUSer, setSearchConversationUSer] = useState("")
-  // const filterData = userLists?.filter((resource) => {
-  //   const fullName = resource?.full_name?.toLowerCase() || "";
-  //   const email = resource?.email?.toLowerCase() || "";
-  //   const search = searchValue.toLowerCase();
 
-  //   return fullName.includes(search) || email.includes(search);
-  // });
   const [isUserListOpen, setIsUserListOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -240,13 +227,20 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
         <div className="flex mb-4 border border-gray-300 rounded-md overflow-hidden">
           <button
             className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "single" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
-            onClick={() => dispatch(setSelectedChatType("single"))}
+            onClick={() => {
+              dispatch(setSelectedChatType("single"))
+              socket.current.emit("conversation", profileData._id);
+            }}
           >
             Single
           </button>
           <button
             className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
-            onClick={() => dispatch(setSelectedChatType("group"))}
+            onClick={() => {
+              dispatch(setSelectedChatType("group"))
+              socket.current.emit("groupConversation", profileData._id);
+
+            }}
           >
             Group
           </button>
@@ -266,7 +260,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               ? singleConversationList
               : groupConversationList
             )?.map((cv, i) => {
-              const data = cv.members.find(item => item._id !== profileData?._id)
+              const data = cv?.members?.find(item => item._id !== profileData?._id)
               let user = {}
               if (selectedChatType === "single") {
                 user.senderId = cv?.lastMessageDetails?.isSenderId
@@ -284,7 +278,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                 user.time = cv?.lastMessageDetails?.timestamp
               }
               const isYour = user.senderId === profileData?._id
-
+              const invite = cv?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
               return (
                 <li
                   key={i}
@@ -333,10 +327,15 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                         </>
                         :
                         <>
-                          {isYour ? "you" + ": " : cv?.lastMessageDetails?.isSenderId?.name + ": "}
-                          {cv?.lastMessageDetails?.messageType === "file"
-                            ? "File"
-                            : cv?.lastMessageDetails?.message || "Start Conversation"}
+                          {
+                            invite ? "Invite You to join group" :
+                              <>
+                                {isYour ? "you" + ": " : cv?.lastMessageDetails ? cv?.lastMessageDetails?.isSenderId?.name + ": " : ""}
+                                {cv?.lastMessageDetails?.messageType === "file"
+                                  ? "File"
+                                  : cv?.lastMessageDetails?.message || "Starts Conversation"}
+                              </>
+                          }
                         </>
                       }
                     </p>
@@ -345,7 +344,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   {/* Time and unread count */}
                   <div className="flex flex-col items-end text-xs text-gray-500">
                     {cv?.lastMessageDetails?.unReadMessages &&
-                      cv?._id !== selectedUser?._id ? (
+                      cv?._id !== selectedUser?._id && !invite ? (
                       <span className="inline-block bg-gray-500 text-white rounded-full px-2 py-0.5 mb-0.5">
                         {formatter.format(cv?.lastMessageDetails?.unReadMessages)}
                       </span>

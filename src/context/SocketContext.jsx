@@ -6,7 +6,9 @@ import {
   clearChatState,
   onlineStatusData,
   setGroupConversationList,
+  setGroupCreateLoading,
   setIsTyping,
+  setNewGroupConversation,
   setSelectedChatMessages,
   setSelectUser,
   setSendMessages,
@@ -16,6 +18,7 @@ import {
   updateFilesList,
   updatelinksList
 } from "../Redux/features/Chat/chatSlice";
+import toast from "react-hot-toast";
 
 const SocketContext = createContext(null);
 
@@ -34,6 +37,7 @@ export const SocketProvider = ({ children }) => {
   const { selectedUser, ChatMessages, onlineStatus, selectedChatType } = useSelector((state) => state?.ChatDataSlice);
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
+  const [openCreateGroupModle, setOpenCreateGroupModle] = useState(false)
 
   useEffect(() => {
     if (profileData && !socket.current) {
@@ -59,19 +63,19 @@ export const SocketProvider = ({ children }) => {
         socket.current = null;
       };
     }
-  }, [profileData, dispatch, location?.pathname]);
+  }, [socket, dispatch, location?.pathname]);
 
   useEffect(() => {
-    dispatch(clearChatState())
-    if (socket.current) {
+    if (profileData?._id && socket.current) {
       socket.current.emit("conversation", profileData._id);
       socket.current.emit("groupConversation", profileData._id);
       socket.current.emit("getUserList");
     }
-  }, [socket, location?.pathname])
+  }, [socket]);
 
 
   useEffect(() => {
+    if (!socket.current || !profileData) return;
     if (socket.current) {
       socket.current.off("userList");
       socket.current.off("conversationCreateResult");
@@ -94,6 +98,19 @@ export const SocketProvider = ({ children }) => {
         if (selectedUser !== null && userData?._id === selectedUser?._id) {
           dispatch(setSelectUser(userData));
         }
+      });
+
+
+      socket.current.on("groupCreated", async (groupData, message) => {
+        dispatch(setNewGroupConversation(groupData));
+        await dispatch(setGroupCreateLoading(false));
+        setOpenCreateGroupModle(false);
+        if (groupData.admin === profileData?._id) toast.success(message || "Group created successfully");
+      });
+
+      socket.current.on("groupCreationFailed", async (message) => {
+        await dispatch(setGroupCreateLoading(false));
+        toast.success(message || "Internal server error");
       });
 
       socket.current.on("groupConversationResults", (groupConversation) => {
@@ -216,7 +233,9 @@ export const SocketProvider = ({ children }) => {
         setHasMore,
         page,
         setPage,
-        pageSize
+        pageSize,
+        openCreateGroupModle,
+        setOpenCreateGroupModle
       }}
     >
       {children}

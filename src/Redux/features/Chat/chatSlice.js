@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createGroupService, getUserListService } from "../../../Services/ChatServices";
+import { createGroupService, getUserListService, groupInviteAcceptAndReject } from "../../../Services/ChatServices";
 
 // Initial state
 const initialState = {
@@ -22,7 +22,8 @@ const initialState = {
   isFirstLoad: true,
   isUserDetails: false,
   filesList: [],
-  linksList: []
+  linksList: [],
+  groupCreateLoading: false,
 };
 
 export const getUserList = createAsyncThunk(
@@ -37,6 +38,14 @@ export const createGroup = createAsyncThunk(
   "chat/createGroup",
   async (data) => {
     const response = await createGroupService(data);
+    return response.data || [];
+  }
+);
+
+export const acceptAndRejectInvite = createAsyncThunk(
+  "chat/acceptAndReject",
+  async (data) => {
+    const response = await groupInviteAcceptAndReject(data);
     return response.data || [];
   }
 );
@@ -61,6 +70,13 @@ const chatSlice = createSlice({
     },
     setGroupConversationList: (state, action) => {
       state.groupConversationList = action.payload;
+    },
+    setNewGroupConversation: (state, action) => {
+      const newGroup = action.payload;
+      state.groupConversationList = [newGroup, ...state.groupConversationList];
+    },
+    setGroupCreateLoading: (state, action) => {
+      state.groupCreateLoading = action.payload;
     },
     setSelectedChatMessages: (state, action) => { // all messages
       state.ChatMessages = [...action.payload, ...state.ChatMessages];
@@ -188,7 +204,7 @@ const chatSlice = createSlice({
         state.loading = false;
         if(action.payload.data){
           state.groupConversationList = [action.payload.data, ...state.groupConversationList] || [];
-        }else{
+        } else {
           state.groupConversationList = state.groupConversationList || [];
         }
         state.error = "";
@@ -198,8 +214,22 @@ const chatSlice = createSlice({
         state.groupConversationList = [];
         state.error = action.error.message;
       })
+      //---------------------------------------------------
+      .addCase(acceptAndRejectInvite.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(acceptAndRejectInvite.fulfilled, (state, action) => {
+        state.loading = false;
+        state.selectedUser = action.payload.data || {};
+        state.error = "";
+      })
+      .addCase(acceptAndRejectInvite.rejected, (state, action) => {
+        state.loading = false;
+        state.selectedUser = {};
+        state.error = action.error.message;
+      })
     //---------------------------------------------------
-
   },
 });
 
@@ -210,6 +240,8 @@ export const {
   setSelectedChatType,
   setSingleConversationList,
   setGroupConversationList,
+  setNewGroupConversation,
+  setGroupCreateLoading,
   setChatMessagesClear,
   setSendMessages,
   setSelectedChatMessages,

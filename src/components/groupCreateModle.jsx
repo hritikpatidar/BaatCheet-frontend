@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Users, Image as ImageIcon, UserCheck, ChevronDown, X } from 'lucide-react';
 import { groupCreateValidation } from '../Utils/validation';
-import { createGroup } from '../Redux/features/Chat/chatSlice';
+import { createGroup, setGroupCreateLoading } from '../Redux/features/Chat/chatSlice';
 import toast from 'react-hot-toast';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { useSocket } from '../context/SocketContext';
 
 const usersList = [
     { id: 1, name: 'Ritik Patidar bheelawat', status: 'Code करता हूँ, coffee के साथ ☕' },
@@ -20,9 +21,11 @@ const usersList = [
 
 const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
     const dispatch = useDispatch()
+    const { socket } = useSocket()
+    const { groupCreateLoading } = useSelector((state) => state?.ChatDataSlice);
+    const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [errorMessages, setErrorMessages] = useState({});
-    const [loading, setLoading] = useState(false);
 
     const [formData, setFormData] = useState({
         groupName: '',
@@ -94,48 +97,58 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
             ...errors,
         });
         if (!isValid) return;
-        setLoading(true);
+        dispatch(setGroupCreateLoading(true));
         try {
-            const data = new FormData();
-            data.append('name', formData.groupName);
-            data.append('image', formData.image);
+            // const data = new FormData();
+            // data.append('name', formData.groupName);
+            // data.append('image', formData.image);
 
-            // formData.invites.forEach((user) => {
-            ["685f8deaade9a93c4b95d58b","685e40e52723ae09d190cae2","685fb590b4ef045200c052e6","6885ec81138d8a0aa92c60d1"].forEach((user) => {
-                data.append(`invites`, user);
+            // // formData.invites.forEach((user) => {
+            // ["685e40e52723ae09d190cae2","685fb590b4ef045200c052e6","6885ec81138d8a0aa92c60d1"].forEach((user) => {
+            //     data.append(`invites`, user);
+            // });
+
+            // data.append('add_member', formData.toggles.add_member);
+            // data.append('approve_new_member', formData.toggles.approve_new_member);
+            // data.append('edit_group_setting', formData.toggles.edit_group_setting);
+            // data.append('invite_via_link', formData.toggles.invite_via_link);
+            // data.append('send_msg', formData.toggles.send_msg);
+
+            // const response = await dispatch(createGroup(data));
+            // if (response?.payload?.status === true) {
+            //     toast.success(response?.payload?.message);
+            //     setOpenCreateGroupModle(false)
+            //     setFormData({
+            //         groupName: '',
+            //         invites: [],
+            //         image: null,
+            //         toggles: {
+            //             edit_group_setting: false,
+            //             send_msg: false,
+            //             add_member: false,
+            //             invite_via_link: false,
+            //             approve_new_member: false,
+            //         },
+            //     })
+
+            // } else {
+            //     toast.error(
+            //         response.payload?.message || "Group Not Create"
+            //     );
+            // }
+            socket.current.emit("createGroup", {
+                name: formData.groupName,
+                invites: formData.invites,
+                image: formData.image, // or base64 string or URL
+                edit_group_setting: formData.toggles.edit_group_setting,
+                send_msg: formData.toggles.send_msg,
+                add_member: formData.toggles.add_member,
+                invite_via_link: formData.toggles.invite_via_link,
+                approve_new_member: formData.toggles.approve_new_member,
+                user_id: profileData?._id,
             });
-
-            data.append('add_member', formData.toggles.add_member);
-            data.append('approve_new_member', formData.toggles.approve_new_member);
-            data.append('edit_group_setting', formData.toggles.edit_group_setting);
-            data.append('invite_via_link', formData.toggles.invite_via_link);
-            data.append('send_msg', formData.toggles.send_msg);
-
-            const response = await dispatch(createGroup(data));
-            if (response?.payload?.status === true) {
-                toast.success(response?.payload?.message);
-                setOpenCreateGroupModle(false)
-                setFormData({
-                    groupName: '',
-                    invites: [],
-                    image: null,
-                    toggles: {
-                        edit_group_setting: false,
-                        send_msg: false,
-                        add_member: false,
-                        invite_via_link: false,
-                        approve_new_member: false,
-                    },
-                })
-            } else {
-                toast.error(
-                    response.payload?.message || "Group Not Create"
-                );
-            }
         } catch (error) {
             toast.error("An error occurred. Please try again.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -280,9 +293,9 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                     <button
                         type="submit"
                         className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
-                        disabled={loading}
+                        disabled={groupCreateLoading}
                     >
-                        {loading ? "Logging in..." : "Create Group"}
+                        {groupCreateLoading ? "Logging in..." : "Create Group"}
                     </button>
                 </div>
             </form>

@@ -3,5 +3,6 @@ export {
     uploadFileService,
     getDownloadBufferFile,
     getConversationService,
-    createGroupService
+    createGroupService,
+    groupInviteAcceptAndReject
 } from './chatServices';
