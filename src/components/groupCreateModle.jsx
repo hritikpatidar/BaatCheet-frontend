@@ -209,7 +209,6 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                                 <p className="p-2 text-gray-500">No users available</p>
                                 :
                             userList?.filter((cv) => cv?._id !== profileData?._id).map((user) => {
-                                console.log("user", user)
                                 const isSelected = formData.invites.some((u) => u === user._id);
                                 return (
                                     <div
