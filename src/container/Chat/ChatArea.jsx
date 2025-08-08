@@ -540,7 +540,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       if (blobFiles.length > 0) {
         for (const [index, singleFile] of blobFiles.entries()) {
           const formData = new FormData();
-          formData.append("files", singleFile); // Append the file to the FormData
+          formData.append("file", singleFile); // Append the file to the FormData
 
           const imageUrl = await uploadFileService(formData); // ✅ Upload file
           const fileURl = imageUrl?.data?.data
