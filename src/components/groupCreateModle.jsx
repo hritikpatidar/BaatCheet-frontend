@@ -5,6 +5,7 @@ import { createGroup, setGroupCreateLoading } from '../Redux/features/Chat/chatS
 import toast from 'react-hot-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSocket } from '../context/SocketContext';
+import { uploadFileService } from '../Services/ChatServices';
 
 const usersList = [
     { id: 1, name: 'Ritik Patidar bheelawat', status: 'Code करता हूँ, coffee के साथ ☕' },
@@ -98,47 +99,13 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
         if (!isValid) return;
         dispatch(setGroupCreateLoading(true));
         try {
-            // const data = new FormData();
-            // data.append('name', formData.groupName);
-            // data.append('image', formData.image);
-
-            // // formData.invites.forEach((user) => {
-            // ["685e40e52723ae09d190cae2","685fb590b4ef045200c052e6","6885ec81138d8a0aa92c60d1"].forEach((user) => {
-            //     data.append(`invites`, user);
-            // });
-
-            // data.append('add_member', formData.toggles.add_member);
-            // data.append('approve_new_member', formData.toggles.approve_new_member);
-            // data.append('edit_group_setting', formData.toggles.edit_group_setting);
-            // data.append('invite_via_link', formData.toggles.invite_via_link);
-            // data.append('send_msg', formData.toggles.send_msg);
-
-            // const response = await dispatch(createGroup(data));
-            // if (response?.payload?.status === true) {
-            //     toast.success(response?.payload?.message);
-            //     setOpenCreateGroupModle(false)
-            //     setFormData({
-            //         groupName: '',
-            //         invites: [],
-            //         image: null,
-            //         toggles: {
-            //             edit_group_setting: false,
-            //             send_msg: false,
-            //             add_member: false,
-            //             invite_via_link: false,
-            //             approve_new_member: false,
-            //         },
-            //     })
-
-            // } else {
-            //     toast.error(
-            //         response.payload?.message || "Group Not Create"
-            //     );
-            // }
+            const data = new FormData();
+            data.append("file", formData.image); // Append the file to the FormData
+            const imageUrl = await uploadFileService(data);
             socket.current.emit("createGroup", {
                 name: formData.groupName,
                 invites: formData.invites,
-                image: formData.image, // or base64 string or URL
+                image: imageUrl?.data?.data, // or base64 string or URL
                 edit_group_setting: formData.toggles.edit_group_setting,
                 send_msg: formData.toggles.send_msg,
                 add_member: formData.toggles.add_member,
@@ -208,57 +175,57 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                             {userList?.filter((cv) => cv?._id !== profileData?._id).length === 0 ?
                                 <p className="p-2 text-gray-500">No users available</p>
                                 :
-                            userList?.filter((cv) => cv?._id !== profileData?._id).map((user) => {
-                                const isSelected = formData.invites.some((u) => u === user._id);
-                                return (
-                                    <div
-                                        key={user._id}
-                                        onClick={() => handleInviteSelect(user)}
-                                        className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-100'
-                                            }`}
-                                    >
-                                        {/* Left: Profile + Name + Status */}
-                                        <div className="flex items-center gap-3 overflow-hidden">
-                                            {/* Profile */}
-                                            <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white text-xs font-semibold overflow-hidden">
-                                                {user.profile ? (
-                                                    <img
-                                                        src={user.profile}
-                                                        alt="Profile"
-                                                        className="w-8 h-8 rounded-full object-cover"
-                                                    />
-                                                ) : (
-                                                    user.name
-                                                        .split(' ')
-                                                        .filter((_, index) => index === 0 || index === 1)
-                                                        .map((n) => n[0])
-                                                        .join('')
-                                                        .toUpperCase()
-                                                )}
+                                userList?.filter((cv) => cv?._id !== profileData?._id).map((user) => {
+                                    const isSelected = formData.invites.some((u) => u === user._id);
+                                    return (
+                                        <div
+                                            key={user._id}
+                                            onClick={() => handleInviteSelect(user)}
+                                            className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-100'
+                                                }`}
+                                        >
+                                            {/* Left: Profile + Name + Status */}
+                                            <div className="flex items-center gap-3 overflow-hidden">
+                                                {/* Profile */}
+                                                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white text-xs font-semibold overflow-hidden">
+                                                    {user.profile ? (
+                                                        <img
+                                                            src={user.profile}
+                                                            alt="Profile"
+                                                            className="w-8 h-8 rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        user.name
+                                                            .split(' ')
+                                                            .filter((_, index) => index === 0 || index === 1)
+                                                            .map((n) => n[0])
+                                                            .join('')
+                                                            .toUpperCase()
+                                                    )}
+                                                </div>
+
+                                                {/* Name & Status */}
+                                                <div className="flex flex-col overflow-hidden">
+                                                    <p className="font-medium text-gray-800 truncate whitespace-nowrap">
+                                                        {user?.name}
+                                                    </p>
+                                                    <p className="text-xs text-gray-600 truncate whitespace-nowrap">
+                                                        {user?.status}
+                                                    </p>
+                                                </div>
                                             </div>
 
-                                            {/* Name & Status */}
-                                            <div className="flex flex-col overflow-hidden">
-                                                <p className="font-medium text-gray-800 truncate whitespace-nowrap">
-                                                    {user?.name}
-                                                </p>
-                                                <p className="text-xs text-gray-600 truncate whitespace-nowrap">
-                                                    {user?.status}
-                                                </p>
-                                            </div>
+                                            {/* Right: Checkbox */}
+                                            <input
+                                                type="checkbox"
+                                                checked={isSelected}
+                                                onChange={() => handleInviteSelect(user)}
+                                                onClick={(e) => e.stopPropagation()}
+                                                className="custom-checkbox"
+                                            />
                                         </div>
-
-                                        {/* Right: Checkbox */}
-                                        <input
-                                            type="checkbox"
-                                            checked={isSelected}
-                                            onChange={() => handleInviteSelect(user)}
-                                            onClick={(e) => e.stopPropagation()}
-                                            className="custom-checkbox"
-                                        />
-                                    </div>
-                                );
-                            })}
+                                    );
+                                })}
                         </div>
                     )}
                 </div>

@@ -49,12 +49,12 @@ export const SocketProvider = ({ children }) => {
 
       socket.current.on("connect", () => {
         console.log("✅ Socket connected");
-        if (profileData._id && location.pathname === "/chat") {
-          socket.current.emit("registerUser", profileData._id);
-          socket.current.emit("conversation", profileData._id);
-          socket.current.emit("groupConversation", profileData._id);
-          socket.current.emit("getUserList");
-        }
+        socket.current.emit("registerUser", profileData._id);
+        // if (profileData._id && location.pathname === "/chat") {
+        socket.current.emit("conversation", profileData._id);
+        socket.current.emit("groupConversation", profileData._id);
+        socket.current.emit("getUserList");
+        // }
       });
 
       socket.current.on("disconnect", () => {
@@ -85,10 +85,13 @@ export const SocketProvider = ({ children }) => {
     if (socket.current) {
       socket.current.off("userList");
       socket.current.off("conversationCreateResult");
+      socket.current.off("groupCreated");
+      socket.current.off("groupCreationFailed");
       socket.current.off("groupConversationResults");
       socket.current.off("conversationResults");
       socket.current.off("receiveMessage");
       socket.current.off("getMessageResults");
+      socket.current.off("updateUserStatus");
       socket.current.off("downloadFileResult");
       socket.current.off("getFilesResults");
       socket.current.off("userTyping");
