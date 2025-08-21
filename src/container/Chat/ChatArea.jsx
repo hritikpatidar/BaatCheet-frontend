@@ -60,7 +60,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [userDetails, setUserDetails] = useState()
-
+  console.log("userDetails", userDetails);
   //message container states
   const messagesContainerRef = useRef(null)
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
@@ -1199,7 +1199,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       </div>
                     </div>
                     {
-                      userDetails?.admin?._id === profileData?._id && !invite &&
+                      (userDetails?.admin === profileData?._id && !invite) &&
                       <div className="flex-1 flex items-center justify-center p-4">
                         <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg bg-white rounded-xl shadow-md overflow-hidden">
 

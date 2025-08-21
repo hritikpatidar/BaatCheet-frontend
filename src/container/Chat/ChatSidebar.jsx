@@ -25,6 +25,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { userList, singleConversationList, groupConversationList, selectedChatType, selectedUser } = useSelector((state) => state?.ChatDataSlice);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+
   const [isUserListOpen, setIsUserListOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,6 +36,49 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
     notation: 'compact',
     maximumFractionDigits: 1
   });
+
+  const filteredUsers = userList?.filter(
+    (cv) =>
+      cv?._id !== profileData?._id &&
+      cv?.name?.toLowerCase().includes(searchTerm.toLowerCase().trim())
+  );
+
+  // 🔹 Filter list according to search
+  const chatList =
+    selectedChatType === "single"
+      ? singleConversationList
+      : groupConversationList;
+
+  const filteredList = chatList?.filter((cv) => {
+    const data =
+      selectedChatType === "single"
+        ? cv?.members?.find((item) => item._id !== profileData?._id)
+        : cv;
+    const name = selectedChatType === "single" ? data?.name : cv?.name;
+    return name?.toLowerCase().includes(searchTerm.toLowerCase().trim());
+  });
+
+  // Function to highlight search text
+  const highlightText = (text, search) => {
+    const regex = new RegExp(`(${search.trim()})`, "gi");
+    const parts = text.split(regex);
+
+    return (
+      <>
+        {parts.map((part, i) =>
+          part.toLowerCase() === search.toLowerCase().trim() ? (
+            <span key={i} className="text-green-500 font-semibold">
+              {part}
+            </span>
+          ) : (
+            <span key={i} className="text-gray-800">
+              {part}
+            </span>
+          )
+        )}
+      </>
+    );
+  };
 
   return (
     <>
@@ -48,7 +94,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
           <div className="flex items-center gap-2">
             <button
               className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md group"
-              onClick={() => setIsUserListOpen(!isUserListOpen)}
+              onClick={() => {
+                setIsUserListOpen(!isUserListOpen)
+                setSearchTerm("");
+              }}
             >
               <MessageSquarePlus className="w-5 h-5" />
 
@@ -117,6 +166,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                       className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
                       onClick={() => {
                         setIsUserListOpen(!isUserListOpen)
+                        setSearchTerm("");
                         close();
                       }}
                     >
@@ -219,6 +269,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
           <input
             type="text"
             placeholder="Search or start a new chat"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-3 py-2 pl-10 rounded-md border border-gray-300 bg-white focus:outline-none text-sm text-gray-800"
           />
         </div>
@@ -228,6 +280,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
           <button
             className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "single" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
             onClick={() => {
+              setSearchTerm("");
               dispatch(setSelectedChatType("single"))
               socket.current.emit("conversation", profileData._id);
             }}
@@ -238,6 +291,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
             onClick={() => {
               dispatch(setSelectedChatType("group"))
+              setSearchTerm("");
               socket.current.emit("groupConversation", profileData._id);
 
             }}
@@ -246,7 +300,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
           </button>
         </div>
 
-        {/* Recent Chats */}
+        {/* Recent Chats
         <ul className="space-y-2 overflow-y-auto flex-1">
           {(selectedChatType === "single"
             ? singleConversationList
@@ -294,7 +348,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     fetchMessages(1, cv)
                   }}
                 >
-                  {/* Profile circle (initials) */}
                   <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold overflow-hidden">
                     {user.profile ? (
                       <img
@@ -312,7 +365,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     )}
                   </div>
 
-                  {/* Name and message */}
                   <div className="flex-1 overflow-hidden">
                     <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
                       {user.name}
@@ -341,7 +393,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     </p>
                   </div>
 
-                  {/* Time and unread count */}
                   <div className="flex flex-col items-end text-xs text-gray-500">
                     {cv?.lastMessageDetails?.unReadMessages &&
                       cv?._id !== selectedUser?._id && !invite ? (
@@ -355,8 +406,121 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               )
             })
           )}
-        </ul>
+        </ul> */}
 
+        {/* 🔹 Recent Chats */}
+        <ul className="space-y-2 overflow-y-auto flex-1">
+          {filteredList?.length === 0 ? (
+            <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
+              {selectedChatType === "single" ? "No user found" : "No group found"}
+            </li>
+          ) : (
+            filteredList?.map((cv, i) => {
+              const data = cv?.members?.find(
+                (item) => item._id !== profileData?._id
+              );
+              let user = {};
+              if (selectedChatType === "single") {
+                user.senderId = cv?.lastMessageDetails?.isSenderId;
+                user.name = data?.name;
+                user.profile = dummyImage;
+                user.message = cv?.lastMessageDetails?.message;
+                user.messageType = cv?.lastMessageDetails?.messageType;
+                user.time = cv?.lastMessageDetails?.timestamp;
+              } else {
+                user.senderId = cv?.lastMessageDetails?.isSenderId?._id;
+                user.name = cv.name;
+                user.profile = dummyImage;
+                user.message = cv?.lastMessageDetails?.message;
+                user.messageType = cv?.lastMessageDetails?.messageType;
+                user.time = cv?.lastMessageDetails?.timestamp;
+              }
+
+              const isYour = user.senderId === profileData?._id;
+              const invite = cv?.invites?.find(
+                (invite) => invite?.invitedUser?._id === profileData?._id
+              );
+
+              return (
+                <li
+                  key={i}
+                  className={`cursor-pointer flex items-center gap-3 p-2 rounded-md ${cv?._id === selectedUser?._id && "bg-gray-300"
+                    } hover:bg-gray-300 shadow-sm`}
+                  onClick={() => {
+                    if (cv?._id === selectedUser?._id) return;
+                    setShowSidebar(false);
+                    dispatch(setSelectUser(cv));
+                    dispatch(setChatMessagesClear([]));
+                    setHasMore(true);
+                    setPage(1);
+                    fetchMessages(1, cv);
+                  }}
+                >
+                  {/* Profile */}
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold overflow-hidden">
+                    {user.profile ? (
+                      <img
+                        src={user.profile}
+                        alt={"No Image"}
+                        className="w-12 h-12 rounded-full object-cover"
+                      />
+                    ) : (
+                      user?.name
+                        ?.split(" ")
+                        .filter((_, index) => index === 0 || index === 1)
+                        .map((n) => n[0])
+                        .join("")
+                        .toUpperCase()
+                    )}
+                  </div>
+
+                  {/* Name + Message */}
+                  <div className="flex-1 overflow-hidden">
+                    <p className="font-medium truncate">
+                      {highlightText(user.name, searchTerm)}
+                    </p>
+                    <p className="text-xs truncate">
+                      {selectedChatType === "single" ? (
+                        <>
+                          {isYour ? t("you") + ": " : ""}
+                          {cv?.lastMessageDetails?.messageType === "file"
+                            ? "File"
+                            : cv?.lastMessageDetails?.message || "Start Conversation"}
+                        </>
+                      ) : invite ? (
+                        "Invite You to join group"
+                      ) : (
+                        <>
+                          {isYour
+                            ? "you: "
+                            : cv?.lastMessageDetails
+                              ? cv?.lastMessageDetails?.isSenderId?.name + ": "
+                              : ""}
+                          {cv?.lastMessageDetails?.messageType === "file"
+                            ? "File"
+                            : cv?.lastMessageDetails?.message ||
+                            "Starts Conversation"}
+                        </>
+                      )}
+                    </p>
+                  </div>
+
+                  {/* Time + unread count */}
+                  <div className="flex flex-col items-end text-xs text-gray-500">
+                    {cv?.lastMessageDetails?.unReadMessages &&
+                      cv?._id !== selectedUser?._id &&
+                      !invite ? (
+                      <span className="inline-block bg-gray-500 text-white rounded-full px-2 py-0.5 mb-0.5">
+                        {formatter.format(cv?.lastMessageDetails?.unReadMessages)}
+                      </span>
+                    ) : null}
+                    <span>{dayjs(user.time).format("hh:mm A")}</span>
+                  </div>
+                </li>
+              );
+            })
+          )}
+        </ul>
       </div>
 
       <div
@@ -367,7 +531,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
           <button
             className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
-            onClick={() => setIsUserListOpen(false)}
+            onClick={() => {
+              setIsUserListOpen(false)
+              setSearchTerm("");
+            }}
           >
             <MoveLeft className="w-5 h-5" />
           </button>
@@ -379,6 +546,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
           <input
             type="text"
             placeholder="Search or start a new chat"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full px-3 py-2 pl-10 rounded-md border border-gray-300 bg-white focus:outline-none text-sm text-gray-800"
           />
         </div>
@@ -386,57 +555,57 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
         <h3 className="text-gray-500 font-bold ml-2 mb-3">Connect with us</h3>
 
         {/* User List */}
+        {/* User List */}
         <ul className="space-y-2 overflow-y-auto flex-1">
-          {userList?.filter((cv) => cv?._id !== profileData?._id).length === 0 ? (
+          {filteredUsers?.length === 0 ? (
             <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
               No user found
             </li>
           ) : (
-            userList
-              ?.filter((cv) => cv?._id !== profileData?._id)
-              .map((cv, i) => (
-                <li
-                  key={i}
-                  className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
-                  onClick={() => {
-                    const payload = {
-                      _id: "",
-                      conversationType: "single",
-                      members: [
-                        {
-                          _id: cv?._id,
-                          name: cv?.name,
-                          email: cv?.email,
-                          profile: "",
-                        },
-                      ],
-                      status: "sent",
-                      isChatDisabled: false,
-                    };
-                    dispatch(setSelectUser(payload));
-                    setIsUserListOpen(false);
-                    setShowSidebar(false)
-                    dispatch(setChatMessagesClear([]));
-                    fetchMessages(1, payload)
-                  }}
-                >
-                  <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
-                    {cv?.name
-                      ?.split(" ")
-                      ?.map((word) => word[0])
-                      .join("")
-                      .toUpperCase()}
-                  </div>
-                  <div className="flex-1 overflow-hidden">
-                    <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {cv.name}
-                    </p>
-                    <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {"This theme is awesome!"}
-                    </p>
-                  </div>
-                </li>
-              ))
+            filteredUsers.map((cv, i) => (
+              <li
+                key={i}
+                className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
+                onClick={() => {
+                  const payload = {
+                    _id: "",
+                    conversationType: "single",
+                    members: [
+                      {
+                        _id: cv?._id,
+                        name: cv?.name,
+                        email: cv?.email,
+                        profile: "",
+                      },
+                    ],
+                    status: "sent",
+                    isChatDisabled: false,
+                  };
+                  dispatch(setSelectUser(payload));
+                  setIsUserListOpen(false);
+                  setShowSidebar(false);
+                  dispatch(setChatMessagesClear([]));
+                  fetchMessages(1, payload);
+                }}
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
+                  {cv?.name
+                    ?.split(" ")
+                    ?.map((word) => word[0])
+                    .join("")
+                    .toUpperCase()}
+                </div>
+                <div className="flex-1 overflow-hidden">
+                  <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                    {/* {cv.name} */}
+                    {highlightText(cv.name, searchTerm)}
+                  </p>
+                  <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                    {"This theme is awesome!"}
+                  </p>
+                </div>
+              </li>
+            ))
           )}
         </ul>
 
