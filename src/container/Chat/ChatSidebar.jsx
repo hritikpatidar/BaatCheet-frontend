@@ -37,7 +37,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   return (
     <>
       <div
-        className={`fixed z-20 h-full w-72 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+        className={`fixed z-30 h-full w-full bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
               ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
@@ -360,7 +360,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
       </div>
 
       <div
-        className={`fixed z-20 h-full w-72 sm:w-56 md:w-72 xl:w-96 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+        className={`fixed z-50 h-full w-full sm:w-56 md:w-72 xl:w-96 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
                 ${isUserListOpen ? "translate-x-0" : "-translate-x-100"} `}
       >
         {/* Header */}

@@ -44,6 +44,7 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
     const handleChange = (e) => {
         const { name, value } = e.target;
         const newData = { [name]: value };
+        if (name === "groupName" && value.length > 30) return
 
         setFormData((prev) => ({
             ...prev,
@@ -128,15 +129,28 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
 
                 {/* Group Name */}
                 <div className="relative mb-4">
-                    <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Group Name"
-                        name="groupName"
-                        value={formData.groupName}
-                        onChange={handleChange}
-                        className={`w-full pl-10 pr-3 py-2 ${errorMessages?.groupName ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
-                    />
+                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                        Group Name
+                    </label>
+                    <div className="relative">
+                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <input
+                            type="text"
+                            placeholder="Enter group name"
+                            name="groupName"
+                            value={formData.groupName}
+                            maxLength={30}
+                            onChange={handleChange}
+                            className={`w-full pl-10 pr-12 py-2 ${errorMessages?.groupName
+                                    ? "border border-red-500"
+                                    : "border border-gray-300"
+                                } rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                        />
+                        {/* Character Counter - Right Corner */}
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+                            {formData.groupName.length}/30
+                        </span>
+                    </div>
                 </div>
 
                 {/* Group Image */}

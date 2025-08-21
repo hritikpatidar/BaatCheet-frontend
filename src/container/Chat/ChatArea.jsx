@@ -23,7 +23,11 @@ import {
   ChevronsDown,
   Lock,
   Users,
-  Plus
+  Plus,
+  Info,
+  PlusCircle,
+  CircleCheck,
+  CircleX
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -53,7 +57,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
   const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
-
   //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [userDetails, setUserDetails] = useState()
@@ -588,17 +591,39 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     } else if (selectedUser?.conversationType === "group") {
       if (blobFiles.length > 0) {
         for (const [index, singleFile] of blobFiles.entries()) {
+          const formData = new FormData();
+          formData.append("file", singleFile);
+          const imageUrl = await uploadFileService(formData);
+          const fileURl = imageUrl?.data?.data
+          if (imageUrl.status !== 200) return
           const newMessage = {
             isSenderId: { _id: profileData?._id },
-            isReceiverId: "",
-            groupId: selectedUser?._id,
+            isReceiverId: selectedUser?.conversationType === "single" ? userDetails?._id : "",
+            groupId: selectedUser?.conversationType === "group" ? selectedUser?._id : "",
             message: index === 0 ? message : "",
-            fileUrl: singleFile,
+            fileUrl: fileURl,
             messageType: "file",
             timestamp: dayjs().format()
           };
+
           await onSendMessage(newMessage);
         }
+      } else if (recordedBlob) {
+        const reader = new FileReader();
+        reader.onloadend = async () => {
+          const base64Audio = reader.result;
+          const newMessage = {
+            isSenderId: { _id: profileData?._id },
+            isReceiverId: userDetails?._id,
+            groupId: "",
+            message: "",
+            fileUrl: base64Audio,
+            messageType: "audio",
+            timestamp: dayjs().format()
+          };
+          await onSendMessage(newMessage);
+        };
+        reader.readAsDataURL(recordedBlob);
       } else {
         const newMessage = {
           isSenderId: { _id: profileData?._id },
@@ -617,11 +642,11 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const handleAcceptAndRejectInvitation = async (type) => {
     try {
       const response = await dispatch(acceptAndRejectInvite({ _id: selectedUser?._id, type }));
-      if(response?.payload?.status === true) {
+      if (response?.payload?.status === true) {
         if (socket.current) {
           socket.current.emit("groupConversation", profileData._id);
         }
-        if(type === "declined") {
+        if (type === "declined") {
           dispatch(closeChat());
           setShowSidebar(false);
         }
@@ -947,135 +972,222 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               )}
 
               {selectedUser.conversationType === "single" ? (
-                Object.keys(groupedMessages).length > 0 ? (
-                  Object.keys(groupedMessages).map((date, index) => (
-                    <div key={index} className="mb-4">
-                      <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                        <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
-                      </div>
-                      {groupedMessages[date].map((message, idx) => {
-                        const isSender = message.isSenderId?._id === profileData?._id;
-                        return (
-                          <div
-                            key={idx}
-                            className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
-                          >
-                            <div
-                              className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
-                                  ${isSender
-                                  ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
-                                  : "bg-white text-gray-800 rounded-tr-xl rounded-tl-xl rounded-br-xl"
-                                }`}
-                            >
-                              {message.messageType === "file" ? (
-                                checkIfImage(message.fileUrl) ? (
-                                  <div
-                                    className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
-                                    onClick={() => {
-                                      dispatch(setViewImages([message.fileUrl]));
-                                      setShowImage(true);
-                                    }}
-                                  >
-                                    {(message.fileUrl) ? (
-                                      <img
-                                        className="h-full w-full object-cover"
-                                        src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
-                                        alt="Sent Image"
-                                      />
-                                    ) : (
-                                      <div className="absolute inset-0 flex items-center justify-center ">
-                                        <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
-                                      </div>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
-                                    <div className="flex items-center gap-2" onClick={() =>
-                                      downloadFile(message.fileUrl, message._id, idx)
-                                    }>
-                                      <FileArchive className="text-gray-600 text-3xl" />
-                                      <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
-                                        {message.fileUrl.split("/").pop()}
-                                      </span>
-                                    </div>
-                                    {!message.isDownload && message.isReceiverId === profileData?._id && (
-                                      <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
-                                        {Downloading === idx ? (
-                                          <span className="text-sm font-medium text-gray-700">
-                                            {DownloadProgress}%
-                                          </span>
-                                        ) : (
-                                          <ArrowDownToLine className="text-gray-500" />
-                                        )}
-                                      </span>
-                                    )}
-                                  </div>
-                                )
-                                // <></>
-                              ) :
-                                message.messageType === "audio" ? (
-                                  <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                    <AudioMessagePlayer audioUrl={message.fileUrl} />
-                                  </div>
-                                ) : (
-                                  <p className="pr-14 break-words">
-                                    {detectURLs(message.message).map((part, i2) =>
-                                      isValidURL(part) ? (
-                                        <a
-                                          key={i2}
-                                          href={part}
-                                          target="_blank"
-                                          rel="noopener noreferrer"
-                                          className="hover:text-blue-300 underline"
-                                        >
-                                          {part}
-                                        </a>
-                                      ) : (
-                                        part
-                                      )
-                                    )}
-                                  </p>
-                                )
-                              }
-
-                              <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
-                                <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
-                                {isSender && (
-                                  <>
-                                    {message.status === "" ? (
-                                      <Clock3 size={12} />
-                                    ) : message.status === "delivered" ? (
-                                      <CheckCheck size={12} />
-                                    ) : message.status === "read" ? (
-                                      <CheckCheck size={12} className="text-blue-500" />
-                                    ) : (
-                                      <Check size={12} />
-                                    )}
-                                  </>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                <>
+                  <div className="flex-1 flex items-center justify-center p-4">
+                    <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
+                      <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
+                        <Lock />
+                      </span>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                      </p>
                     </div>
-                  ))
-                ) : messageLoading ? (
-                  <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
-                    <Spinner className="h-5 w-5 text-secondary/50" />
                   </div>
-                ) : (
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-gray-500 text-center">No Message Found</p>
-                  </div>
-                )
+                  {
+                    Object.keys(groupedMessages).length > 0 ? (
+                      Object.keys(groupedMessages).map((date, index) => (
+                        <div key={index} className="mb-4">
+                          <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                            <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
+                          </div>
+                          {groupedMessages[date].map((message, idx) => {
+                            const isSender = message.isSenderId?._id === profileData?._id;
+                            return (
+                              <div
+                                key={idx}
+                                className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                              >
+                                <div
+                                  className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
+                                  ${isSender
+                                      ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+                                      : "bg-white text-gray-800 rounded-tr-xl rounded-tl-xl rounded-br-xl"
+                                    }`}
+                                >
+                                  {message.messageType === "file" ? (
+                                    checkIfImage(message.fileUrl) ? (
+                                      <div
+                                        className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                        onClick={() => {
+                                          dispatch(setViewImages([message.fileUrl]));
+                                          setShowImage(true);
+                                        }}
+                                      >
+                                        {(message.fileUrl) ? (
+                                          <img
+                                            className="h-full w-full object-cover"
+                                            src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                            alt="Sent Image"
+                                          />
+                                        ) : (
+                                          <div className="absolute inset-0 flex items-center justify-center ">
+                                            <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
+                                          </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
+                                        <div className="flex items-center gap-2" onClick={() =>
+                                          downloadFile(message.fileUrl, message._id, idx)
+                                        }>
+                                          <FileArchive className="text-gray-600 text-3xl" />
+                                          <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
+                                            {message.fileUrl.split("/").pop()}
+                                          </span>
+                                        </div>
+                                        {!message.isDownload && message.isReceiverId === profileData?._id && (
+                                          <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
+                                            {Downloading === idx ? (
+                                              <span className="text-sm font-medium text-gray-700">
+                                                {DownloadProgress}%
+                                              </span>
+                                            ) : (
+                                              <ArrowDownToLine className="text-gray-500" />
+                                            )}
+                                          </span>
+                                        )}
+                                      </div>
+                                    )
+                                    // <></>
+                                  ) :
+                                    message.messageType === "audio" ? (
+                                      <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
+                                        <AudioMessagePlayer audioUrl={message.fileUrl} />
+                                      </div>
+                                    ) : (
+                                      <p className="pr-14 break-words">
+                                        {detectURLs(message.message).map((part, i2) =>
+                                          isValidURL(part) ? (
+                                            <a
+                                              key={i2}
+                                              href={part}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="hover:text-blue-300 underline"
+                                            >
+                                              {part}
+                                            </a>
+                                          ) : (
+                                            part
+                                          )
+                                        )}
+                                      </p>
+                                    )
+                                  }
+
+                                  <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
+                                    <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
+                                    {isSender && (
+                                      <>
+                                        {message.status === "" ? (
+                                          <Clock3 size={12} />
+                                        ) : message.status === "delivered" ? (
+                                          <CheckCheck size={12} />
+                                        ) : message.status === "read" ? (
+                                          <CheckCheck size={12} className="text-blue-500" />
+                                        ) : (
+                                          <Check size={12} />
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))
+                    ) :
+                      //  messageLoading ? (
+                      //   <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
+                      //     <Spinner className="h-5 w-5 text-secondary/50" />
+                      //   </div>
+                      // ) :
+                      (
+                        <div className="flex-1 flex items-center justify-center">
+                          {/* <p className="text-gray-500 text-center">No Message Found</p> */}
+                        </div>
+                      )
+                  }
+                </>
+
               ) : (
                 // ---- GROUP CHAT ----
                 invite ? (
                   <>
-                    <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                      <span className="bg-gray-300/80 p-1 rounded-md">24/06/2025</span>
+                    {/* Date Header */}
+                    <div className="sticky top-0 z-10 text-center text-xs sm:text-sm text-gray-800 pb-2 font-medium">
+                      <span className="bg-gray-300/80 px-2 py-0.5 rounded-md">24/06/2025</span>
                     </div>
+
+                    {/* Encryption Info */}
+                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4 py-2">
+                      <div className="flex items-center gap-2 bg-gray-200 px-3 py-1.5 rounded-md w-full max-w-full sm:max-w-md">
+                        <span className="text-gray-500 text-lg sm:text-xl flex-shrink-0 flex items-center h-full">
+                          <Lock strokeWidth={1.2} />
+                        </span>
+                        <p className="text-xs sm:text-sm text-gray-600 leading-snug">
+                          Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Invitation Card */}
+                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4 py-2">
+                      <div className="w-full max-w-full sm:max-w-md bg-white rounded-xl shadow-md p-3 sm:p-4 space-y-2 sm:space-y-3">
+                        <div className="bg-gray-50 p-3 sm:p-3 rounded-xl text-center space-y-1.5 sm:space-y-2">
+                          <p className="text-xs sm:text-sm text-gray-600">You’ve been invited to the group</p>
+                          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
+                            {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
+                          </h2>
+                          <p className="text-xs sm:text-sm text-gray-600">by</p>
+
+                          {/* Inviter Avatar */}
+                          <div className="flex justify-center">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 sm:border-3 border-gray-500 bg-gray-400 text-white font-semibold text-sm sm:text-base">
+                              {invite.invitedBy?.profile ? (
+                                <img
+                                  src={invite.invitedBy.profile}
+                                  alt="Profile"
+                                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full"
+                                />
+                              ) : invite.invitedBy?.name
+                                ?.split(" ")
+                                .filter((_, index) => index === 0 || index === 1)
+                                .map((n) => n[0])
+                                .join("")
+                                .toUpperCase()}
+                            </div>
+                          </div>
+
+                          <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">
+                            {invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}
+                          </p>
+
+                          {/* Buttons */}
+                          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleAcceptAndRejectInvitation("accepted")}
+                              className="flex items-center justify-center gap-1 px-4 sm:px-5 py-1.5 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
+                            >
+                              <CircleCheck strokeWidth={1.2} /> Accept
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleAcceptAndRejectInvitation("declined")}
+                              className="flex items-center justify-center gap-1 px-4 sm:px-5 py-1.5 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition text-sm"
+                            >
+                              <CircleX strokeWidth={1.2} /> Decline
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                ) : (
+                  <>
+
                     <div className="flex-1 flex items-center justify-center p-4">
                       <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
                         <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
@@ -1086,205 +1198,226 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         </p>
                       </div>
                     </div>
-                    <div className="flex-1 flex items-center justify-center p-4">
-                      <div className="w-full max-w-md bg-white rounded-xl shadow-md p-4 space-y-4">
-                        <div className="bg-gray-50 p-4 rounded-xl text-center space-y-3">
-                          <p className="text-sm text-gray-600">You’ve been invited to the group</p>
-                          <h2 className="text-xl font-semibold text-gray-900">{userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}</h2>
-                          <p className="text-sm text-gray-600">by</p>
-                          <div className="flex justify-center">
-                            <div className="w-16 h-16 flex items-center justify-center rounded-full border-4 border-gray-500 bg-gray-400 text-white font-semibold">
-                              {invite.invitedBy?.profile ? (
-                                <img src={invite.invitedBy.profile} alt="Profile" className="w-12 h-12 rounded-full" />
-                              ) : invite.invitedBy?.name?.split(" ").filter((_, index) => index === 0 || index === 1).map(n => n[0]).join("").toUpperCase()}
-                            </div>
-                          </div>
-                          <p className="text-lg font-bold text-gray-800">{invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}</p>
-                          <div className="flex justify-center gap-4 pt-2">
-                            <button type="button" onClick={() => handleAcceptAndRejectInvitation("accepted")} className="flex items-center gap-1 px-5 py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition">
-                              ✔️ Accept
-                            </button>
-                            <button type="button" onClick={() => handleAcceptAndRejectInvitation("declined")} className="flex items-center gap-1 px-5 py-2 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition">
-                              ❌ Decline
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  // ✅ Show group messages
-                  Object.keys(groupedMessages).length > 0 ? (
-                    Object.keys(groupedMessages).map((date, index) => (
-                      <div key={index} className="mb-4">
-                        <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                          <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
-                        </div>
-                        {index === 0 && (
-                          <div className="flex-1 flex items-center justify-center p-4">
-                            <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
-                              <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
-                                <Lock />
+                    {
+                      userDetails?.admin?._id === profileData?._id && !invite &&
+                      <div className="flex-1 flex items-center justify-center p-4">
+                        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg bg-white rounded-xl shadow-md overflow-hidden">
+
+                          {/* Group Image / Profile */}
+                          <div className="w-full aspect-video flex items-center justify-center bg-gray-100">
+                            {userDetails?.profile ? (
+                              <img
+                                src={dummyImage}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-3xl sm:text-4xl font-semibold text-gray-600">
+                                {userDetails?.name
+                                  ?.split(" ")
+                                  .filter((_, index) => index === 0 || index === 1)
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()}
                               </span>
-                              <p className="text-sm text-gray-600 leading-relaxed">
-                                Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
-                              </p>
+                            )}
+                          </div>
+
+                          {/* Group Details */}
+                          <div className="p-3 sm:p-4 text-center space-y-1">
+                            <p className="text-xs sm:text-sm text-gray-600">
+                              You’ve created the group
+                            </p>
+                            <h2 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
+                              {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
+                            </h2>
+
+                            {/* Buttons */}
+                            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-2">
+                              <button
+                                type="button"
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
+                              >
+                                <Info strokeWidth={1.2} /> Group Info
+                              </button>
+                              <button
+                                type="button"
+                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
+                              >
+                                <PlusCircle strokeWidth={1.2} /> Add Members
+                              </button>
                             </div>
                           </div>
-                        )}
-                        {groupedMessages[date].map((message, idx) => {
-                          const isSender = message.isSenderId?._id === profileData?._id;
-                          return (
-                            <div
-                              key={idx}
-                              className={`relative flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
-                            >
-                              {!isSender && (
-                                <div className="absolute -left-2 top-5 text-xs text-gray-500 font-medium mb-1">
-                                  {!message.isSenderId?.profile ? (
-                                    // Show initials inside a styled circle when no profile image
-                                    <div className="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center mt-1 text-[10px] font-semibold">
-                                      {message.isSenderId?.name
-                                        ?.split(" ")
-                                        .filter((_, index) => index === 0 || index === 1)
-                                        .map(n => n[0])
-                                        .join("")
-                                        .toUpperCase()}
-                                    </div>
-                                  ) : (
-                                    // Show profile image if available
-                                    <img
-                                      src={message.isSenderId.profile}
-                                      alt="User"
-                                      className="w-8 h-8 rounded-full object-cover mt-1"
-                                    />
-                                  )}
-                                </div>
-                              )}
-
-                              <div
-                                className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
-                                          ${isSender
-                                    ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
-                                    : "bg-white text-gray-800 ms-7 rounded-tr-xl rounded-tl-xl rounded-br-xl"
-                                  }`}
-                              >
-                                {!isSender && (
-                                  <div className="flex items-start gap-2">
-
-                                    {/* <div className="bg-gray-100 px-4 py-2 rounded-xl max-w-xs sm:max-w-md relative"> */}
-                                    <div className="text-xs text-gray-500 font-medium mb-1">
-                                      {message.isSenderId?.name || "Unknown"}
-                                    </div>
-                                    {/* </div> */}
-                                  </div>
-                                )}
-                                {message.messageType === "file" ? (
-                                  checkIfImage(message.fileUrl) ? (
-                                    <div
-                                      className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
-                                      onClick={() => {
-                                        dispatch(setViewImages([message.fileUrl]));
-                                        setShowImage(true);
-                                      }}
-                                    >
-                                      {(message.fileUrl) ? (
-                                        <img
-                                          className="h-full w-full object-cover"
-                                          src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
-                                          alt="Sent Image"
-                                        />
-                                      ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center ">
-                                          <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
-                                        </div>
-                                      )}
-                                    </div>
-                                  ) : (
-                                    <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
-                                      <div className="flex items-center gap-2" onClick={() =>
-                                        downloadFile(message.fileUrl, message._id, idx)
-                                      }>
-                                        <FileArchive className="text-gray-600 text-3xl" />
-                                        <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
-                                          {message.fileUrl.split("/").pop()}
-                                        </span>
-                                      </div>
-                                      {!message.isDownload && message.isReceiverId === profileData?._id && (
-                                        <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
-                                          {Downloading === idx ? (
-                                            <span className="text-sm font-medium text-gray-700">
-                                              {DownloadProgress}%
-                                            </span>
-                                          ) : (
-                                            <ArrowDownToLine className="text-gray-500" />
-                                          )}
-                                        </span>
-                                      )}
-                                    </div>
-                                  )
-                                  // <></>
-                                ) :
-                                  message.messageType === "audio" ? (
-                                    <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                      <AudioMessagePlayer audioUrl={message.fileUrl} />
-                                    </div>
-                                  ) : (
-                                    <p className="pr-14 break-words">
-                                      {detectURLs(message.message).map((part, i2) =>
-                                        isValidURL(part) ? (
-                                          <a
-                                            key={i2}
-                                            href={part}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="hover:text-blue-300 underline"
-                                          >
-                                            {part}
-                                          </a>
-                                        ) : (
-                                          part
-                                        )
-                                      )}
-                                    </p>
-                                  )
-                                }
-
-                                <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
-                                  <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
-                                  {isSender && (
-                                    <>
-                                      {message.status === "" ? (
-                                        <Clock3 size={12} />
-                                      ) : message.status === "delivered" ? (
-                                        <CheckCheck size={12} />
-                                      ) : message.status === "read" ? (
-                                        <CheckCheck size={12} className="text-blue-500" />
-                                      ) : (
-                                        <Check size={12} />
-                                      )}
-                                    </>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          );
-                        })}
+                        </div>
                       </div>
-                    ))
-                  ) : messageLoading ? (
-                    <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
-                      <Spinner className="h-5 w-5 text-secondary/50" />
-                    </div>
-                  ) : (
-                    <div className="flex-1 flex items-center justify-center">
-                      <p className="text-gray-500 text-center">No Message Found</p>
-                    </div>
-                  )
+                    }
+
+
+                    {
+                      Object.keys(groupedMessages).length > 0 ? (
+                        Object.keys(groupedMessages).map((date, index) => (
+                          <div key={index} className="mb-4">
+                            <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
+                              <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
+                            </div>
+                            {/* {index === 0 && (
+                              
+                            )} */}
+                            {groupedMessages[date].map((message, idx) => {
+                              const isSender = message.isSenderId?._id === profileData?._id;
+                              return (
+                                <div
+                                  key={idx}
+                                  className={`relative flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                                >
+                                  {!isSender && (
+                                    <div className="absolute -left-2 top-5 text-xs text-gray-500 font-medium mb-1">
+                                      {!message.isSenderId?.profile ? (
+                                        // Show initials inside a styled circle when no profile image
+                                        <div className="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center mt-1 text-[10px] font-semibold">
+                                          {message.isSenderId?.name
+                                            ?.split(" ")
+                                            .filter((_, index) => index === 0 || index === 1)
+                                            .map(n => n[0])
+                                            .join("")
+                                            .toUpperCase()}
+                                        </div>
+                                      ) : (
+                                        // Show profile image if available
+                                        <img
+                                          src={message.isSenderId.profile}
+                                          alt="User"
+                                          className="w-8 h-8 rounded-full object-cover mt-1"
+                                        />
+                                      )}
+                                    </div>
+                                  )}
+
+                                  <div
+                                    className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
+                                          ${isSender
+                                        ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+                                        : "bg-white text-gray-800 ms-7 rounded-tr-xl rounded-tl-xl rounded-br-xl"
+                                      }`}
+                                  >
+                                    {!isSender && (
+                                      <div className="flex items-start gap-2">
+
+                                        {/* <div className="bg-gray-100 px-4 py-2 rounded-xl max-w-xs sm:max-w-md relative"> */}
+                                        <div className="text-xs text-gray-500 font-medium mb-1">
+                                          {message.isSenderId?.name || "Unknown"}
+                                        </div>
+                                        {/* </div> */}
+                                      </div>
+                                    )}
+                                    {message.messageType === "file" ? (
+                                      checkIfImage(message?.fileUrl) ? (
+                                        <div
+                                          className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                          onClick={() => {
+                                            dispatch(setViewImages([message?.fileUrl]));
+                                            setShowImage(true);
+                                          }}
+                                        >
+                                          {(message?.fileUrl) ? (
+                                            <img
+                                              className="h-full w-full object-cover"
+                                              src={`${import.meta.env.VITE_SOCKET_URL}/${message?.fileUrl}`}
+                                              alt="Sent Image"
+                                            />
+                                          ) : (
+                                            <div className="absolute inset-0 flex items-center justify-center ">
+                                              <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
+                                          <div className="flex items-center gap-2" onClick={() =>
+                                            downloadFile(message?.fileUrl, message._id, idx)
+                                          }>
+                                            <FileArchive className="text-gray-600 text-3xl" />
+                                            <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
+                                              {message?.fileUrl.split("/").pop()}
+                                            </span>
+                                          </div>
+                                          {!message.isDownload && message.isReceiverId === profileData?._id && (
+                                            <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
+                                              {Downloading === idx ? (
+                                                <span className="text-sm font-medium text-gray-700">
+                                                  {DownloadProgress}%
+                                                </span>
+                                              ) : (
+                                                <ArrowDownToLine className="text-gray-500" />
+                                              )}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )
+                                      // <></>
+                                    ) :
+                                      message.messageType === "audio" ? (
+                                        <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
+                                          <AudioMessagePlayer audioUrl={message.fileUrl} />
+                                        </div>
+                                      ) : (
+                                        <p className="pr-14 break-words h-6">
+                                          {detectURLs(message.message).map((part, i2) =>
+                                            isValidURL(part) ? (
+                                              <a
+                                                key={i2}
+                                                href={part}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="hover:text-blue-300 underline"
+                                              >
+                                                {part}
+                                              </a>
+                                            ) : (
+                                              part
+                                            )
+                                          )}
+                                        </p>
+                                      )
+                                    }
+
+                                    <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
+                                      <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
+                                      {isSender && (
+                                        <>
+                                          {message.status === "" ? (
+                                            <Clock3 size={12} />
+                                          ) : message.status === "delivered" ? (
+                                            <CheckCheck size={12} />
+                                          ) : message.status === "read" ? (
+                                            <CheckCheck size={12} className="text-blue-500" />
+                                          ) : (
+                                            <Check size={12} />
+                                          )}
+                                        </>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))
+                      ) :
+                        // messageLoading ? (
+                        // <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
+                        //   <Spinner className="h-5 w-5 text-secondary/50" />
+                        // </div>
+                        // ) :
+                        (
+                          <div className="flex-1 flex items-center justify-center">
+                            {/* <p className="text-gray-500 text-center">No Message Found</p> */}
+                          </div>
+                        )
+                    }
+                  </>
                 )
               )}
-
-
             </div>
 
 
