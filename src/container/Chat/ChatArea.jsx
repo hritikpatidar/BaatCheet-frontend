@@ -710,7 +710,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     .toUpperCase()}
                 </div>
                 <div>
-                  <h2 className="text-md font-bold text-gray-800">
+                  <h2 className="text-md font-bold text-gray-800 max-w-[150px] sm:max-w-[200px] lg:max-w-[250px] truncate">
                     {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
                   </h2>
                   <p className="text-sm text-green-600">
