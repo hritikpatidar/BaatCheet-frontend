@@ -1019,7 +1019,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                         {(message.fileUrl) ? (
                                           <img
                                             className="h-full w-full object-cover"
-                                            src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                            // src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                            src={dummyImage}
                                             alt="Sent Image"
                                           />
                                         ) : (
@@ -1058,7 +1059,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                         <AudioMessagePlayer audioUrl={message.fileUrl} />
                                       </div>
                                     ) : (
-                                      <p className="pr-14 break-words">
+                                      <p className="pr-14 break-words min-h-6">
                                         {detectURLs(message.message).map((part, i2) =>
                                           isValidURL(part) ? (
                                             <a
@@ -1275,23 +1276,23 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                   className={`relative flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
                                 >
                                   {!isSender && (
-                                    <div className="absolute -left-2 top-5 text-xs text-gray-500 font-medium mb-1">
-                                      {!message.isSenderId?.profile ? (
+                                    <div className="absolute left-8 bottom-2 translate-x-[-120%] flex items-end">
+                                      {message.isSenderId?.profile ? (
                                         // Show initials inside a styled circle when no profile image
-                                        <div className="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center mt-1 text-[10px] font-semibold">
+                                        <div className="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px] font-semibold">
                                           {message.isSenderId?.name
                                             ?.split(" ")
                                             .filter((_, index) => index === 0 || index === 1)
-                                            .map(n => n[0])
+                                            .map((n) => n[0])
                                             .join("")
                                             .toUpperCase()}
                                         </div>
                                       ) : (
                                         // Show profile image if available
                                         <img
-                                          src={message.isSenderId.profile}
+                                          src={message.isSenderId.profile || dummyImage}
                                           alt="User"
-                                          className="w-8 h-8 rounded-full object-cover mt-1"
+                                          className="w-8 h-8 rounded-full object-cover"
                                         />
                                       )}
                                     </div>
@@ -1314,6 +1315,15 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                         {/* </div> */}
                                       </div>
                                     )}
+                                    {isSender && (
+                                      <div className="flex items-start gap-2">
+                                        {/* <div className="bg-gray-100 px-4 py-2 rounded-xl max-w-xs sm:max-w-md relative"> */}
+                                        <div className="text-xs text-white-500 font-medium mb-1">
+                                          {"You" || "Unknown"}
+                                        </div>
+                                        {/* </div> */}
+                                      </div>
+                                    )}
                                     {message.messageType === "file" ? (
                                       checkIfImage(message?.fileUrl) ? (
                                         <div
@@ -1326,7 +1336,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                           {(message?.fileUrl) ? (
                                             <img
                                               className="h-full w-full object-cover"
-                                              src={`${import.meta.env.VITE_SOCKET_URL}/${message?.fileUrl}`}
+                                              // src={`${import.meta.env.VITE_SOCKET_URL}/${message?.fileUrl}`}
+                                              src={dummyImage}
                                               alt="Sent Image"
                                             />
                                           ) : (
@@ -1365,7 +1376,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                           <AudioMessagePlayer audioUrl={message.fileUrl} />
                                         </div>
                                       ) : (
-                                        <p className="pr-14 break-words h-6">
+                                        <p className="pr-14 break-words min-h-6">
                                           {detectURLs(message.message).map((part, i2) =>
                                             isValidURL(part) ? (
                                               <a
@@ -1561,11 +1572,19 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         words[0] = words[0][0].toUpperCase() + words[0].slice(1);
                       }
                       setMessage(words.join(" "));
-                      socket.current.emit("typing", selectedUser?._id, profileData?._id);
-                      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                      typingTimeoutRef.current = setTimeout(() => {
-                        socket.current.emit("stopTyping", selectedUser?._id, profileData?._id);
-                      }, 2000);
+                      if (selectedUser?.conversationType === "group") {
+                        socket.current.emit("groupTyping", selectedUser?._id, profileData?._id, profileData?.name);
+                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                        typingTimeoutRef.current = setTimeout(() => {
+                          socket.current.emit("groupStopTyping", selectedUser?._id, profileData?._id, profileData?.name);
+                        }, 2000);
+                      } else {
+                        socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id);
+                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                        typingTimeoutRef.current = setTimeout(() => {
+                          socket.current.emit("stopTyping", selectedUser?._id, profileData?._id, userDetails?._id);
+                        }, 2000);
+                      }
                     }}
                     onPaste={handlePaste}
                     onKeyDown={(e) => {

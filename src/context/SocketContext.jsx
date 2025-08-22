@@ -178,15 +178,15 @@ export const SocketProvider = ({ children }) => {
       });
 
       socket.current.on("userTyping", (data) => {
-        if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
+        // if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
           dispatch(setIsTyping(true));
-        }
+        // }
       });
 
       socket.current.on("userStopTyping", (data) => {
-        if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
+        // if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
           dispatch(setIsTyping(false));
-        }
+        // }
       });
 
       // socket.current.on("downloadFileResult", (MessageData) => {
