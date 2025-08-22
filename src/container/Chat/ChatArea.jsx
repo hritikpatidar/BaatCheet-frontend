@@ -60,7 +60,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   //header states
   const [isUserDetailsView, setIsUserDetailsView] = useState(false)
   const [userDetails, setUserDetails] = useState()
-  console.log("userDetails", userDetails);
   //message container states
   const messagesContainerRef = useRef(null)
   const [prevScrollHeight, setPrevScrollHeight] = useState(0);
@@ -696,7 +695,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 <button
                   type="button"
                   className="sm:hidden text-2xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
-                  onClick={() => setShowSidebar(true)}
+                  onClick={() => {
+                    setShowSidebar(true)
+                    dispatch(closeChat())
+                  }}
                 >
                   <AlignJustify />
                 </button>

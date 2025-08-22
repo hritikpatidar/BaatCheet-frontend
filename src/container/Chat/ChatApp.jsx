@@ -4,7 +4,7 @@ import ChatArea from './ChatArea';
 
 
 const ChatApp = () => {
-  const [showSidebar, setShowSidebar] = useState(false);
+  const [showSidebar, setShowSidebar] = useState(true);
 
   return (
     <div className="flex h-screen font-sans bg-gray-100 ">
