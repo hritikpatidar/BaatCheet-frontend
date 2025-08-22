@@ -12,7 +12,7 @@ import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import LogOutModal from "../../components/LogOutModalPage";
-import GroupCreateModal from "../../components/groupCreateModle";
+import GroupCreateModal from "../../components/groupCreateModal";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

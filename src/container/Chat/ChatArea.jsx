@@ -48,6 +48,7 @@ import ImageLightbox from "../../components/imagePreview";
 import WaveSurfer from "wavesurfer.js";
 import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js'
 import { Spinner } from "@material-tailwind/react";
+import AddMembersModal from "../../components/addMembersModal";
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
@@ -84,7 +85,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [isPlay, setIsPlay] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState(null);
   const isSendDisabled = (!message && file.length === 0 && !recordedBlob) ? true : false;
-
+  const [addMembersGroupModle, setAddMembersGroupModle] = useState(false)
 
   //useEffect hooks
   //header useEffect
@@ -1244,6 +1245,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                               </button>
                               <button
                                 type="button"
+                                onClick={() => setAddMembersGroupModle(true)}
                                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
                               >
                                 <PlusCircle strokeWidth={1.2} /> Add Members
@@ -1673,6 +1675,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         <ImageLightbox
           setShowImage={setShowImage}
           downloadImages={downloadImages}
+        />
+      }
+
+      {
+        addMembersGroupModle &&
+        <AddMembersModal 
+        addMembersGroupModle={addMembersGroupModle}
+        setAddMembersGroupModle={setAddMembersGroupModle}
         />
       }
 
