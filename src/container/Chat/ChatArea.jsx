@@ -598,8 +598,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           if (imageUrl.status !== 200) return
           const newMessage = {
             isSenderId: { _id: profileData?._id },
-            isReceiverId: selectedUser?.conversationType === "single" ? userDetails?._id : "",
-            groupId: selectedUser?.conversationType === "group" ? selectedUser?._id : "",
+            isReceiverId: "",
+            groupId: selectedUser?._id,
             message: index === 0 ? message : "",
             fileUrl: fileURl,
             messageType: "file",
@@ -614,8 +614,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           const base64Audio = reader.result;
           const newMessage = {
             isSenderId: { _id: profileData?._id },
-            isReceiverId: userDetails?._id,
-            groupId: "",
+            isReceiverId: "",
+            groupId: selectedUser?._id,
             message: "",
             fileUrl: base64Audio,
             messageType: "audio",
@@ -1202,7 +1202,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       </div>
                     </div>
                     {
-                      (userDetails?.admin === profileData?._id && !invite) &&
+                      (userDetails?.admin?._id === profileData?._id && !invite) &&
                       <div className="flex-1 flex items-center justify-center p-4">
                         <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg bg-white rounded-xl shadow-md overflow-hidden">
 
@@ -1680,9 +1680,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
       {
         addMembersGroupModle &&
-        <AddMembersModal 
-        addMembersGroupModle={addMembersGroupModle}
-        setAddMembersGroupModle={setAddMembersGroupModle}
+        <AddMembersModal
+          addMembersGroupModle={addMembersGroupModle}
+          setAddMembersGroupModle={setAddMembersGroupModle}
         />
       }
 
