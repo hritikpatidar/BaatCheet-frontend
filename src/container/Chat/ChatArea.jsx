@@ -90,6 +90,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   //useEffect hooks
   //header useEffect
   useEffect(() => {
+    setMessage("")
     const payload = { ...selectedUser, profile: selectedUser?.image }
     setUserDetails(selectedUser?.conversationType === "single" ? selectedUser?.members?.find(item => item._id !== profileData?._id) : payload)
   }, [selectedUser])
@@ -186,7 +187,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   };
 
   const groupMessagesByDate = (messages) => {
-    return messages.reduce((acc, message) => {
+    return messages?.reduce((acc, message) => {
       if (
         socket.current &&
         message?.status === "sent" &&
@@ -718,7 +719,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                   </h2>
                   <p className="text-sm text-green-600">
                     {selectedUser?.conversationType === "single" ?
-                      isTyping ? "Typing..."
+                      isTyping.length > 0 ? "Typing..."
                         :
                         onlineStatus?.onlineUsers?.includes(userDetails?._id) ? (
                           "Online"
@@ -742,8 +743,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           .join(", ");
 
                         const extraCount = members.length - 5;
-
-                        if (activeUsers.length >= 2 && currentUserActive) {
+                        const isTypingUserList = isTyping
+                          ?.filter((u) => u._id !== profileData?._id) // apna naam hata do
+                          ?.map((u) => u.name) // sirf naam nikalo
+                          ?.join(", ");
+                          
+                        if (isTypingUserList) {
+                          return (`${isTypingUserList} is Typing....`)
+                        } else if (activeUsers.length >= 2 && currentUserActive) {
                           return (`${selectedUser?.members.filter(user =>
                             onlineStatus.onlineUsers.includes(user?._id)
                           ).length} members | active now`)
@@ -1572,19 +1579,24 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         words[0] = words[0][0].toUpperCase() + words[0].slice(1);
                       }
                       setMessage(words.join(" "));
-                      if (selectedUser?.conversationType === "group") {
-                        socket.current.emit("groupTyping", selectedUser?._id, profileData?._id, profileData?.name);
-                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                        typingTimeoutRef.current = setTimeout(() => {
-                          socket.current.emit("groupStopTyping", selectedUser?._id, profileData?._id, profileData?.name);
-                        }, 2000);
-                      } else {
-                        socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id);
-                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                        typingTimeoutRef.current = setTimeout(() => {
-                          socket.current.emit("stopTyping", selectedUser?._id, profileData?._id, userDetails?._id);
-                        }, 2000);
-                      }
+                      // if (selectedUser?.conversationType === "group") {
+                      //   socket.current.emit("groupTyping", selectedUser?._id, profileData?._id, profileData?.name);
+                      //   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                      //   typingTimeoutRef.current = setTimeout(() => {
+                      //     socket.current.emit("groupStopTyping", selectedUser?._id, profileData?._id, profileData?.name);
+                      //   }, 2000);
+                      // } else {
+                      //   socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id);
+                      //   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                      //   typingTimeoutRef.current = setTimeout(() => {
+                      //     socket.current.emit("stopTyping", selectedUser?._id, profileData?._id, userDetails?._id);
+                      //   }, 2000);
+                      // }
+                      socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id, profileData?.name, selectedUser?.conversationType);
+                      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                      typingTimeoutRef.current = setTimeout(() => {
+                        socket.current.emit("stopTyping", selectedUser?._id, profileData?._id, userDetails?._id, profileData?.name, selectedUser?.conversationType);
+                      }, 2000);
                     }}
                     onPaste={handlePaste}
                     onKeyDown={(e) => {

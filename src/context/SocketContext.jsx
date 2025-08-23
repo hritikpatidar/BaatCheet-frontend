@@ -178,15 +178,27 @@ export const SocketProvider = ({ children }) => {
       });
 
       socket.current.on("userTyping", (data) => {
-        // if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
-          dispatch(setIsTyping(true));
-        // }
+        if (data?.conversationType === "single") {
+          if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
+            dispatch(setIsTyping([data.userId]));
+          }
+        } else if (data?.conversationType === "group") {
+          if (data.conversation_id === selectedUser?._id) {
+            dispatch(setIsTyping(data.userId));
+          }
+        }
       });
 
       socket.current.on("userStopTyping", (data) => {
-        // if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
-          dispatch(setIsTyping(false));
-        // }
+        if (data?.conversationType === "single") {
+          if (data.conversation_id === selectedUser?._id && data.userId !== profileData?._id) {
+            dispatch(setIsTyping([data.userId]));
+          }
+        } else if (data?.conversationType === "group") {
+          if (data.conversation_id === selectedUser?._id) {
+            dispatch(setIsTyping(data.userId));
+          }
+        }
       });
 
       // socket.current.on("downloadFileResult", (MessageData) => {

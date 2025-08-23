@@ -10,7 +10,7 @@ const initialState = {
   selectedUser: null, // selectChatUSer ke liye
   ChatMessages: [],
   onlineStatus: [],
-  isTyping: false,
+  isTyping: [],
   selectedFiles: [], // selectedFile ke liye
   isUploading: false,
   isDownloading: false,
