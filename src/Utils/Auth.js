@@ -1,5 +1,6 @@
 import { getImageUrl } from "../Services/ChatServices/chatServices"
 import { getItemLocalStorage } from "./browserServices"
+import CryptoJS from "crypto-js";
 
 export const isLogin = () => {
     const token = getItemLocalStorage("token")
@@ -54,9 +55,26 @@ export const getImage = async (fileUrl) => {
     if (!fileUrl) return null;
     try {
         const response = await getImageUrl(fileUrl);
-        return response.data; 
+        return response.data;
     } catch (error) {
         console.error("Error fetching image:", error);
         return null; // Handle error gracefully
     }
 }
+
+// Encrypt function
+export const encryptMessage = (msg) => {
+    const secret_key = import.meta.env.VITE_SECRET_KEY
+    return CryptoJS.AES.encrypt(msg, secret_key).toString();
+};
+
+// Decrypt function
+export const decryptMessage = (cipher) => {
+    try {
+        const secret_key = import.meta.env.VITE_SECRET_KEY;
+        const bytes = CryptoJS.AES.decrypt(cipher, secret_key);
+        return bytes.toString(CryptoJS.enc.Utf8) || "[Decryption Failed]";
+    } catch (e) {
+        return "";
+    }
+};

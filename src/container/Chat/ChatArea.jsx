@@ -41,7 +41,7 @@ import { Menu, MenuButton, MenuItems } from '@headlessui/react'
 import { acceptAndRejectInvite, closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setRemoveSelectedFiles, setSelectedFiles, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
-import { base64ToFile, checkIfImage, detectURLs, getImage, isLink, isValidURL } from "../../Utils/Auth";
+import { base64ToFile, checkIfImage, decryptMessage, detectURLs, encryptMessage, getImage, isLink, isValidURL } from "../../Utils/Auth";
 import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 import ImageLightbox from "../../components/imagePreview";
@@ -225,6 +225,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {
+      messages = {
+        ...message,
+        message: decryptMessage(message.message)
+      }
       if (selectedUser?.conversationType === "single") {
         if (
           socket.current &&
@@ -610,7 +614,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             isSenderId: { _id: profileData?._id },
             isReceiverId: selectedUser?.conversationType === "single" ? userDetails?._id : "",
             groupId: selectedUser?.conversationType === "group" ? selectedUser?._id : "",
-            message: index === 0 ? message : "",
+            message: index === 0 ? encryptMessage(message) : "",
             fileUrl: fileURl,
             messageType: "file",
             timestamp: dayjs().format()
@@ -639,7 +643,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           isSenderId: { _id: profileData?._id },
           isReceiverId: userDetails?._id,
           groupId: "",
-          message: message,
+          message: encryptMessage(message),
           fileUrl: "",
           messageType: isLink(message) ? "link" : "text",
           timestamp: dayjs().format()
@@ -658,7 +662,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             isSenderId: { _id: profileData?._id },
             isReceiverId: "",
             groupId: selectedUser?._id,
-            message: index === 0 ? message : "",
+            message: index === 0 ? encryptMessage(message) : "",
             fileUrl: fileURl,
             messageType: "file",
             timestamp: dayjs().format()
@@ -687,7 +691,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           isSenderId: { _id: profileData?._id },
           isReceiverId: "",
           groupId: selectedUser?._id,
-          message: message,
+          message: encryptMessage(message),
           fileUrl: "",
           messageType: isLink(message) ? "link" : "text",
           timestamp: dayjs().format()
@@ -801,8 +805,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
                         const extraCount = members.length - 5;
                         const isTypingUserList = isTyping
-                          ?.filter((u) => u._id !== profileData?._id) 
-                          ?.map((u) => u.name) 
+                          ?.filter((u) => u._id !== profileData?._id)
+                          ?.map((u) => u.name)
                           ?.join(", ");
 
                         if (isTypingUserList) {
@@ -1058,6 +1062,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
                           </div>
                           {groupedMessages[date].map((message, idx) => {
+                            const dicreptMessage = decryptMessage(message.message)
                             const isSender = message.isSenderId?._id === profileData?._id;
                             return (
                               <div
@@ -1124,7 +1129,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                       </div>
                                     ) : (
                                       <p className="pr-14 break-words min-h-6">
-                                        {detectURLs(message.message).map((part, i2) =>
+                                        {detectURLs(dicreptMessage).map((part, i2) =>
                                           isValidURL(part) ? (
                                             <a
                                               key={i2}
@@ -1333,6 +1338,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                               
                             )} */}
                             {groupedMessages[date].map((message, idx) => {
+                              const dicreptMessage = decryptMessage(message.message)
+                              debugger
                               const isSender = message.isSenderId?._id === profileData?._id;
                               return (
                                 <div
@@ -1441,7 +1448,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                         </div>
                                       ) : (
                                         <p className="pr-14 break-words min-h-6">
-                                          {detectURLs(message.message).map((part, i2) =>
+                                          {detectURLs(dicreptMessage).map((part, i2) =>
                                             isValidURL(part) ? (
                                               <a
                                                 key={i2}

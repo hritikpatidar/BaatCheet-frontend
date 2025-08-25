@@ -13,6 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import LogOutModal from "../../components/LogOutModalPage";
 import GroupCreateModal from "../../components/groupCreateModal";
+import { decryptMessage } from "../../Utils/Auth";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -427,7 +428,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                 user.message = cv?.lastMessageDetails?.message;
                 user.messageType = cv?.lastMessageDetails?.messageType;
                 user.time = cv?.lastMessageDetails?.timestamp;
-              } else {
+              } else if (selectedChatType === "group") {
                 user.senderId = cv?.lastMessageDetails?.isSenderId?._id;
                 user.name = cv.name;
                 user.profile = dummyImage;
@@ -485,7 +486,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                           {isYour ? t("you") + ": " : ""}
                           {cv?.lastMessageDetails?.messageType === "file"
                             ? "File"
-                            : cv?.lastMessageDetails?.message || "Start Conversation"}
+                            : decryptMessage(user?.message) || "Start Conversation"}
                         </>
                       ) : invite ? (
                         "Invite You to join group"
@@ -498,7 +499,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                               : ""}
                           {cv?.lastMessageDetails?.messageType === "file"
                             ? "File"
-                            : cv?.lastMessageDetails?.message ||
+                            : decryptMessage(user?.message) ||
                             "Starts Conversation"}
                         </>
                       )}
