@@ -156,25 +156,62 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       socket.current.off("deliveredResult");
       socket.current.off("viewResult");
 
-      socket.current.on("deliveredResult", (data) => {
-        const updatedMessages = ChatMessages.map((message) => {
-          if (data?.message_id === message?._id) {
-            return { ...message, status: "delivered" };
-          }
-          return message;
+      if (selectedUser?.conversationType === "single") {
+        socket.current.on("deliveredResult", (data) => {
+          const updatedMessages = ChatMessages.map((message) => {
+            if (data?.message_id === message?._id) {
+              return { ...message, status: "delivered" };
+            }
+            return message;
+          });
+          dispatch(setUpdateMessages(updatedMessages));
         });
-        dispatch(setUpdateMessages(updatedMessages));
-      });
 
-      socket.current.on("viewResult", (data) => {
-        const updatedMessages = ChatMessages.map((message) => {
-          if (data?.message_id === message?._id) {
-            return { ...message, status: "read" };
-          }
-          return message;
+        socket.current.on("viewResult", (data) => {
+          const updatedMessages = ChatMessages.map((message) => {
+            if (data?.message_id === message?._id) {
+              return { ...message, status: "read" };
+            }
+            return message;
+          });
+          dispatch(setUpdateMessages(updatedMessages));
         });
-        dispatch(setUpdateMessages(updatedMessages));
-      });
+      } else if (selectedUser?.conversationType === "group") {
+        // socket.current.on("deliveredResult", (data) => {
+        //   const updatedMessages = ChatMessages.map((message) => {
+        //     if (data?.message_id === message?._id) {
+        //       return {
+        //         ...message,
+        //         status: message.status.map((s) =>
+        //           s.userId === profileData?._id
+        //             ? { ...s, state: "delivered" }
+        //             : s
+        //         ),
+        //       };
+        //     }
+        //     return message;
+        //   });
+        //   dispatch(setUpdateMessages(updatedMessages));
+        // });
+
+        // socket.current.on("viewResult", (data) => {
+        //   const updatedMessages = ChatMessages.map((message) => {
+        //     if (data?.message_id === message?._id) {
+        //       return {
+        //         ...message,
+        //         status: message.status.map((s) =>
+        //           s.userId === profileData?._id
+        //             ? { ...s, state: "read" }
+        //             : s
+        //         ),
+        //       };
+        //     }
+        //     return message;
+        //   });
+        //   dispatch(setUpdateMessages(updatedMessages));
+        // });
+      }
+
     }
   }, [socket, ChatMessages]);
 
@@ -188,21 +225,41 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {
-      if (
-        socket.current &&
-        message?.status === "sent" &&
-        message?.isSenderId?._id !== profileData?._id
-      ) {
-        socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType);
+      if (selectedUser?.conversationType === "single") {
+        if (
+          socket.current &&
+          message?.status === "sent" &&
+          message?.isSenderId?._id !== profileData?._id
+        ) {
+          socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType);
+        }
+
+        if (
+          socket.current &&
+          message?.status === "delivered" &&
+          message?.isSenderId?._id !== profileData?._id
+        ) {
+          socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
+        }
+      } else if (selectedUser?.conversationType === "group") {
+        // const status = Array.isArray(message?.status) ? message?.status?.find(id => id.userId === profileData._id)?.state || "sent" : ""
+        // if (
+        //   socket.current &&
+        //   status === "sent" &&
+        //   message?.isSenderId?._id !== profileData?._id
+        // ) {
+        //   socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType, profileData?._id);
+        // }
+
+        // if (
+        //   socket.current &&
+        //   status === "delivered" &&
+        //   message?.isSenderId?._id !== profileData?._id
+        // ) {
+        //   socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType, profileData?._id);
+        // }
       }
 
-      if (
-        socket.current &&
-        message?.status === "delivered" &&
-        message?.isSenderId?._id !== profileData?._id
-      ) {
-        socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
-      }
 
       const key = formatDateKey(message.createdAt);
       if (!acc[key]) acc[key] = [];
@@ -744,10 +801,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
                         const extraCount = members.length - 5;
                         const isTypingUserList = isTyping
-                          ?.filter((u) => u._id !== profileData?._id) // apna naam hata do
-                          ?.map((u) => u.name) // sirf naam nikalo
+                          ?.filter((u) => u._id !== profileData?._id) 
+                          ?.map((u) => u.name) 
                           ?.join(", ");
-                          
+
                         if (isTypingUserList) {
                           return (`${isTypingUserList} is Typing....`)
                         } else if (activeUsers.length >= 2 && currentUserActive) {
