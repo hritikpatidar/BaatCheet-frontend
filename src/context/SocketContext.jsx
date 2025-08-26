@@ -117,7 +117,7 @@ export const SocketProvider = ({ children }) => {
         dispatch(setNewGroupConversation(groupData.data));
         await dispatch(setGroupCreateLoading(false));
         setOpenCreateGroupModle(false);
-        if (groupData.data.admin === profileData?._id) toast.success(groupData?.message || "Group created successfully");
+        if (groupData.data.admin?._id === profileData?._id) toast.success(groupData?.message || "Group created successfully");
       });
 
       socket.current.on("groupCreationFailed", async (message) => {
