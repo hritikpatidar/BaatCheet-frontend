@@ -137,6 +137,8 @@ export const SocketProvider = ({ children }) => {
       socket.current.on("groupConversationResults", (groupConversation) => {
         if (groupConversation?.value?.length > 0) {
           dispatch(setGroupConversationList(groupConversation?.value));
+        }else{
+          dispatch(setGroupConversationList([]));
         }
       });
 
