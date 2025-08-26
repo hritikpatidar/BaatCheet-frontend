@@ -88,7 +88,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
-          <span className="projectName">
+          <span className="projectName cursor-pointer" onClick={()=>navigate("/")}>
             <span className='text-teal-600'>Baat</span><span className='text-gray-800'>Cheet</span>
           </span>
 
@@ -147,7 +147,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                   <MenuItems
                     transition
-                    className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                    className="absolute -right-4 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                   >
                     {/* Profile Section */}
                     <button
@@ -301,114 +301,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
           </button>
         </div>
 
-        {/* Recent Chats
-        <ul className="space-y-2 overflow-y-auto flex-1">
-          {(selectedChatType === "single"
-            ? singleConversationList
-            : groupConversationList
-          )?.length === 0 ? (
-            <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
-              {selectedChatType === "single" ? "No user found" : "No group found"}
-            </li>
-          ) : (
-            (selectedChatType === "single"
-              ? singleConversationList
-              : groupConversationList
-            )?.map((cv, i) => {
-              const data = cv?.members?.find(item => item._id !== profileData?._id)
-              let user = {}
-              if (selectedChatType === "single") {
-                user.senderId = cv?.lastMessageDetails?.isSenderId
-                user.name = data?.name
-                user.profile = dummyImage
-                user.message = cv?.lastMessageDetails?.message
-                user.messageType = cv?.lastMessageDetails?.messageType
-                user.time = cv?.lastMessageDetails?.timestamp
-              } else {
-                user.senderId = cv?.lastMessageDetails?.isSenderId?._id
-                user.name = cv.name
-                user.profile = dummyImage
-                user.message = cv?.lastMessageDetails?.message
-                user.messageType = cv?.lastMessageDetails?.messageType
-                user.time = cv?.lastMessageDetails?.timestamp
-              }
-              const isYour = user.senderId === profileData?._id
-              const invite = cv?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
-              return (
-                <li
-                  key={i}
-                  className={`cursor-pointer flex items-center gap-3 p-2 rounded-md ${cv?._id === selectedUser?._id && "bg-gray-300"
-                    } hover:bg-gray-300 shadow-sm`}
-                  onClick={() => {
-                    if (cv?._id === selectedUser?._id) return
-                    setShowSidebar(false)
-                    dispatch(setSelectUser(cv))
-                    dispatch(setChatMessagesClear([]))
-                    setHasMore(true)
-                    setPage(1)
-                    fetchMessages(1, cv)
-                  }}
-                >
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold overflow-hidden">
-                    {user.profile ? (
-                      <img
-                        src={user.profile}
-                        alt={"No Image"}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
-                    ) : (
-                      user?.name
-                        ?.split(" ")
-                        .filter((_, index) => index === 0 || index === 1)
-                        .map(n => n[0])
-                        .join("")
-                        .toUpperCase()
-                    )}
-                  </div>
-
-                  <div className="flex-1 overflow-hidden">
-                    <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {user.name}
-                    </p>
-                    <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                      {selectedChatType === "single" ?
-                        <>
-                          {isYour ? t("you") + ": " : ""}
-                          {cv?.lastMessageDetails?.messageType === "file"
-                            ? "File"
-                            : cv?.lastMessageDetails?.message || "Start Conversation"}
-                        </>
-                        :
-                        <>
-                          {
-                            invite ? "Invite You to join group" :
-                              <>
-                                {isYour ? "you" + ": " : cv?.lastMessageDetails ? cv?.lastMessageDetails?.isSenderId?.name + ": " : ""}
-                                {cv?.lastMessageDetails?.messageType === "file"
-                                  ? "File"
-                                  : cv?.lastMessageDetails?.message || "Starts Conversation"}
-                              </>
-                          }
-                        </>
-                      }
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col items-end text-xs text-gray-500">
-                    {cv?.lastMessageDetails?.unReadMessages &&
-                      cv?._id !== selectedUser?._id && !invite ? (
-                      <span className="inline-block bg-gray-500 text-white rounded-full px-2 py-0.5 mb-0.5">
-                        {formatter.format(cv?.lastMessageDetails?.unReadMessages)}
-                      </span>
-                    ) : null}
-                    <span>{dayjs(user.time).format("hh:mm A")}</span>
-                  </div>
-                </li>
-              )
-            })
-          )}
-        </ul> */}
-
         {/* 🔹 Recent Chats */}
         <ul className="space-y-2 overflow-y-auto flex-1">
           {filteredList?.length === 0 ? (
@@ -448,7 +340,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   className={`cursor-pointer flex items-center gap-3 p-2 rounded-md ${cv?._id === selectedUser?._id && "bg-gray-300"
                     } hover:bg-gray-300 shadow-sm`}
                   onClick={() => {
-                    if (cv?._id === selectedUser?._id) return;
+                    // if (cv?._id === selectedUser?._id) return;
                     setShowSidebar(false);
                     dispatch(setSelectUser(cv));
                     dispatch(setChatMessagesClear([]));

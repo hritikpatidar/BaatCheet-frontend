@@ -7,6 +7,7 @@ import {
   onlineStatusData,
   setGroupConversationList,
   setGroupCreateLoading,
+  setInviteUserLoading,
   setIsTyping,
   setNewGroupConversation,
   setSelectedChatMessages,
@@ -38,6 +39,7 @@ export const SocketProvider = ({ children }) => {
   const [hasMore, setHasMore] = useState(false);
   const [page, setPage] = useState(1);
   const [openCreateGroupModle, setOpenCreateGroupModle] = useState(false)
+  const [addMembersGroupModle, setAddMembersGroupModle] = useState(false)
 
   useEffect(() => {
     if (profileData && !socket.current) {
@@ -96,6 +98,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.off("getFilesResults");
       socket.current.off("userTyping");
       socket.current.off("userStopTyping");
+      socket.current.off("userGroupInviteResponse");
 
       socket.current.on("userList", (userList) => {
         if (userList) {
@@ -110,16 +113,25 @@ export const SocketProvider = ({ children }) => {
       });
 
 
-      socket.current.on("groupCreated", async (groupData, message) => {
-        dispatch(setNewGroupConversation(groupData));
+      socket.current.on("groupCreated", async (groupData) => {
+        dispatch(setNewGroupConversation(groupData.data));
         await dispatch(setGroupCreateLoading(false));
         setOpenCreateGroupModle(false);
-        if (groupData.admin === profileData?._id) toast.success(message || "Group created successfully");
+        if (groupData.data.admin === profileData?._id) toast.success(groupData?.message || "Group created successfully");
       });
 
       socket.current.on("groupCreationFailed", async (message) => {
         await dispatch(setGroupCreateLoading(false));
         toast.success(message || "Internal server error");
+      });
+
+      socket.current.on("userGroupInviteResponse", async (groupData) => {
+        socket.current.emit("groupConversation", profileData._id);
+        if(groupData.data?._id === selectedUser?._id){
+          dispatch(setSelectUser(groupData.data));
+          await dispatch(setInviteUserLoading(false));
+          setAddMembersGroupModle(false);
+        }
       });
 
       socket.current.on("groupConversationResults", (groupConversation) => {
@@ -257,7 +269,9 @@ export const SocketProvider = ({ children }) => {
         setPage,
         pageSize,
         openCreateGroupModle,
-        setOpenCreateGroupModle
+        setOpenCreateGroupModle,
+        addMembersGroupModle,
+        setAddMembersGroupModle
       }}
     >
       {children}

@@ -1,16 +1,24 @@
 import { Search } from 'lucide-react';
 import React, { useState } from 'react'
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { groupCreateValidation } from '../Utils/validation';
+import { useSocket } from '../context/SocketContext';
+import { setInviteUserLoading } from '../Redux/features/Chat/chatSlice';
 
-const AddMembersModal = ({ addMembersGroupModle, setAddMembersGroupModle }) => {
+const AddMembersModal = () => {
+  const dispatch = useDispatch()
+  const { socket, setAddMembersGroupModle } = useSocket()
   const [searchTerm, setSearchTerm] = useState("");
   const { userList } = useSelector((state) => state?.ChatDataSlice);
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
+  const { selectedUser, inviteUserLoading } = useSelector((state) => state?.ChatDataSlice);
+  const memberIds = selectedUser?.members?.map(member => member?._id);
+  const invitedUserIds = selectedUser?.invites?.map(invite => invite?.invitedUser?._id);
+  const allMemberIds = [...memberIds, ...invitedUserIds];
+
   const [formData, setFormData] = useState({
     invites: [],
   });
-  const [isLoading, setIsLoading] = useState(false);
 
   const filteredUsers = userList?.filter(
     (cv) =>
@@ -66,15 +74,14 @@ const AddMembersModal = ({ addMembersGroupModle, setAddMembersGroupModle }) => {
 
   const handleAddMembers = async (e) => {
     e.preventDefault();
-    // Assuming you have a function to handle the actual adding of members
-    // await addMembersToGroup(formData.invites);
     if (formData?.invites.length === 0) return
-    // Close the modal after adding members
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    // setAddMembersGroupModle(false);
+    dispatch(setInviteUserLoading(true))
+    const inviteUser = {
+      user_id: profileData?._id,
+      group_id: selectedUser?._id,
+      friends_id: formData?.invites
+    }
+    if (socket) socket.current.emit('UserGroupInvite', inviteUser);
   }
 
   return (
@@ -107,11 +114,12 @@ const AddMembersModal = ({ addMembersGroupModle, setAddMembersGroupModle }) => {
         <ul className="space-y-2 overflow-y-auto flex-1 pr-1">
           {filteredUsers?.map((user, i) => {
             const isSelected = formData.invites.some((u) => u === user._id);
+            const userAlreadyAdded = allMemberIds.includes(user?._id)
 
             return (
               <li
                 key={i}
-                className="cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-gray-100"
+                className={`cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-gray-200 ${(isSelected || userAlreadyAdded) && "bg-gray-200"}` }
                 onClick={() => handleInviteSelect(user)}
               >
                 {/* Profile */}
@@ -146,10 +154,11 @@ const AddMembersModal = ({ addMembersGroupModle, setAddMembersGroupModle }) => {
                 {/* Checkbox */}
                 <input
                   type="checkbox"
-                  checked={isSelected}
+                  checked={isSelected || userAlreadyAdded}
                   onChange={() => handleInviteSelect(user)}
                   onClick={(e) => e.stopPropagation()}
                   className="custom-checkbox"
+                  disabled={userAlreadyAdded}
                 />
               </li>
             );
@@ -160,7 +169,11 @@ const AddMembersModal = ({ addMembersGroupModle, setAddMembersGroupModle }) => {
         <div className="flex justify-end gap-4 pt-4">
           <button
             type="button"
-            onClick={() => setAddMembersGroupModle(false)}
+            onClick={() => {
+              dispatch(setInviteUserLoading(false))
+              setAddMembersGroupModle(false)
+            }
+            }
             className="px-4 py-2 rounded-md border border-gray-400 text-gray-800 hover:bg-gray-100 transition"
           >
             Cancel
@@ -168,9 +181,9 @@ const AddMembersModal = ({ addMembersGroupModle, setAddMembersGroupModle }) => {
           <button
             type="submit"
             className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
-            disabled={isLoading}
+            disabled={inviteUserLoading}
           >
-            {isLoading ? "Adding..." : "Add Members"}
+            {inviteUserLoading ? "Adding..." : "Add Members"}
           </button>
         </div>
       </form>

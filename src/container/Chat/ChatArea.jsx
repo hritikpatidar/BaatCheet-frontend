@@ -27,7 +27,8 @@ import {
   Info,
   PlusCircle,
   CircleCheck,
-  CircleX
+  CircleX,
+  CircleMinus
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -54,7 +55,7 @@ import AddMembersModal from "../../components/addMembersModal";
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const dispatch = useDispatch();
   //global states
-  const { socket, fetchMessages, page, setPage, messageLoading } = useSocket()
+  const { socket, fetchMessages, page, setPage, addMembersGroupModle, setAddMembersGroupModle } = useSocket()
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
   const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
@@ -85,7 +86,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const [isPlay, setIsPlay] = useState(false)
   const [recordedBlob, setRecordedBlob] = useState(null);
   const isSendDisabled = (!message && file.length === 0 && !recordedBlob) ? true : false;
-  const [addMembersGroupModle, setAddMembersGroupModle] = useState(false)
 
   //useEffect hooks
   //header useEffect
@@ -753,12 +753,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           {/* Main Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Header */}
-            <div className="bg-gray-300 px-6 py-2 shadow-sm flex justify-between items-center">
-              <div className="flex items-center gap-4">
+            <div className="bg-gray-300 px-6 py-2 shadow-sm flex justify-between items-center cursor-pointer"
+              onClick={(e) => {
+                setIsUserDetailsView(!isUserDetailsView)
+              }}
+            >
+              <div className="flex items-center gap-4" >
                 <button
                   type="button"
                   className="sm:hidden text-2xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
-                  onClick={() => {
+                  onClick={(e) => {
+                    e.stopPropagation();
                     setShowSidebar(true)
                     dispatch(closeChat())
                   }}
@@ -826,26 +831,42 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               {selectedUser?.conversationType === "single" ?
                 <div className="flex items-center gap-2 px-1 -mr-[10px]">
                   <div className="hidden xl:flex items-center gap-3">
-                    <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation(); // parent ke onClick ko rokta hai
+                      }}
+                      className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                    >
                       <Phone className="w-5 h-5" />
                     </button>
-                    <button type="button" className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation(); // parent ke onClick ko rokta hai
+                      }}
+                      className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                    >
                       <Video className="w-5 h-5" />
                     </button>
-                    <button
+                    {/* <button
                       type="button"
                       className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer "
                       onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                     >
                       <User className="w-5 h-5" />
-                    </button>
+                    </button> */}
                   </div>
 
                   <Menu as="div" className="relative inline-block text-left z-20">
                     {({ close }) => (
                       <>
                         <div>
-                          <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                          <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                            onClick={(e) => {
+                              e.stopPropagation(); // parent ke onClick ko rokta hai
+                            }}
+                          >
                             <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
                           </MenuButton>
                         </div>
@@ -856,8 +877,21 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         >
                           <button
                             type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition   "
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setIsUserDetailsView(!isUserDetailsView);
+                              close();
+                            }}
+                          >
+                            <User className="w-5 h-5" />
+                            View details
+                          </button>
+                          <button
+                            type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Archive clicked")
                               close();
                             }}
@@ -868,7 +902,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Archive clicked")
                               close();
                             }}
@@ -876,23 +911,13 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <Video className="w-5 h-5" />
                             Video call
                           </button>
-                          <button
-                            type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                            onClick={() => {
-                              setIsUserDetailsView(!isUserDetailsView);
-                              close();
-                            }}
-                          >
-                            <User className="w-5 h-5" />
-                            View details
-                          </button>
 
                           {/* New Options */}
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Archive clicked")
                               close();
                             }}
@@ -904,7 +929,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Mute clicked")
                               close();
                             }}
@@ -916,19 +942,32 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               dispatch(closeChat())
                               close();
                             }}
                           >
-                            <MessageSquareX className="w-5 h-5" />
-                            Clear conversation
+                            <CircleX className="w-5 h-5" />
+                            Close chat
+                          </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              close();
+                            }}
+                          >
+                            <CircleMinus className="w-5 h-5" />
+                            Clear chat
                           </button>
 
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Delete Chat clicked")
                               close();
                             }}
@@ -946,7 +985,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     {({ close }) => (
                       <>
                         <div>
-                          <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                          <MenuButton
+                            onClick={(e) => {
+                              e.stopPropagation(); // parent ke onClick ko rokta hai
+                            }}
+                            className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                          >
                             <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
                           </MenuButton>
                         </div>
@@ -958,7 +1002,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setIsUserDetailsView(!isUserDetailsView)
                               close();
                             }}
@@ -970,7 +1015,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Mute clicked")
                               close();
                             }}
@@ -981,7 +1027,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               setOpenCreateGroupModle(true)
                               close();
                             }}
@@ -998,19 +1045,32 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              close();
+                            }}
+                          >
+                            <CircleX className="w-5 h-5" />
+                            Close chat
+                          </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               dispatch(closeChat())
                               close();
                             }}
                           >
                             <MessageSquareX className="w-5 h-5" />
-                            Clear conversation
+                            Clear chat
                           </button>
 
                           <button
                             type="button"
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.stopPropagation();
                               console.log("Delete Chat clicked")
                               close();
                             }}
@@ -1309,6 +1369,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-2">
                               <button
                                 type="button"
+                                onClick={()=>setIsUserDetailsView(true)}
                                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
                               >
                                 <Info strokeWidth={1.2} /> Group Info
@@ -1339,7 +1400,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             )} */}
                             {groupedMessages[date].map((message, idx) => {
                               const dicreptMessage = decryptMessage(message.message)
-                              debugger
                               const isSender = message.isSenderId?._id === profileData?._id;
                               return (
                                 <div
@@ -1643,19 +1703,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         words[0] = words[0][0].toUpperCase() + words[0].slice(1);
                       }
                       setMessage(words.join(" "));
-                      // if (selectedUser?.conversationType === "group") {
-                      //   socket.current.emit("groupTyping", selectedUser?._id, profileData?._id, profileData?.name);
-                      //   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                      //   typingTimeoutRef.current = setTimeout(() => {
-                      //     socket.current.emit("groupStopTyping", selectedUser?._id, profileData?._id, profileData?.name);
-                      //   }, 2000);
-                      // } else {
-                      //   socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id);
-                      //   if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                      //   typingTimeoutRef.current = setTimeout(() => {
-                      //     socket.current.emit("stopTyping", selectedUser?._id, profileData?._id, userDetails?._id);
-                      //   }, 2000);
-                      // }
                       socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id, profileData?.name, selectedUser?.conversationType);
                       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                       typingTimeoutRef.current = setTimeout(() => {
@@ -1775,10 +1822,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
       {
         addMembersGroupModle &&
-        <AddMembersModal
-          addMembersGroupModle={addMembersGroupModle}
-          setAddMembersGroupModle={setAddMembersGroupModle}
-        />
+        <AddMembersModal />
       }
 
     </>
