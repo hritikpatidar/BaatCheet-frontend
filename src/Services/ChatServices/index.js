@@ -4,5 +4,4 @@ export {
     getDownloadBufferFile,
     getConversationService,
     createGroupService,
-    groupInviteAcceptAndReject
 } from './chatServices';

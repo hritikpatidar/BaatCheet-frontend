@@ -376,8 +376,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                       {selectedChatType === "single" ? (
                         <>
                           {isYour ? t("you") + ": " : ""}
-                          {cv?.lastMessageDetails?.messageType === "file"
-                            ? "File"
+                          {cv?.lastMessageDetails?.messageType === "file" || cv?.lastMessageDetails?.messageType === "audio"
+                            ? cv?.lastMessageDetails?.messageType === "file" ? "File" : "Audio"
                             : decryptMessage(user?.message) || "Start Conversation"}
                         </>
                       ) : invite ? (
@@ -389,8 +389,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                             : cv?.lastMessageDetails
                               ? cv?.lastMessageDetails?.isSenderId?.name + ": "
                               : ""}
-                          {cv?.lastMessageDetails?.messageType === "file"
-                            ? "File"
+                          {cv?.lastMessageDetails?.messageType === "file" || cv?.lastMessageDetails?.messageType === "audio"
+                            ? cv?.lastMessageDetails?.messageType === "file" ? "File" : "Audio"
                             : decryptMessage(user?.message) ||
                             "Starts Conversation"}
                         </>

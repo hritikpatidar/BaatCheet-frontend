@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import {
   clearChatState,
+  closeChat,
   onlineStatusData,
+  setChatMessagesClear,
   setGroupConversationList,
   setGroupCreateLoading,
   setInviteUserLoading,
@@ -40,6 +42,10 @@ export const SocketProvider = ({ children }) => {
   const [page, setPage] = useState(1);
   const [openCreateGroupModle, setOpenCreateGroupModle] = useState(false)
   const [addMembersGroupModle, setAddMembersGroupModle] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDeleteGroupModalOpen, setIsDeleteGroupModalOpen] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingType, setLoadingType] = useState(null);
 
   useEffect(() => {
     if (profileData && !socket.current) {
@@ -99,6 +105,12 @@ export const SocketProvider = ({ children }) => {
       socket.current.off("userTyping");
       socket.current.off("userStopTyping");
       socket.current.off("userGroupInviteResponse");
+      socket.current.off("groupMessagesCleared");
+      socket.current.off("groupMessagesError");
+      socket.current.off("groupLeaved");
+      socket.current.off("groupLeavedError");
+      socket.current.off("AcceptAndRejectInviteResult");
+      socket.current.off("AcceptAndRejectInviteResultError");
 
       socket.current.on("userList", (userList) => {
         if (userList) {
@@ -127,7 +139,7 @@ export const SocketProvider = ({ children }) => {
 
       socket.current.on("userGroupInviteResponse", async (groupData) => {
         socket.current.emit("groupConversation", profileData._id);
-        if(groupData.data?._id === selectedUser?._id){
+        if (groupData.data?._id === selectedUser?._id) {
           dispatch(setSelectUser(groupData.data));
           await dispatch(setInviteUserLoading(false));
           setAddMembersGroupModle(false);
@@ -137,7 +149,7 @@ export const SocketProvider = ({ children }) => {
       socket.current.on("groupConversationResults", (groupConversation) => {
         if (groupConversation?.value?.length > 0) {
           dispatch(setGroupConversationList(groupConversation?.value));
-        }else{
+        } else {
           dispatch(setGroupConversationList([]));
         }
       });
@@ -216,6 +228,56 @@ export const SocketProvider = ({ children }) => {
         }
       });
 
+      socket.current.on("AcceptAndRejectInviteResult", (result) => {
+        if ((result?.status === "accepted") && result?.data?._id === selectedUser?._id) {
+          dispatch(setSelectUser(result?.data))
+        } else if (result?.status === "declined" && result?.data?._id === selectedUser?._id) {
+          const isUser = result?.data?.members.find(i => i._id === profileData?._id)
+          if (!isUser) {
+            dispatch(closeChat())
+          } else {
+            dispatch(setSelectUser(result?.data))
+          }
+        }
+        socket.current.emit("groupConversation", profileData._id);
+        setLoadingType(null)
+      });
+
+      socket.current.on("AcceptAndRejectInviteResultError", (result) => {
+        socket.current.emit("groupConversation", profileData._id);
+        dispatch(closeChat())
+        setLoadingType(null)
+      });
+
+      socket.current.on("groupMessagesCleared", (response) => {
+        if (response.messages.length === 0 && selectedUser?._id === response?.groupId) {
+          dispatch(setChatMessagesClear(response?.messages))
+        }
+        setIsLoading(false)
+        setIsModalOpen(false)
+      })
+
+      socket.current.on("groupMessagesError", (response) => {
+        setIsModalOpen(false)
+      })
+
+      socket.current.on("groupLeaved", (groupData) => {
+        const isUser = groupData.members.find(i => i._id === profileData?._id)
+        if (selectedUser?._id === groupData?._id && !isUser) {
+          dispatch(setSelectUser({}))
+        } else if (selectedUser?._id === groupData?._id) {
+          dispatch(setSelectUser(groupData))
+        }
+        socket.current.emit("groupConversation", profileData._id);
+        setIsDeleteGroupModalOpen(false)
+        setIsLoading(false)
+
+      })
+
+      socket.current.on("groupLeavedError", (groupId) => {
+        setIsDeleteGroupModalOpen(false)
+      })
+
       // socket.current.on("downloadFileResult", (MessageData) => {
       //   try {
       //     if (!MessageData?.message?._id) return;
@@ -273,7 +335,15 @@ export const SocketProvider = ({ children }) => {
         openCreateGroupModle,
         setOpenCreateGroupModle,
         addMembersGroupModle,
-        setAddMembersGroupModle
+        setAddMembersGroupModle,
+        isLoading,
+        setIsLoading,
+        isModalOpen,
+        setIsModalOpen,
+        isDeleteGroupModalOpen,
+        setIsDeleteGroupModalOpen,
+        loadingType,
+        setLoadingType,
       }}
     >
       {children}

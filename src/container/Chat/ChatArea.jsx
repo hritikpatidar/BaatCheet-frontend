@@ -39,23 +39,23 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { useSocket } from "../../context/SocketContext";
 import { Menu, MenuButton, MenuItems } from '@headlessui/react'
-import { acceptAndRejectInvite, closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setRemoveSelectedFiles, setSelectedFiles, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
+import { closeChat, setFileDownloadProgress, setFileUploadProgress, setIsDownloading, setIsUploading, setSendMessages, setUpdateMessages, setViewImages } from "../../Redux/features/Chat/chatSlice";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
-import { base64ToFile, checkIfImage, decryptMessage, detectURLs, encryptMessage, getImage, isLink, isValidURL } from "../../Utils/Auth";
+import { base64ToFile, checkIfImage, decryptMessage, detectURLs, encryptMessage, isLink, isValidURL } from "../../Utils/Auth";
 import { getDownloadBufferFile, uploadFileService } from "../../Services/ChatServices";
 import AudioMessagePlayer from "../../components/chatComponent/AudioMessagePlayer";
 import ImageLightbox from "../../components/imagePreview";
 import WaveSurfer from "wavesurfer.js";
 import MicrophonePlugin from 'wavesurfer.js/dist/plugin/wavesurfer.microphone.min.js'
-import { Spinner } from "@material-tailwind/react";
 import AddMembersModal from "../../components/addMembersModal";
+import CustomizeModal from "../../components/CustomizeModal";
 
 
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const dispatch = useDispatch();
   //global states
-  const { socket, fetchMessages, page, setPage, addMembersGroupModle, setAddMembersGroupModle } = useSocket()
+  const { socket, fetchMessages, page, setPage, addMembersGroupModle, setAddMembersGroupModle, isLoading, setIsLoading, isModalOpen, setIsModalOpen, isDeleteGroupModalOpen, setIsDeleteGroupModalOpen, loadingType, setLoadingType } = useSocket()
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
   const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
@@ -702,21 +702,20 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   };
 
   const handleAcceptAndRejectInvitation = async (type) => {
-    try {
-      const response = await dispatch(acceptAndRejectInvite({ _id: selectedUser?._id, type }));
-      if (response?.payload?.status === true) {
-        if (socket.current) {
-          socket.current.emit("groupConversation", profileData._id);
-        }
-        if (type === "declined") {
-          dispatch(closeChat());
-          setShowSidebar(false);
-        }
-      }
-    } catch (error) {
-      console.error("Error accepting or rejecting invitation:", error);
-    }
+    setLoadingType(type)
+    if (socket) socket.current.emit('acceptAndRejectRequest', type, selectedUser?._id, profileData?._id);
   }
+
+  const handleClearChat = () => {
+    setIsLoading(true)
+    if (socket) socket.current.emit('clearGroupChat', selectedUser?._id, profileData?._id);
+  };
+
+  const handleDelete = () => {
+    setIsLoading(true)
+    if (socket) socket.current.emit('leaveGroup', selectedUser?._id, profileData?._id);
+  };
+
 
   return (
     <>
@@ -956,6 +955,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                             onClick={(e) => {
                               e.stopPropagation();
+                              setIsModalOpen(true);
                               close();
                             }}
                           >
@@ -1047,6 +1047,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                             onClick={(e) => {
                               e.stopPropagation();
+                              dispatch(closeChat())
                               close();
                             }}
                           >
@@ -1058,7 +1059,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              dispatch(closeChat())
+                              setIsModalOpen(true);
                               close();
                             }}
                           >
@@ -1071,7 +1072,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Delete Chat clicked")
+                              setIsDeleteGroupModalOpen(true)
                               close();
                             }}
                           >
@@ -1303,15 +1304,17 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                               type="button"
                               onClick={() => handleAcceptAndRejectInvitation("accepted")}
                               className="flex items-center justify-center gap-1 px-4 sm:px-5 py-1.5 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
+                              disabled={loadingType === "accepted"}
                             >
-                              <CircleCheck strokeWidth={1.2} /> Accept
+                              {loadingType === "accepted" ? <>Loading...</> : <><CircleCheck strokeWidth={1.2} /> Accept</>}
                             </button>
                             <button
                               type="button"
                               onClick={() => handleAcceptAndRejectInvitation("declined")}
                               className="flex items-center justify-center gap-1 px-4 sm:px-5 py-1.5 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition text-sm"
+                              disabled={loadingType === "declined"}
                             >
-                              <CircleX strokeWidth={1.2} /> Decline
+                              {loadingType === "declined" ? <>Loading...</> : <><CircleX strokeWidth={1.2} /> Decline</>}
                             </button>
                           </div>
                         </div>
@@ -1369,7 +1372,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-2">
                               <button
                                 type="button"
-                                onClick={()=>setIsUserDetailsView(true)}
+                                onClick={() => setIsUserDetailsView(true)}
                                 className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
                               >
                                 <Info strokeWidth={1.2} /> Group Info
@@ -1824,7 +1827,34 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         addMembersGroupModle &&
         <AddMembersModal />
       }
+      {
+        isModalOpen &&
+        <CustomizeModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onConfirm={handleClearChat}
+          title="Clear this Chat?"
+          description="This will remove chat history from your device."
+          confirmText="Clear"
+          cancelText="Cancel"
+          loading={isLoading}
+        />
+      }
 
+      {
+        isDeleteGroupModalOpen &&
+        <CustomizeModal
+          isOpen={isDeleteGroupModalOpen}
+          onClose={() => setIsDeleteGroupModalOpen(false)}
+          onConfirm={handleDelete}
+          title={`Delete group: "${selectedUser?.name}" ?`}
+          description="Only admins are notified when you leave a group."
+          confirmText="Delete"
+          cancelText="Cancel"
+          danger={true}
+          loading={isLoading}
+        />
+      }
     </>
   );
 };

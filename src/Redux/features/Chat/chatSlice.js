@@ -1,5 +1,5 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { createGroupService, getUserListService, groupInviteAcceptAndReject } from "../../../Services/ChatServices";
+import { createGroupService, getUserListService } from "../../../Services/ChatServices";
 
 // Initial state
 const initialState = {
@@ -39,14 +39,6 @@ export const createGroup = createAsyncThunk(
   "chat/createGroup",
   async (data) => {
     const response = await createGroupService(data);
-    return response.data || [];
-  }
-);
-
-export const acceptAndRejectInvite = createAsyncThunk(
-  "chat/acceptAndReject",
-  async (data) => {
-    const response = await groupInviteAcceptAndReject(data);
     return response.data || [];
   }
 );
@@ -206,7 +198,7 @@ const chatSlice = createSlice({
       })
       .addCase(createGroup.fulfilled, (state, action) => {
         state.loading = false;
-        if(action.payload.data){
+        if (action.payload.data) {
           state.groupConversationList = [action.payload.data, ...state.groupConversationList] || [];
         } else {
           state.groupConversationList = state.groupConversationList || [];
@@ -216,21 +208,6 @@ const chatSlice = createSlice({
       .addCase(createGroup.rejected, (state, action) => {
         state.loading = false;
         state.groupConversationList = [];
-        state.error = action.error.message;
-      })
-      //---------------------------------------------------
-      .addCase(acceptAndRejectInvite.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(acceptAndRejectInvite.fulfilled, (state, action) => {
-        state.loading = false;
-        state.selectedUser = action.payload.data || {};
-        state.error = "";
-      })
-      .addCase(acceptAndRejectInvite.rejected, (state, action) => {
-        state.loading = false;
-        state.selectedUser = {};
         state.error = action.error.message;
       })
     //---------------------------------------------------
