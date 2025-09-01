@@ -152,15 +152,25 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   // socket functions for message view and delivery status
   useEffect(() => {
     if (socket.current) {
-      socket.current.emit("conversation", profileData._id);
       socket.current.off("deliveredResult");
       socket.current.off("viewResult");
+      socket.current.off("deliveredAllResult");
 
       if (selectedUser?.conversationType === "single") {
         socket.current.on("deliveredResult", (data) => {
           const updatedMessages = ChatMessages.map((message) => {
             if (data?.message_id === message?._id) {
-              return { ...message, status: "delivered" };
+              return {
+                ...message,
+                status: (message.status || []).map((s) =>
+                  String(s.userId) === String(message.isReceiverId) && s.status !== "delivered" && s.status !== "read"
+                    ? {
+                      ...s, status: "delivered"
+
+                    }
+                    : s
+                ),
+              };
             }
             return message;
           });
@@ -170,47 +180,97 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
         socket.current.on("viewResult", (data) => {
           const updatedMessages = ChatMessages.map((message) => {
             if (data?.message_id === message?._id) {
-              return { ...message, status: "read" };
+              return {
+                ...message,
+                status: (message.status || []).map((s) =>
+                  String(s.userId) === String(message.isReceiverId) && s.status !== "read"
+                    ? {
+                      ...s, status: "read"
+
+                    }
+                    : s
+                ),
+              };
             }
             return message;
           });
           dispatch(setUpdateMessages(updatedMessages));
         });
       } else if (selectedUser?.conversationType === "group") {
-        // socket.current.on("deliveredResult", (data) => {
-        //   const updatedMessages = ChatMessages.map((message) => {
-        //     if (data?.message_id === message?._id) {
-        //       return {
-        //         ...message,
-        //         status: message.status.map((s) =>
-        //           s.userId === profileData?._id
-        //             ? { ...s, state: "delivered" }
-        //             : s
-        //         ),
-        //       };
-        //     }
-        //     return message;
-        //   });
-        //   dispatch(setUpdateMessages(updatedMessages));
-        // });
+        socket.current.on("deliveredResult", (data) => {
+          const updatedMessages = ChatMessages.map((message) => {
+            if (data?.message_id === message?._id) {
+              return {
+                ...message,
+                status: message.status.map((s) =>
+                  String(s.userId) === String(data.userId) && s.status !== "delivered" && s.status !== "read"
+                    ? { ...s, status: "delivered" }
+                    : s
+                ),
+              };
+            }
+            return message;
+          });
+          dispatch(setUpdateMessages(updatedMessages));
+        });
 
-        // socket.current.on("viewResult", (data) => {
-        //   const updatedMessages = ChatMessages.map((message) => {
-        //     if (data?.message_id === message?._id) {
-        //       return {
-        //         ...message,
-        //         status: message.status.map((s) =>
-        //           s.userId === profileData?._id
-        //             ? { ...s, state: "read" }
-        //             : s
-        //         ),
-        //       };
-        //     }
-        //     return message;
-        //   });
-        //   dispatch(setUpdateMessages(updatedMessages));
-        // });
+        socket.current.on("viewResult", (data) => {
+          const updatedMessages = ChatMessages.map((message) => {
+            if (data?.message_id === message?._id) {
+              return {
+                ...message,
+                status: message.status.map((s) =>
+                  String(s.userId) === String(data.userId) && s.status !== "read"
+                    ? { ...s, status: "read" }
+                    : s
+                ),
+              };
+            }
+            return message;
+          });
+          dispatch(setUpdateMessages(updatedMessages));
+        });
       }
+
+      socket.current.emit("conversation", profileData._id);
+      socket.current.emit("groupConversation", profileData._id);
+
+      socket.current.on("deliveredAllResult", (data) => {
+        const updatedMessages = ChatMessages.map((message) => {
+          if (selectedUser?.conversationType === "single") {
+            if (message?.isReceiverId === data?.userId) {
+              return {
+                ...message,
+                status: (message.status || []).map((s) =>
+                  String(s.userId) === String(message.isReceiverId) && s.status !== "delivered" && s.status !== "read" 
+                    ? {
+                      ...s, status: "delivered"
+
+                    }
+                    : s
+                ),
+              };
+            }
+          } else if (selectedUser?.conversationType === "group") {
+            if (message?.members.includes(data?.userId)) {
+              return {
+                ...message,
+                status: (message.status || []).map((s) =>
+                  message?.members.includes(s?.userId) && s.status !== "delivered" && s.status !== "read"
+                    ? {
+                      ...s, status: "delivered"
+
+                    }
+                    : s
+                ),
+              };
+            }
+          }
+
+          return message;
+        });
+        dispatch(setUpdateMessages(updatedMessages));
+      });
 
     }
   }, [socket, ChatMessages]);
@@ -232,36 +292,22 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       if (selectedUser?.conversationType === "single") {
         if (
           socket.current &&
-          message?.status === "sent" &&
+          message?.status[0]?.status === "delivered" &&
           message?.isSenderId?._id !== profileData?._id
         ) {
-          socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType);
-        }
-
-        if (
-          socket.current &&
-          message?.status === "delivered" &&
-          message?.isSenderId?._id !== profileData?._id
-        ) {
-          socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType);
+          const usersId = [message?.isSenderId?._id, profileData?._id]
+          socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType, usersId, profileData?._id);
         }
       } else if (selectedUser?.conversationType === "group") {
-        // const status = Array.isArray(message?.status) ? message?.status?.find(id => id.userId === profileData._id)?.state || "sent" : ""
-        // if (
-        //   socket.current &&
-        //   status === "sent" &&
-        //   message?.isSenderId?._id !== profileData?._id
-        // ) {
-        //   socket.current.emit("deliveredMessage", message?._id, selectedUser?.conversationType, profileData?._id);
-        // }
-
-        // if (
-        //   socket.current &&
-        //   status === "delivered" &&
-        //   message?.isSenderId?._id !== profileData?._id
-        // ) {
-        //   socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType, profileData?._id);
-        // }
+        const status = Array.isArray(message?.status) ? message?.status?.find(id => id.userId === profileData._id)?.status || "sent" : ""
+        if (
+          socket.current &&
+          status === "delivered" &&
+          message?.isSenderId?._id !== profileData?._id
+        ) {
+          const usersId = message?.members
+          socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType, usersId, profileData?._id);
+        }
       }
 
 
@@ -617,7 +663,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             message: index === 0 ? encryptMessage(message) : "",
             fileUrl: fileURl,
             messageType: "file",
-            timestamp: dayjs().format()
+            timestamp: dayjs().format(),
+            status: []
           };
 
           await onSendMessage(newMessage);
@@ -633,7 +680,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             message: "",
             fileUrl: base64Audio,
             messageType: "audio",
-            timestamp: dayjs().format()
+            timestamp: dayjs().format(),
+            status: []
           };
           await onSendMessage(newMessage);
         };
@@ -646,7 +694,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           message: encryptMessage(message),
           fileUrl: "",
           messageType: isLink(message) ? "link" : "text",
-          timestamp: dayjs().format()
+          timestamp: dayjs().format(),
+          status: []
         };
         await onSendMessage(newMessage);
       }
@@ -665,7 +714,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             message: index === 0 ? encryptMessage(message) : "",
             fileUrl: fileURl,
             messageType: "file",
-            timestamp: dayjs().format()
+            timestamp: dayjs().format(),
+            status: []
           };
 
           await onSendMessage(newMessage);
@@ -681,7 +731,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             message: "",
             fileUrl: base64Audio,
             messageType: "audio",
-            timestamp: dayjs().format()
+            timestamp: dayjs().format(),
+            status: []
           };
           await onSendMessage(newMessage);
         };
@@ -694,7 +745,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           message: encryptMessage(message),
           fileUrl: "",
           messageType: isLink(message) ? "link" : "text",
-          timestamp: dayjs().format()
+          timestamp: dayjs().format(),
+          status: []
         };
         await onSendMessage(newMessage);
       }
@@ -1211,13 +1263,13 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
                                   <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
                                     <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
-                                    {isSender && (
+                                    {(isSender && selectedUser?.conversationType === "single") && (
                                       <>
-                                        {message.status === "" ? (
+                                        {message?.status.length === 0 ? (
                                           <Clock3 size={12} />
-                                        ) : message.status === "delivered" ? (
+                                        ) : message?.status[0]?.status === "delivered" ? (
                                           <CheckCheck size={12} />
-                                        ) : message.status === "read" ? (
+                                        ) : message?.status[0]?.status === "read" ? (
                                           <CheckCheck size={12} className="text-blue-500" />
                                         ) : (
                                           <Check size={12} />
@@ -1404,6 +1456,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             {groupedMessages[date].map((message, idx) => {
                               const dicreptMessage = decryptMessage(message.message)
                               const isSender = message.isSenderId?._id === profileData?._id;
+                              const isAllDelivered = message.status.length > 0 ? message.status.every(s => s.status !== "sent") : false;
+                              const isAllRead = message.status.length > 0 ? message.status.every(s => s.status === "read") : false;
                               return (
                                 <div
                                   key={idx}
@@ -1534,12 +1588,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                       <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
                                       {isSender && (
                                         <>
-                                          {message.status === "" ? (
+                                          {message.status.length === 0 ? (
                                             <Clock3 size={12} />
-                                          ) : message.status === "delivered" ? (
-                                            <CheckCheck size={12} />
-                                          ) : message.status === "read" ? (
+                                          ) : isAllRead ? (
                                             <CheckCheck size={12} className="text-blue-500" />
+                                          ) : isAllDelivered ? (
+                                            <CheckCheck size={12} />
                                           ) : (
                                             <Check size={12} />
                                           )}
