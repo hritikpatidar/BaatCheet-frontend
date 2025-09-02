@@ -44,6 +44,7 @@ export const SocketProvider = ({ children }) => {
   const [addMembersGroupModle, setAddMembersGroupModle] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteGroupModalOpen, setIsDeleteGroupModalOpen] = useState(false)
+  const [isLeaveGroupModalOpen, setIsLeaveGroupModalOpen] = useState(false)
   const [isLoading, setIsLoading] = useState(false);
   const [loadingType, setLoadingType] = useState(null);
 
@@ -57,7 +58,7 @@ export const SocketProvider = ({ children }) => {
 
       socket.current.on("connect", () => {
         console.log("✅ Socket connected");
-        socket.current.emit("deliveredAllMessages", profileData._id, )
+        socket.current.emit("deliveredAllMessages", profileData._id,)
         socket.current.emit("registerUser", profileData._id);
         // if (profileData._id && location.pathname === "/chat") {
         socket.current.emit("conversation", profileData._id);
@@ -274,13 +275,29 @@ export const SocketProvider = ({ children }) => {
           dispatch(setSelectUser(groupData))
         }
         socket.current.emit("groupConversation", profileData._id);
-        setIsDeleteGroupModalOpen(false)
+        setIsLeaveGroupModalOpen(false)
         setIsLoading(false)
 
       })
 
       socket.current.on("groupLeavedError", (groupId) => {
+        setIsLeaveGroupModalOpen(false)
+        setIsLoading(false)
+      })
+
+      socket.current.on("groupDeleted", (groupData) => {
+        socket.current.emit("groupConversation", profileData._id);
+        if (selectedUser?._id === groupData?.groupId) {
+          dispatch(setSelectUser({}))
+        }
         setIsDeleteGroupModalOpen(false)
+        setIsLoading(false)
+
+      })
+
+      socket.current.on("groupDeletedError", (groupId) => {
+        setIsDeleteGroupModalOpen(false)
+        setIsLoading(false)
       })
 
       // socket.current.on("downloadFileResult", (MessageData) => {
@@ -349,6 +366,8 @@ export const SocketProvider = ({ children }) => {
         setIsDeleteGroupModalOpen,
         loadingType,
         setLoadingType,
+        isLeaveGroupModalOpen,
+        setIsLeaveGroupModalOpen
       }}
     >
       {children}

@@ -55,7 +55,23 @@ import CustomizeModal from "../../components/CustomizeModal";
 const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const dispatch = useDispatch();
   //global states
-  const { socket, fetchMessages, page, setPage, addMembersGroupModle, setAddMembersGroupModle, isLoading, setIsLoading, isModalOpen, setIsModalOpen, isDeleteGroupModalOpen, setIsDeleteGroupModalOpen, loadingType, setLoadingType } = useSocket()
+  const {
+    socket,
+    fetchMessages,
+    page,
+    setPage,
+    addMembersGroupModle,
+    setAddMembersGroupModle,
+    isLoading,
+    setIsLoading,
+    isModalOpen,
+    setIsModalOpen,
+    isDeleteGroupModalOpen,
+    setIsDeleteGroupModalOpen,
+    loadingType,
+    setLoadingType,
+    isLeaveGroupModalOpen,
+    setIsLeaveGroupModalOpen } = useSocket()
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { selectedUser, ChatMessages, Downloading, DownloadProgress, isTyping, onlineStatus } = useSelector((state) => state?.ChatDataSlice);
   const invite = selectedUser?.invites?.find(invite => invite?.invitedUser?._id === profileData?._id);
@@ -242,7 +258,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               return {
                 ...message,
                 status: (message.status || []).map((s) =>
-                  String(s.userId) === String(message.isReceiverId) && s.status !== "delivered" && s.status !== "read" 
+                  String(s.userId) === String(message.isReceiverId) && s.status !== "delivered" && s.status !== "read"
                     ? {
                       ...s, status: "delivered"
 
@@ -763,9 +779,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
     if (socket) socket.current.emit('clearGroupChat', selectedUser?._id, profileData?._id);
   };
 
-  const handleDelete = () => {
+  const handleLeave = () => {
     setIsLoading(true)
     if (socket) socket.current.emit('leaveGroup', selectedUser?._id, profileData?._id);
+  };
+
+  const handleDelete = () => {
+    setIsLoading(true)
+    if (socket) socket.current.emit('deleteGroup', selectedUser?._id, profileData?._id);
   };
 
 
@@ -1118,19 +1139,34 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <MessageSquareX className="w-5 h-5" />
                             Clear chat
                           </button>
-
-                          <button
-                            type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setIsDeleteGroupModalOpen(true)
-                              close();
-                            }}
-                          >
-                            <Trash2 className="w-5 h-5 text-red-600" />
-                            Delete group
-                          </button>
+                          {
+                            selectedUser?.admin?._id === profileData?._id ?
+                              <button
+                                type="button"
+                                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsDeleteGroupModalOpen(true)
+                                  close();
+                                }}
+                              >
+                                <Trash2 className="w-5 h-5 text-red-600" />
+                                Delete group
+                              </button>
+                              :
+                              <button
+                                type="button"
+                                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setIsLeaveGroupModalOpen(true)
+                                  close();
+                                }}
+                              >
+                                <Trash2 className="w-5 h-5 text-red-600" />
+                                Leave group
+                              </button>
+                          }
                         </MenuItems>
                       </>
                     )}
@@ -1896,13 +1932,27 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       }
 
       {
+        isLeaveGroupModalOpen &&
+        <CustomizeModal
+          isOpen={isLeaveGroupModalOpen}
+          onClose={() => setIsLeaveGroupModalOpen(false)}
+          onConfirm={handleLeave}
+          title={`Leave group: "${selectedUser?.name}" ?`}
+          description="Only admins are notified when you leave a group."
+          confirmText="Leave"
+          cancelText="Cancel"
+          danger={true}
+          loading={isLoading}
+        />
+      }
+      {
         isDeleteGroupModalOpen &&
         <CustomizeModal
           isOpen={isDeleteGroupModalOpen}
           onClose={() => setIsDeleteGroupModalOpen(false)}
           onConfirm={handleDelete}
           title={`Delete group: "${selectedUser?.name}" ?`}
-          description="Only admins are notified when you leave a group."
+          description="This group has been deleted permanently"
           confirmText="Delete"
           cancelText="Cancel"
           danger={true}
