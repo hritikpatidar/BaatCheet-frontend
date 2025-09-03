@@ -27,12 +27,12 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const { userList, singleConversationList, groupConversationList, selectedChatType, selectedUser } = useSelector((state) => state?.ChatDataSlice);
 
   const [searchTerm, setSearchTerm] = useState("");
-
-
   const [isUserListOpen, setIsUserListOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  const singleMessageCount = singleConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
+  const groupMessageCount = groupConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
   const formatter = Intl.NumberFormat('en', {
     notation: 'compact',
     maximumFractionDigits: 1
@@ -88,7 +88,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
-          <span className="projectName cursor-pointer" onClick={()=>navigate("/")}>
+          <span className="projectName cursor-pointer" onClick={() => navigate("/")}>
             <span className='text-teal-600'>Baat</span><span className='text-gray-800'>Cheet</span>
           </span>
 
@@ -287,6 +287,11 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             }}
           >
             Single
+            {singleMessageCount.length > 0 &&
+              <span className=" inline-block bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
+                {formatter.format(singleMessageCount.length)}
+              </span>
+            }
           </button>
           <button
             className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
@@ -298,6 +303,11 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             }}
           >
             Group
+            {groupMessageCount.length > 0 &&
+              <span className=" inline-block bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
+                {formatter.format(groupMessageCount.length)}
+              </span>
+            }
           </button>
         </div>
 

@@ -22,6 +22,7 @@ import {
   updatelinksList
 } from "../Redux/features/Chat/chatSlice";
 import toast from "react-hot-toast";
+import { decryptMessage } from "../Utils/Auth";
 
 const SocketContext = createContext(null);
 
@@ -113,6 +114,8 @@ export const SocketProvider = ({ children }) => {
       socket.current.off("groupLeavedError");
       socket.current.off("AcceptAndRejectInviteResult");
       socket.current.off("AcceptAndRejectInviteResultError");
+      socket.current.off("exportChatSuccess");
+      socket.current.off("exportChatError");
 
       socket.current.on("userList", (userList) => {
         if (userList) {
@@ -264,6 +267,7 @@ export const SocketProvider = ({ children }) => {
       })
 
       socket.current.on("groupMessagesError", (response) => {
+        console.log("groupMessagesError", response)
         setIsModalOpen(false)
       })
 
@@ -298,6 +302,49 @@ export const SocketProvider = ({ children }) => {
       socket.current.on("groupDeletedError", (groupId) => {
         setIsDeleteGroupModalOpen(false)
         setIsLoading(false)
+      })
+
+      socket.current.on("exportChatSuccess", (data) => {
+        console.log("export chat success", data)
+        if (data.chatData && data.chatData.length) {
+          // Format date to readable Indian time
+          const formatDate = (isoDate) => {
+            const date = new Date(isoDate);
+            const options = {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              hour12: true,
+              timeZone: 'Asia/Kolkata'
+            };
+            return date.toLocaleString('en-GB', options).replace(',', '');
+          };
+
+          // Format messages
+          const formattedMessages = data.chatData.map(msg => {
+            const sender = msg.isSenderId?._id === profileData?._id ? "You" : msg.isSenderId?.name || "Unknown";
+            const content = msg.messageType === "text" ? decryptMessage(msg.message) : `[File] ${decryptMessage(msg.fileUrl)}`;
+            const timestamp = formatDate(msg.createdAt);
+            return `[${timestamp}] - ${sender}: ${content} `;
+          }).join('\n');
+          // Download as .txt
+          const blob = new Blob([formattedMessages], { type: "text/plain;charset=utf-8" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "chat.txt";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setIsViewChatLoading(false);
+        } else {
+          toast.error(t("no_data_found"));
+        }
+      })
+
+      socket.current.on("exportChatError", (data) => {
+        console.log("export chat error", data?.message)
       })
 
       // socket.current.on("downloadFileResult", (MessageData) => {

@@ -28,7 +28,9 @@ import {
   PlusCircle,
   CircleCheck,
   CircleX,
-  CircleMinus
+  CircleMinus,
+  LogOut,
+  Share
 } from "lucide-react";
 import {
   FaFileAudio,
@@ -301,10 +303,6 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
   const groupMessagesByDate = (messages) => {
     return messages?.reduce((acc, message) => {
-      messages = {
-        ...message,
-        message: decryptMessage(message.message)
-      }
       if (selectedUser?.conversationType === "single") {
         if (
           socket.current &&
@@ -312,7 +310,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           message?.isSenderId?._id !== profileData?._id
         ) {
           const usersId = [message?.isSenderId?._id, profileData?._id]
-          socket.current.emit("viewMessage", messages?._id, selectedUser?.conversationType, usersId, profileData?._id);
+          socket.current.emit("viewMessage", message?._id, selectedUser?.conversationType, usersId, profileData?._id);
         }
       } else if (selectedUser?.conversationType === "group") {
         const status = Array.isArray(message?.status) ? message?.status?.find(id => id.userId === profileData._id)?.status || "sent" : ""
@@ -676,8 +674,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             isSenderId: { _id: profileData?._id },
             isReceiverId: selectedUser?.conversationType === "single" ? userDetails?._id : "",
             groupId: selectedUser?.conversationType === "group" ? selectedUser?._id : "",
-            message: index === 0 ? encryptMessage(message) : "",
-            fileUrl: fileURl,
+            message: message ? index === 0 ? encryptMessage(message) : "" : "",
+            fileUrl: encryptMessage(fileURl),
             messageType: "file",
             timestamp: dayjs().format(),
             status: []
@@ -694,7 +692,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             isReceiverId: userDetails?._id,
             groupId: "",
             message: "",
-            fileUrl: base64Audio,
+            fileUrl: encryptMessage(base64Audio),
             messageType: "audio",
             timestamp: dayjs().format(),
             status: []
@@ -727,13 +725,12 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             isSenderId: { _id: profileData?._id },
             isReceiverId: "",
             groupId: selectedUser?._id,
-            message: index === 0 ? encryptMessage(message) : "",
-            fileUrl: fileURl,
+            message: message ? index === 0 ? encryptMessage(message) : "" : "",
+            fileUrl: encryptMessage(fileURl),
             messageType: "file",
             timestamp: dayjs().format(),
             status: []
           };
-
           await onSendMessage(newMessage);
         }
       } else if (recordedBlob) {
@@ -745,7 +742,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             isReceiverId: "",
             groupId: selectedUser?._id,
             message: "",
-            fileUrl: base64Audio,
+            fileUrl: encryptMessage(base64Audio),
             messageType: "audio",
             timestamp: dayjs().format(),
             status: []
@@ -787,6 +784,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   const handleDelete = () => {
     setIsLoading(true)
     if (socket) socket.current.emit('deleteGroup', selectedUser?._id, profileData?._id);
+  };
+
+  const handleExportChat = () => {
+    if (socket) socket.current.emit('ExportChat', selectedUser?._id, selectedUser?.conversationType, profileData?._id);
   };
 
 
@@ -1016,6 +1017,22 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                             onClick={(e) => {
                               e.stopPropagation();
+                              handleExportChat()
+                              close();
+                            }}
+                          >
+                            {/* Users Icon with Plus on top-right */}
+                            <span className="relative">
+                              <Share className="w-5 h-5" />
+                            </span>
+
+                            Export Chat
+                          </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
                               dispatch(closeChat())
                               close();
                             }}
@@ -1114,6 +1131,22 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
                             Add members
                           </button>
+                          <button
+                            type="button"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExportChat()
+                              close();
+                            }}
+                          >
+                            {/* Users Icon with Plus on top-right */}
+                            <span className="relative">
+                              <Share className="w-5 h-5" />
+                            </span>
+
+                            Export Chat
+                          </button>
 
                           <button
                             type="button"
@@ -1163,7 +1196,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                   close();
                                 }}
                               >
-                                <Trash2 className="w-5 h-5 text-red-600" />
+                                <LogOut className="w-5 h-5 text-red-600" />
                                 Leave group
                               </button>
                           }
@@ -1212,6 +1245,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           </div>
                           {groupedMessages[date].map((message, idx) => {
                             const dicreptMessage = decryptMessage(message.message)
+                            const dicreptFileUrl = decryptMessage(message.fileUrl)
                             const isSender = message.isSenderId?._id === profileData?._id;
                             return (
                               <div
@@ -1226,18 +1260,18 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                     }`}
                                 >
                                   {message.messageType === "file" ? (
-                                    checkIfImage(message.fileUrl) ? (
+                                    checkIfImage(dicreptFileUrl) ? (
                                       <div
                                         className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
                                         onClick={() => {
-                                          dispatch(setViewImages([message.fileUrl]));
+                                          dispatch(setViewImages([dicreptFileUrl]));
                                           setShowImage(true);
                                         }}
                                       >
-                                        {(message.fileUrl) ? (
+                                        {(dicreptFileUrl) ? (
                                           <img
                                             className="h-full w-full object-cover"
-                                            // src={`${import.meta.env.VITE_SOCKET_URL}/${message.fileUrl}`}
+                                            // src={`${import.meta.env.VITE_SOCKET_URL}/${dicreptFileUrl}`}
                                             src={dummyImage}
                                             alt="Sent Image"
                                           />
@@ -1250,11 +1284,11 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                     ) : (
                                       <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
                                         <div className="flex items-center gap-2" onClick={() =>
-                                          downloadFile(message.fileUrl, message._id, idx)
+                                          downloadFile(dicreptFileUrl, message._id, idx)
                                         }>
                                           <FileArchive className="text-gray-600 text-3xl" />
                                           <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
-                                            {message.fileUrl.split("/").pop()}
+                                            {dicreptFileUrl.split("/").pop()}
                                           </span>
                                         </div>
                                         {!message.isDownload && message.isReceiverId === profileData?._id && (
@@ -1274,7 +1308,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                   ) :
                                     message.messageType === "audio" ? (
                                       <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                        <AudioMessagePlayer audioUrl={message.fileUrl} />
+                                        <AudioMessagePlayer audioUrl={dicreptFileUrl} />
                                       </div>
                                     ) : (
                                       <p className="pr-14 break-words min-h-6">
@@ -1491,6 +1525,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             )} */}
                             {groupedMessages[date].map((message, idx) => {
                               const dicreptMessage = decryptMessage(message.message)
+                              const dicreptFileUrl = decryptMessage(message.fileUrl)
                               const isSender = message.isSenderId?._id === profileData?._id;
                               const isAllDelivered = message.status.length > 0 ? message.status.every(s => s.status !== "sent") : false;
                               const isAllRead = message.status.length > 0 ? message.status.every(s => s.status === "read") : false;
@@ -1549,18 +1584,18 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                       </div>
                                     )}
                                     {message.messageType === "file" ? (
-                                      checkIfImage(message?.fileUrl) ? (
+                                      checkIfImage(dicreptFileUrl) ? (
                                         <div
                                           className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
                                           onClick={() => {
-                                            dispatch(setViewImages([message?.fileUrl]));
+                                            dispatch(setViewImages([dicreptFileUrl]));
                                             setShowImage(true);
                                           }}
                                         >
-                                          {(message?.fileUrl) ? (
+                                          {(dicreptFileUrl) ? (
                                             <img
                                               className="h-full w-full object-cover"
-                                              // src={`${import.meta.env.VITE_SOCKET_URL}/${message?.fileUrl}`}
+                                              // src={`${import.meta.env.VITE_SOCKET_URL}/${dicreptFileUrl}`}
                                               src={dummyImage}
                                               alt="Sent Image"
                                             />
@@ -1573,11 +1608,11 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                                       ) : (
                                         <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
                                           <div className="flex items-center gap-2" onClick={() =>
-                                            downloadFile(message?.fileUrl, message._id, idx)
+                                            downloadFile(dicreptFileUrl, message._id, idx)
                                           }>
                                             <FileArchive className="text-gray-600 text-3xl" />
                                             <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
-                                              {message?.fileUrl.split("/").pop()}
+                                              {dicreptFileUrl.split("/").pop()}
                                             </span>
                                           </div>
                                           {!message.isDownload && message.isReceiverId === profileData?._id && (
