@@ -24,7 +24,7 @@ const initialState = {
   filesList: [],
   linksList: [],
   groupCreateLoading: false,
-  inviteUserLoading:false
+  inviteUserLoading: false
 };
 
 export const getUserList = createAsyncThunk(
@@ -71,7 +71,7 @@ const chatSlice = createSlice({
     setGroupCreateLoading: (state, action) => {
       state.groupCreateLoading = action.payload;
     },
-    setInviteUserLoading :(state, action)=>{
+    setInviteUserLoading: (state, action) => {
       state.inviteUserLoading = action.payload
     },
     setSelectedChatMessages: (state, action) => { // all messages

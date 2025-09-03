@@ -7,7 +7,7 @@ const NotFound = () => {
 
   return (
     <div className="min-h-screen bg-[#fdf7f2] flex flex-col items-center justify-center px-6 py-12 text-center relative overflow-hidden">
-      
+
       <h1 className="text-[42px] md:text-[56px] font-bold text-[#242424] mb-4 z-10 tracking-wide">
         Baatcheet 📱
       </h1>

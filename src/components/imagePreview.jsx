@@ -3,7 +3,7 @@ import "react-image-lightbox/style.css";
 import { ArrowDownToLine, X } from "lucide-react";
 import { useSelector } from "react-redux";
 
-const ImageLightbox = ({ downloadImages,setShowImage }) => {
+const ImageLightbox = ({ downloadImages, setShowImage }) => {
     const imageUrl = useSelector((state) => state?.ChatDataSlice?.viewImages);
     const [scale, setScale] = useState(0.5);
     const [cursor, setCursor] = useState("default");
@@ -45,7 +45,7 @@ const ImageLightbox = ({ downloadImages,setShowImage }) => {
             onMouseLeave={handleMouseUp}
             style={{ cursor }}
         >
-            
+
             {/* 🔹 Modal Header */}
             <div className="absolute top-0 left-0 w-full flex justify-between items-center p-4 bg-gray-900 text-white shadow-md z-50">
                 <h2 className="text-xl font-semibold">Image Viewer</h2>

@@ -65,7 +65,7 @@ export const getImage = async (fileUrl) => {
 export const formatter = Intl.NumberFormat('en', {
     notation: 'compact',
     maximumFractionDigits: 1
-  });
+});
 
 // Encrypt function
 export const encryptMessage = (msg) => {

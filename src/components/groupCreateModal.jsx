@@ -143,8 +143,8 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                             maxLength={30}
                             onChange={handleChange}
                             className={`w-full pl-10 pr-12 py-2 ${errorMessages?.groupName
-                                    ? "border border-red-500"
-                                    : "border border-gray-300"
+                                ? "border border-red-500"
+                                : "border border-gray-300"
                                 } rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
                         />
                         {/* Character Counter - Right Corner */}

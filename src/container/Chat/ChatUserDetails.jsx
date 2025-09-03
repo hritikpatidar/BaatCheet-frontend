@@ -246,20 +246,18 @@ const ChatUserDetails = () => {
                 <button
                   onClick={() => setIsChecked(!isChecked)}
                   className={`relative w-9 h-5 flex items-center rounded-full transition-all duration-300 
-      ${
-        isChecked
-          ? "ltr:bg-blue-900 rtl:bg-blue-900" // ON condition - correct for both
-          : "ltr:bg-gray-200 rtl:bg-gray-200"
-      } // OFF condition - default gray
+      ${isChecked
+                      ? "ltr:bg-blue-900 rtl:bg-blue-900" // ON condition - correct for both
+                      : "ltr:bg-gray-200 rtl:bg-gray-200"
+                    } // OFF condition - default gray
       focus:outline-none`}
                 >
                   <span
                     className={`absolute top-[2px] w-4 h-4 bg-white rounded-full shadow-md transition-all duration-300 
-        ${
-          isChecked
-            ? "ltr:left-[2px] rtl:right-[2px] translate-x-4 rtl:-translate-x-4"
-            : "ltr:left-[2px] rtl:right-[2px] translate-x-0"
-        }`}
+        ${isChecked
+                        ? "ltr:left-[2px] rtl:right-[2px] translate-x-4 rtl:-translate-x-4"
+                        : "ltr:left-[2px] rtl:right-[2px] translate-x-0"
+                      }`}
                   ></span>
                 </button>
               </div>
@@ -285,11 +283,10 @@ const ChatUserDetails = () => {
             {[t("media"), t("docs"), t("links")].map((tab) => (
               <button
                 key={tab}
-                className={`px-4 py-2 flex-1 text-center capitalize ${
-                  activeTab === tab
+                className={`px-4 py-2 flex-1 text-center capitalize ${activeTab === tab
                     ? "border-b-2 border-blue-500 text-blue-500 font-semibold"
                     : "text-gray-600"
-                }`}
+                  }`}
                 onClick={() => setActiveTab(tab)}
               >
                 {tab}

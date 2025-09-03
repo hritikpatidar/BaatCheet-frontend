@@ -8,7 +8,7 @@ const AudioMessagePlayer = ({ audioUrl }) => {
   const waveSurfer = useRef(null)
   const [currentTime, setCurrentTime] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [audioBlob, setAudioBlob] = useState("http://localhost:3000/"+audioUrl)
+  const [audioBlob, setAudioBlob] = useState("http://localhost:3000/" + audioUrl)
 
   // useEffect(() => {
   //   fetchUrl(audioUrl)

@@ -33,11 +33,10 @@ const CustomizeModal = ({
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`w-full sm:w-auto px-4 py-2 rounded-md text-white transition ${
-              danger
+            className={`w-full sm:w-auto px-4 py-2 rounded-md text-white transition ${danger
                 ? "bg-red-600 hover:bg-red-700"
                 : "bg-gray-700 hover:bg-gray-800"
-            } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
+              } ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
           >
             {loading ? "Processing..." : confirmText}
           </button>

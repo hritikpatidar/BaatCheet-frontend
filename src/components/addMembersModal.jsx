@@ -119,7 +119,7 @@ const AddMembersModal = () => {
             return (
               <li
                 key={i}
-                className={`cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-gray-200 ${(isSelected || userAlreadyAdded) && "bg-gray-200"}` }
+                className={`cursor-pointer flex items-center gap-2 p-2 rounded-md hover:bg-gray-200 ${(isSelected || userAlreadyAdded) && "bg-gray-200"}`}
                 onClick={() => handleInviteSelect(user)}
               >
                 {/* Profile */}

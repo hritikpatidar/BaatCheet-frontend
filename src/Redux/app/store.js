@@ -36,7 +36,7 @@ export const store = configureStore({
   devTools: import.meta.env.VITE_PROTECTION === "developer" ? true : false,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false, 
+      serializableCheck: false,
       thunk,
     }),
 });
