@@ -103,6 +103,7 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
             const data = new FormData();
             data.append("file", formData.image); // Append the file to the FormData
             const imageUrl = await uploadFileService(data);
+            debugger
             socket.current.emit("createGroup", {
                 name: formData.groupName,
                 invites: formData.invites,

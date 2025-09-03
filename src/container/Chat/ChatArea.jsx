@@ -843,9 +843,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 >
                   <AlignJustify />
                 </button>
-                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
+                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-2xl sm:text-2xl font-semibold text-gray-600">
                   {userDetails?.profile ? (
-                    <img src={dummyImage} alt={"No Image"} className="w-12 h-12 rounded-full" />
+                    <img src={userDetails?.profile || dummyImage} alt={"No Image"} className="w-12 h-12 rounded-full object-cover" />
                   ) : userDetails?.name?.split(" ")
                     .filter((_, index) => index === 0 || index === 1)
                     .map(n => n[0])
@@ -1116,10 +1116,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           </button>
                           <button
                             type="button"
-                            className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setOpenCreateGroupModle(true)
+                              setAddMembersGroupModle(true)
                               close();
                             }}
                           >
@@ -1465,7 +1465,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <div className="w-full aspect-video flex items-center justify-center bg-gray-100">
                             {userDetails?.profile ? (
                               <img
-                                src={dummyImage}
+                                src={userDetails?.profile || dummyImage}
                                 alt="Profile"
                                 className="w-full h-full object-cover"
                               />
@@ -1909,9 +1909,9 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
             {/* User Avatar */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-24 h-24 rounded-full bg-gray-300 flex items-center justify-center text-3xl text-white font-bold">
+              <div className=" rounded-full bg-gray-100 flex items-center justify-center text-2xl sm:text-2xl font-semibold text-gray-600">
                 {userDetails?.profile ? (
-                  <img src={dummyImage} alt={"No Image"} className="w-24 h-24 rounded-full" />
+                  <img src={userDetails?.profile || dummyImage} alt={"No Image"} className="w-24 h-24 rounded-full object-cover" />
                 ) : userDetails?.name?.split(" ")
                   .map((word) => word[0])
                   .join("")

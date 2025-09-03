@@ -318,18 +318,19 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               const data = cv?.members?.find(
                 (item) => item._id !== profileData?._id
               );
+
               let user = {};
               if (selectedChatType === "single") {
                 user.senderId = cv?.lastMessageDetails?.isSenderId;
                 user.name = data?.name;
-                user.profile = dummyImage;
+                user.profile = data?.image;
                 user.message = cv?.lastMessageDetails?.message;
                 user.messageType = cv?.lastMessageDetails?.messageType;
                 user.time = cv?.lastMessageDetails?.timestamp;
               } else if (selectedChatType === "group") {
                 user.senderId = cv?.lastMessageDetails?.isSenderId?._id;
                 user.name = cv.name;
-                user.profile = dummyImage;
+                user.profile = cv?.image;
                 user.message = cv?.lastMessageDetails?.message;
                 user.messageType = cv?.lastMessageDetails?.messageType;
                 user.time = cv?.lastMessageDetails?.timestamp;
@@ -356,7 +357,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   }}
                 >
                   {/* Profile */}
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold overflow-hidden">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-2xl sm:text-2xl font-semibold text-gray-600 overflow-hidden">
                     {user.profile ? (
                       <img
                         src={user.profile}
