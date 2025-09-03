@@ -4,16 +4,21 @@ import { Bell, EllipsisVertical, Grip, Image, LifeBuoy, LogOut, MessageCircle, P
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { dummyImage } from '../assets';
 import LogOutModal from './LogOutModalPage';
+import { useSelector } from 'react-redux';
+import { formatter } from '../Utils/Auth';
 
 const MainHeader = () => {
     const navigate = useNavigate();
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
-    // Dummy counts for demo
-    const unreadMessages = 3;
-    const unreadNotifications = 5;
+    const { singleConversationList, groupConversationList } = useSelector((state) => state?.ChatDataSlice);
 
+    // Dummy counts for demo
+    const singleMessageCount = singleConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
+    const groupMessageCount = groupConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
+    const unreadMessages = singleMessageCount.length + groupMessageCount.length;
+    const unreadNotifications = 5;
     return (
         <header className="fixed top-0 left-0 w-full bg-white py-2 px-4 z-10 shadow flex items-center justify-between">
             {/* Left side: Logo */}
@@ -42,9 +47,11 @@ const MainHeader = () => {
                         >
                             <MessageCircle className="w-5 h-5" />
                         </button>
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                            <span>{unreadMessages}</span>
-                        </span>
+                        {unreadMessages > 0 &&
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                {formatter.format(unreadMessages)}
+                            </span>
+                        }
                     </div>
 
                     {/* Notification Icon with badge */}
@@ -54,9 +61,11 @@ const MainHeader = () => {
                         >
                             <Bell className="w-5 h-5" />
                         </button>
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                            <span>{unreadNotifications}</span>
-                        </span>
+                        {unreadNotifications > 0 &&
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                {formatter.format(unreadNotifications)}
+                            </span>
+                        }
                     </div>
                 </div>
                 {/* Profile Dropdown */}
@@ -100,9 +109,11 @@ const MainHeader = () => {
                                 <MessageCircle className="w-5 h-5" />
                                 Chat
                             </span>
-                            <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                                {unreadMessages}
-                            </span>
+                            {unreadMessages > 0 &&
+                                <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                    {formatter.format(unreadMessages)}
+                                </span>
+                            }
                         </button>
                         <button
                             className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition md:hidden"
@@ -112,9 +123,11 @@ const MainHeader = () => {
                                 <Bell className="w-5 h-5" />
                                 Notification
                             </span>
-                            <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                                {unreadNotifications}
-                            </span>
+                            {unreadNotifications > 0 &&
+                                <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                    {formatter.format(unreadNotifications)}
+                                </span>
+                            }
                         </button>
 
                         <button

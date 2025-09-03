@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import LogOutModal from "../../components/LogOutModalPage";
 import GroupCreateModal from "../../components/groupCreateModal";
-import { decryptMessage } from "../../Utils/Auth";
+import { decryptMessage, formatter } from "../../Utils/Auth";
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,10 +33,6 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
   const singleMessageCount = singleConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
   const groupMessageCount = groupConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
-  const formatter = Intl.NumberFormat('en', {
-    notation: 'compact',
-    maximumFractionDigits: 1
-  });
 
   const filteredUsers = userList?.filter(
     (cv) =>
