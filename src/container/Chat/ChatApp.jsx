@@ -9,7 +9,6 @@ const ChatApp = () => {
   return (
     <div className="flex h-screen font-sans bg-gray-100 ">
       <>
-        {/* Sidebar */}
         <ChatSidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
       </>
       <ChatArea showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
