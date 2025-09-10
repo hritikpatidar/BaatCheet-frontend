@@ -22,7 +22,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { t } = useTranslation();
-  const { socket, userListModal, setUserListModal, fetchMessages, setHasMore, setPage, openCreateGroupModle, setOpenCreateGroupModle } = useSocket();
+  const { socket, userListModal, setUserListModal, fetchMessages, hasMore, setHasMore, setPage, openCreateGroupModle, setOpenCreateGroupModle } = useSocket();
   const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
   const { userList, singleConversationList, groupConversationList, selectedChatType, selectedUser } = useSelector((state) => state?.ChatDataSlice);
 
@@ -347,7 +347,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   className={`cursor-pointer flex items-center gap-3 p-2 rounded-md ${cv?._id === selectedUser?._id && "bg-gray-300"
                     } hover:bg-gray-300 shadow-sm`}
                   onClick={() => {
-                    // if (cv?._id === selectedUser?._id) return;
+                    if (hasMore) return;
                     setShowSidebar(false);
                     dispatch(setSelectUser(cv));
                     dispatch(setChatMessagesClear([]));
