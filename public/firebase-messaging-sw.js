@@ -2,13 +2,13 @@
 // importScripts('https://www.gstatic.com/firebasejs/10.13.2/firebase-messaging-compat.js');
 
 // firebase.initializeApp({
-//     apiKey: "AIzaSyDvVU87Pv6_BrWHhQOoQZujIMgX1Fqe4Js",
-//     authDomain: "smartfit-pro.firebaseapp.com",
-//     projectId: "smartfit-pro",
-//     storageBucket: "smartfit-pro.firebasestorage.app",
-//     messagingSenderId: "416686174115",
-//     appId: "1:416686174115:web:804dede6316e7170b07416",
-//     measurementId: "G-P2QFHK6GLZ"
+//     apiKey: "AIzaSyBJ4NKf5MeRu9A1YaoN5YKQM5BvOcsBl0Y",
+//     authDomain: "baatcheet-b424d.firebaseapp.com",
+//     projectId: "baatcheet-b424d",
+//     storageBucket: "baatcheet-b424d.firebasestorage.app",
+//     messagingSenderId: "817145024781",
+//     appId: "1:817145024781:web:d94eb131aa42484eaf2044",
+//     measurementId: "G-GQ5RFPG7SZ"
 // });
 
 // const messaging = firebase.messaging();
