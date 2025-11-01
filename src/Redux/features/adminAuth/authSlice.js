@@ -9,6 +9,10 @@ const initialState = {
   profileDetails: {},
   notificationList: [],
   error: "",
+  items: [
+    { id: 1, name: "Item 1", image: "https://via.placeholder.com/50" },
+    { id: 2, name: "Item 2", image: "https://via.placeholder.com/50" }
+  ]
 };
 
 
@@ -64,6 +68,9 @@ const AuthSlice = createSlice({
       state.notificationList = [];
       state.error = "";
     },
+    addItem: (state, action) => {
+      state.items.unshift(action.payload);
+    }
   },
   extraReducers: (builder) => {
     builder.addCase(signupForm.pending, (state) => {
@@ -126,5 +133,5 @@ const AuthSlice = createSlice({
   },
 });
 
-export const { logoutSuccess } = AuthSlice.actions;
+export const { logoutSuccess, addItem } = AuthSlice.actions;
 export default AuthSlice.reducer;

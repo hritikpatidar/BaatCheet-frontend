@@ -7,6 +7,7 @@ import NotFound from './components/NotFound';
 import LoginPage from './container/AuthPages/LoginPage';
 import { SignupForm } from './container/AuthPages/SignupForm';
 import DashboardPage from './container/Dashboard/Dashboard';
+import ListPage from './container/List/ListPage';
 // import { generateToken, messaging } from "./firebase";
 // import { onMessage } from "firebase/messaging";
 // import { useEffect } from 'react';
@@ -32,6 +33,7 @@ export default function App() {
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<DashboardPage />} />
             <Route path="/chat" element={<ChatApp />} />
+            {/* <Route path="/list" element={<ListPage />} /> */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

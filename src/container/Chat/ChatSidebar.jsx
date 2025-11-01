@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom"; // Import for navigation
 import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { clearChatState, setChatMessagesClear, setSelectedChatType, setSelectUser } from "../../Redux/features/Chat/chatSlice";
+import { clearChatState, closeChat, setChatMessagesClear, setSelectedChatType, setSelectUser } from "../../Redux/features/Chat/chatSlice";
 import { useSocket } from "../../context/SocketContext";
 import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Plus, Search, Settings, SunMoon, User, Users, X } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
@@ -84,7 +84,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
-          <span className="projectName cursor-pointer" onClick={() => navigate("/")}>
+          <span className="projectName cursor-pointer" onClick={async() => {
+            await navigate("/")
+            dispatch(closeChat())
+          }}>
             <span className='text-teal-600'>Baat</span><span className='text-gray-800'>Cheet</span>
           </span>
 
