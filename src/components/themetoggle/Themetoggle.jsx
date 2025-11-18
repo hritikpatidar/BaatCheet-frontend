@@ -1,20 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { SunMedium } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
 
 const Themetoggle = () => {
-  const [theme, settheme] = useState(localStorage.getItem("theme"));
+  const [theme, setTheme] = useState(localStorage.getItem("theme"));
   const themetoggle = () => {
-    settheme(theme === "dark" ? "light" : "dark");
+    const newTheme = theme === "dark" ? "light" : "dark"
+    setTheme(newTheme);
+    document.documentElement.classList.toggle('dark', newTheme === "dark");
+    localStorage.setItem('theme', newTheme);
   };
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('theme', theme);
-  }, [theme]);
+
   return (
-    <div className="cursor-pointer " onClick={themetoggle}>
-      <SunMedium className="w-5 h-5" />
+    <div
+      className="
+    rounded-full p-2 shadow-md 
+    shadow-teal-400 dark:shadow-teal-600 
+    cursor-pointer 
+    text-gray-600 dark:text-gray-200 
+    hover:text-teal-400 dark:hover:text-teal-300 
+    bg-white dark:bg-gray-800
+    transition-all ease-in-out
+  "
+      onClick={themetoggle}
+    >
+      {theme === 'light'
+        ? <Moon className="w-5 h-5" />
+        : <Sun className="w-5 h-5" />
+      }
     </div>
+
   );
 };
 
