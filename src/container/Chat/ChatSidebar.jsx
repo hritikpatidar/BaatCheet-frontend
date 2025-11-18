@@ -93,7 +93,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
           <div className="flex items-center gap-2">
             <button
-              className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md group"
+              className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md group"
               onClick={() => {
                 setIsUserListOpen(!isUserListOpen)
                 setSearchTerm("");
@@ -109,7 +109,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
             {selectedChatType === "group" &&
               <button
-                className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md group"
+                className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md group"
                 onClick={() => setOpenCreateGroupModle(true)}
               >
                 {/* Main Users Icon */}
@@ -129,10 +129,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               {({ close }) => (
                 <>
                   <div>
-                    <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer">
+                    <MenuButton className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer">
                       {/* <EllipsisVertical className="w-5 h-5" aria-hidden=" " /> */}
                       <div
-                        className="relative text-xl text-gray-700 hover:bg-gray-400  cursor-pointer rounded-md group"
+                        className="relative text-xl text-gray-700 hover:bg-gray-200  cursor-pointer rounded-md group"
                       >
                         <EllipsisVertical className="w-5 h-5" />
 
@@ -255,7 +255,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             </Menu>
 
             <button
-              className="sm:hidden text-xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
+              className="sm:hidden text-xl hover:bg-gray-200 p-2 text-gray-700 cursor-pointer rounded-md"
               onClick={() => setShowSidebar(false)}
             >
               <X className="w-5 h-5" />
@@ -433,7 +433,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
         {/* Header */}
         <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
           <button
-            className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
+            className="text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md"
             onClick={() => {
               setIsUserListOpen(false)
               setSearchTerm("");

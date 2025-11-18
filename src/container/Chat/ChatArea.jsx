@@ -798,7 +798,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
           <button
             type="button"
             onClick={() => setShowSidebar(true)}
-            className="absolute top-4 left-4 sm:hidden p-2 rounded-md hover:bg-gray-400 transition text-gray-700  cursor-pointer z-11"
+            className="absolute top-4 left-4 sm:hidden p-2 rounded-md hover:bg-gray-200 transition text-gray-700  cursor-pointer z-11"
           >
             <AlignJustify className="w-6 h-6" />
           </button>
@@ -834,7 +834,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               <div className="flex items-center gap-4" >
                 <button
                   type="button"
-                  className="sm:hidden text-2xl hover:bg-gray-400 p-2 text-gray-700 cursor-pointer rounded-md"
+                  className="sm:hidden text-2xl hover:bg-gray-200 p-2 text-gray-700 cursor-pointer rounded-md"
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowSidebar(true)
@@ -909,7 +909,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       onClick={(e) => {
                         e.stopPropagation(); // parent ke onClick ko rokta hai
                       }}
-                      className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
                     >
                       <Phone className="w-5 h-5" />
                     </button>
@@ -918,13 +918,13 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       onClick={(e) => {
                         e.stopPropagation(); // parent ke onClick ko rokta hai
                       }}
-                      className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
                     >
                       <Video className="w-5 h-5" />
                     </button>
                     {/* <button
                       type="button"
-                      className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer "
+                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer "
                       onClick={() => setIsUserDetailsView(!isUserDetailsView)}
                     >
                       <User className="w-5 h-5" />
@@ -935,7 +935,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     {({ close }) => (
                       <>
                         <div>
-                          <MenuButton className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                          <MenuButton className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
                             onClick={(e) => {
                               e.stopPropagation(); // parent ke onClick ko rokta hai
                             }}
@@ -1079,7 +1079,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             onClick={(e) => {
                               e.stopPropagation(); // parent ke onClick ko rokta hai
                             }}
-                            className="rounded-md hover:bg-gray-400 p-2 text-gray-700 cursor-pointer"
+                            className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
                           >
                             <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
                           </MenuButton>
@@ -1900,7 +1900,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               <h2 className="text-lg font-semibold text-gray-800">User Info</h2>
               <button
                 type="button"
-                className=" text-xl text-gray-700 cursor-pointer hover:bg-gray-400 p-2 rounded-md"
+                className=" text-xl text-gray-700 cursor-pointer hover:bg-gray-200 p-2 rounded-md"
                 onClick={() => setIsUserDetailsView(false)}
               >
                 <X />

@@ -19,7 +19,7 @@ export const PrivateRoute = () => {
     <>
       {adminLogin ? (
         <>
-          {pathname !== "/chat" && <MainHeader />}
+          {(pathname !== "/chat" && pathname !== "/ai-chat") && <MainHeader />}
           <Outlet />
         </>
       ) : (

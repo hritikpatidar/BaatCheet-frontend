@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Bell, EllipsisVertical, Grip, Image, LifeBuoy, LogOut, MessageCircle, Phone, Settings, SunMoon, User, Video } from 'lucide-react';
+import { AirVent, Bell, EllipsisVertical, Grip, Image, LifeBuoy, LogOut, MessageCircle, Phone, Settings, SunMoon, User, Video, Brain } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { dummyImage } from '../assets';
 import LogOutModal from './LogOutModalPage';
@@ -32,44 +32,59 @@ const MainHeader = () => {
 
             {/* Center: Home & Post */}
             <div className="hidden md:flex gap-2 text-gray-800 font-semibold text-base">
-                <button onClick={() => navigate('/')} className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"><Grip className="w-5 h-5" /></button>
-                <button onClick={() => navigate('/posts')} className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"><Image className="w-5 h-5" /></button>
+                <button onClick={() => navigate('/')} className="text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md"><Grip className="w-5 h-5" /></button>
+                <button onClick={() => navigate('/posts')} className="text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md"><Image className="w-5 h-5" /></button>
             </div>
 
             {/* Right side: Icons + Profile */}
-            <div className="flex items-center gap-2 relative">
-                <div className="hidden md:flex items-center gap-3">
-                    {/* Chat Icon with badge */}
+            <div className="flex items-center relative">
+                <div className="hidden md:flex items-center gap-2">
+
+                    {/* AI Chat Icon */}
+                    <div className="relative">
+                        <button
+                            onClick={() => navigate("/ai-chat")}
+                            className="p-2 rounded-md hover:bg-gray-200 text-gray-700"
+                        >
+                            <Brain className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Chat Messages Icon */}
                     <div className="relative">
                         <button
                             onClick={() => navigate("/chat")}
-                            className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
+                            className="p-2 rounded-md hover:bg-gray-200 text-gray-700"
                         >
                             <MessageCircle className="w-5 h-5" />
                         </button>
-                        {unreadMessages > 0 &&
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+
+                        {unreadMessages > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full">
                                 {formatter.format(unreadMessages)}
                             </span>
-                        }
+                        )}
                     </div>
 
-                    {/* Notification Icon with badge */}
+                    {/* Notification Icon */}
                     <div className="relative">
                         <button
-                            className="text-xl text-gray-700 hover:bg-gray-400 p-2 cursor-pointer rounded-md"
+                            className="p-2 rounded-md hover:bg-gray-200 text-gray-700"
                         >
                             <Bell className="w-5 h-5" />
                         </button>
-                        {unreadNotifications > 0 &&
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+
+                        {unreadNotifications > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs min-w-[20px] h-5 px-1 flex items-center justify-center rounded-full">
                                 {formatter.format(unreadNotifications)}
                             </span>
-                        }
+                        )}
                     </div>
+
                 </div>
+
                 {/* Profile Dropdown */}
-                <Menu as="div" className="relative inline-block text-left">
+                <Menu as="div" className="relative inline-block text-left pl-4">
                     <div>
                         <MenuButton className="rounded-md text-gray-700 cursor-pointer">
                             <img
@@ -102,6 +117,13 @@ const MainHeader = () => {
                             Post
                         </button>
                         <button
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition md:hidden  "
+                            onClick={() => navigate("/ai-chat")}
+                        >
+                            <Brain className="w-5 h-5" />
+                            AI Chat
+                        </button>
+                        <button
                             className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition md:hidden"
                             onClick={() => navigate("/chat")}
                         >
@@ -131,35 +153,35 @@ const MainHeader = () => {
                         </button>
 
                         <button
-                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                             onClick={() => console.log("Profile clicked")}
                         >
                             <User className="w-5 h-5 text-gray-700" />
                             Profile
                         </button>
                         <button
-                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                             onClick={() => console.log("Account Settings clicked")}
                         >
                             <Settings className="w-5 h-5 text-gray-700" />
                             Account Settings
                         </button>
                         <button
-                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                             onClick={() => console.log("Theme Toggle clicked")}
                         >
                             <SunMoon className="w-5 h-5 text-gray-700" />
                             Theme: Light/Dark
                         </button>
                         <button
-                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                             onClick={() => console.log("Notifications clicked")}
                         >
                             <Bell className="w-5 h-5 text-gray-700" />
                             Notifications
                         </button>
                         <button
-                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                             onClick={() => console.log("Support clicked")}
                         >
                             <LifeBuoy className="w-5 h-5 text-gray-700" />
@@ -168,7 +190,7 @@ const MainHeader = () => {
 
                         {/* Logout */}
                         <button
-                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
+                            className=" flex items-center  gap-3 w-full px-4 py-2 text-sm hover:bg-red-200 text-gray-700 data-focus:bg-gray-100 data-focus:text-gray-900 data-focus:outline-hidden"
                             onClick={() => setIsLogoutModalOpen(true)}
                         >
                             <LogOut className="w-5 h-5 text-red-600" />
