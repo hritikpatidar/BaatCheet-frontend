@@ -34,7 +34,7 @@ const DashboardPage = () => {
                 {/* ----- Left Sidebar ----- */}
                 <aside className="md:col-span-3 order-2 md:order-1 flex flex-col gap-4">
                     {/* Suggested Users */}
-                    <div className="bg-white h-76 rounded-xl p-4 shadow-sm border border-gray-100">
+                    <div className="bg-white h-76 rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col">
                         <h2 className="font-semibold text-gray-700 mb-3">Suggested Users</h2>
                         {/* User List */}
                         <ul className="space-y-2 overflow-y-auto flex-1">

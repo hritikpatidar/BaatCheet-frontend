@@ -15,8 +15,8 @@ const MainHeader = () => {
     const { singleConversationList, groupConversationList } = useSelector((state) => state?.ChatDataSlice);
 
     // Dummy counts for demo
-    const singleMessageCount = singleConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
-    const groupMessageCount = groupConversationList.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
+    const singleMessageCount = singleConversationList?.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
+    const groupMessageCount = groupConversationList?.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
     const unreadMessages = singleMessageCount.length + groupMessageCount.length;
     const unreadNotifications = 5;
     return (
