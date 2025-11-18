@@ -40,6 +40,14 @@ const MainHeader = () => {
             <div className="flex items-center relative">
                 <div className="hidden md:flex items-center gap-2">
 
+                    {/* AI Chat Icon
+                    <div className="relative">
+                        <div
+                            className="p-2 rounded-md hover:bg-gray-200 text-gray-700"
+                        >
+                            <Themetoggle />
+                        </div>
+                    </div> */}
                     {/* AI Chat Icon */}
                     <div className="relative">
                         <button
