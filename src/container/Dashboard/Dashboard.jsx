@@ -194,7 +194,6 @@ const DashboardPage = () => {
                     flex flex-col space-y-6 
                     md:h-full 
                     overflow-visible md:overflow-y-auto 
-                    pr-2 
                     scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
                 >
 
@@ -202,43 +201,61 @@ const DashboardPage = () => {
 
                     {/* Post */}
                     {[1, 2, 3].map((item) => (
-                        <div key={item}
-                            className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm 
-            border border-gray-100 dark:border-gray-700"
+                        <div
+                            key={item}
+                            className="bg-white dark:bg-gray-800 p-4 rounded-xl shadow-sm 
+        border border-gray-100 dark:border-gray-700 
+        max-w-[600px] mx-auto w-full"
                         >
-                            <div className="flex items-center gap-3 mb-3">
-                                <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 
-                flex items-center justify-center text-white">
+                            {/* Header */}
+                            <div className="flex items-center gap-3 mb-2">
+                                <div className="w-9 h-9 rounded-full bg-gray-300 dark:bg-gray-600 
+            flex items-center justify-center text-white text-sm">
                                     R
                                 </div>
 
                                 <div>
-                                    <h3 className="font-semibold text-gray-700 dark:text-gray-200">
+                                    <h3 className="font-semibold text-gray-700 dark:text-gray-200 text-sm">
                                         Ritik Patidar
                                     </h3>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400">
                                         2 hours ago
                                     </p>
                                 </div>
                             </div>
 
-                            <p className="text-gray-700 dark:text-gray-300 mb-3">
+                            {/* Text */}
+                            <p className="text-gray-700 dark:text-gray-300 mb-2 text-sm leading-snug">
                                 This is a sample post content.
                             </p>
 
-                            <img src={post1} className="w-full rounded-lg mb-3 object-cover" />
+                            {/* Image */}
+                            <img
+                                src={post1}
+                                className="w-full rounded-lg mb-2 object-cover max-h-56"
+                            />
 
+                            {/* Footer */}
                             <div className="flex justify-between text-xs 
-              text-gray-600 dark:text-gray-400 
-              pt-2 border-t border-gray-200 dark:border-gray-700">
+        text-gray-600 dark:text-gray-400 
+        pt-2 border-t border-gray-200 dark:border-gray-700">
 
-                                <button className="hover:text-green-600 dark:hover:text-green-400">👍 Like</button>
-                                <button className="hover:text-green-600 dark:hover:text-green-400">💬 Comment</button>
-                                <button className="hover:text-green-600 dark:hover:text-green-400">↗ Share</button>
+                                <button className="hover:text-green-600 dark:hover:text-green-400">
+                                    👍 Like
+                                </button>
+
+                                <button className="hover:text-green-600 dark:hover:text-green-400">
+                                    💬 Comment
+                                </button>
+
+                                <button className="hover:text-green-600 dark:hover:text-green-400">
+                                    ↗ Share
+                                </button>
 
                             </div>
                         </div>
                     ))}
+
                 </section>
 
                 {/* ----- Right Sidebar ----- */}
