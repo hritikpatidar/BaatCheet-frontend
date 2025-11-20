@@ -7,12 +7,20 @@ const ChatApp = () => {
   const [showSidebar, setShowSidebar] = useState(true);
 
   return (
-    <div className="flex h-screen font-sans bg-gray-100 ">
-      <>
-        <ChatSidebar showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
-      </>
-      <ChatArea showSidebar={showSidebar} setShowSidebar={setShowSidebar} />
-    </div >
+   <div className="flex h-screen font-sans bg-gray-100 dark:bg-gray-900 transition-colors duration-300">
+
+  <ChatSidebar 
+    showSidebar={showSidebar} 
+    setShowSidebar={setShowSidebar} 
+  />
+
+  <ChatArea 
+    showSidebar={showSidebar} 
+    setShowSidebar={setShowSidebar} 
+  />
+
+</div>
+
   );
 };
 

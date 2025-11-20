@@ -794,16 +794,28 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
   return (
     <>
       {!selectedUser?.members ? (
-        <div className="flex-1 flex items-center justify-center relative overflow-hidden bg-gray-200 px-6 py-10">
+        <div className="flex-1 flex items-center justify-center relative overflow-hidden 
+    bg-gray-200 dark:bg-gray-900 px-6 py-10">
+
+          {/* Mobile Sidebar Button */}
           <button
             type="button"
             onClick={() => setShowSidebar(true)}
-            className="absolute top-4 left-4 sm:hidden p-2 rounded-md hover:bg-gray-200 transition text-gray-700  cursor-pointer z-11"
+            className="absolute top-4 left-4 sm:hidden p-2 rounded-md 
+        hover:bg-gray-300 dark:hover:bg-gray-700 
+        text-gray-700 dark:text-gray-200 
+        transition cursor-pointer z-11"
           >
             <AlignJustify className="w-6 h-6" />
           </button>
+
+          {/* Center Content */}
           <div className="text-center max-w-md relative z-10">
-            <div className="mx-auto w-28 h-28 mb-6 bg-white rounded-full flex items-center justify-center shadow-md border border-gray-300">
+
+            <div className="mx-auto w-28 h-28 mb-6 
+        bg-white dark:bg-gray-800 
+        rounded-full flex items-center justify-center 
+        shadow-md border border-gray-300 dark:border-gray-700">
               <img
                 src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
                 alt="Start Chat"
@@ -811,146 +823,191 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               />
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-2">
+            <h2 className="text-2xl sm:text-3xl font-bold 
+        text-gray-800 dark:text-gray-100 mb-2">
               No Conversation Selected
             </h2>
-            <p className="text-gray-600 mb-6 text-sm sm:text-base leading-relaxed">
+
+            <p className="text-gray-600 dark:text-gray-400 
+        mb-6 text-sm sm:text-base leading-relaxed">
               To get started, choose a person from the chat list or begin a new conversation. <br />
               Stay connected, share your thoughts, and collaborate in real-time — all in one place.
             </p>
+
           </div>
         </div>
+
 
       ) : (
         <>
           {/* Main Chat Area */}
           <div className="flex-1 flex flex-col">
             {/* Header */}
-            <div className="bg-gray-300 px-6 py-2 shadow-sm flex justify-between items-center cursor-pointer"
+            <div
+              className="bg-gray-300 dark:bg-gray-800 px-6 py-2 shadow-sm 
+             flex justify-between items-center cursor-pointer 
+             border-b border-gray-400 dark:border-gray-700"
               onClick={(e) => {
-                setIsUserDetailsView(!isUserDetailsView)
+                setIsUserDetailsView(!isUserDetailsView);
               }}
             >
-              <div className="flex items-center gap-4" >
+
+              {/* LEFT SECTION */}
+              <div className="flex items-center gap-4">
+
+                {/* Mobile Back / Menu */}
                 <button
                   type="button"
-                  className="sm:hidden text-2xl hover:bg-gray-200 p-2 text-gray-700 cursor-pointer rounded-md"
+                  className="sm:hidden rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowSidebar(true)
-                    dispatch(closeChat())
+                    setShowSidebar(true);
+                    dispatch(closeChat());
                   }}
                 >
-                  <AlignJustify />
+                  <AlignJustify className="w-5 h-5" />
                 </button>
-                <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-2xl sm:text-2xl font-semibold text-gray-600">
+
+                {/* Profile Picture */}
+                <div className="w-12 h-12 flex items-center justify-center rounded-full 
+                    bg-gray-100 dark:bg-gray-700 
+                    text-2xl sm:text-2xl font-semibold 
+                    text-gray-600 dark:text-gray-200 overflow-hidden">
                   {userDetails?.profile ? (
-                    <img src={userDetails?.profile || dummyImage} alt={"No Image"} className="w-12 h-12 rounded-full object-cover" />
-                  ) : userDetails?.name?.split(" ")
-                    .filter((_, index) => index === 0 || index === 1)
-                    .map(n => n[0])
-                    .join("")
-                    .toUpperCase()}
+                    <img
+                      src={userDetails?.profile || dummyImage}
+                      alt="No Image"
+                      className="w-12 h-12 rounded-full object-cover"
+                    />
+                  ) : (
+                    userDetails?.name
+                      ?.split(" ")
+                      ?.filter((_, index) => index === 0 || index === 1)
+                      ?.map((n) => n[0])
+                      ?.join("")
+                      ?.toUpperCase()
+                  )}
                 </div>
+
+                {/* Name + Status */}
                 <div>
-                  <h2 className="text-md font-bold text-gray-800 max-w-[150px] sm:max-w-[200px] lg:max-w-[250px] truncate">
-                    {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
+                  <h2 className="text-md font-bold text-gray-800 dark:text-gray-100 
+                     max-w-[150px] sm:max-w-[200px] lg:max-w-[250px] truncate">
+                    {userDetails?.name?.charAt(0).toUpperCase() +
+                      userDetails?.name?.slice(1)}
                   </h2>
-                  <p className="text-sm text-green-600">
-                    {selectedUser?.conversationType === "single" ?
-                      isTyping.length > 0 ? "Typing..."
-                        :
-                        onlineStatus?.onlineUsers?.includes(userDetails?._id) ? (
-                          "Online"
-                        ) : (
-                          <span className="text-sm text-gray-500 font-normal">
-                            {dayjs(onlineStatus?.lastSeen?.[userDetails?._id]).format("DD/MM/YYYY hh:mm A") || "Offline"}
-                          </span>
-                        )
-                      :
+
+                  <p className="text-sm text-green-600 dark:text-green-400">
+                    {selectedUser?.conversationType === "single" ? (
+                      isTyping.length > 0 ? (
+                        "Typing..."
+                      ) : onlineStatus?.onlineUsers?.includes(userDetails?._id) ? (
+                        "Online"
+                      ) : (
+                        <span className="text-gray-600 dark:text-gray-300">
+                          {dayjs(
+                            onlineStatus?.lastSeen?.[userDetails?._id]
+                          ).format("DD/MM/YYYY hh:mm A") || "Offline"}
+                        </span>
+                      )
+                    ) : (
                       (() => {
-                        const activeUsers = selectedUser?.members.filter(
-                          user => onlineStatus?.onlineUsers?.includes(user._id)
+                        const activeUsers = selectedUser?.members.filter((user) =>
+                          onlineStatus?.onlineUsers?.includes(user._id)
                         );
-                        const currentUserActive = onlineStatus?.onlineUsers?.includes(profileData?._id);
+                        const currentUserActive = onlineStatus?.onlineUsers?.includes(
+                          profileData?._id
+                        );
                         const members = selectedUser?.members || [];
                         const displayedNames = members
                           .slice(0, 5)
-                          .map(user =>
-                            user._id === profileData._id ? "You" : user?.name?.split(" ")[0]
+                          .map((user) =>
+                            user._id === profileData._id
+                              ? "You"
+                              : user?.name?.split(" ")[0]
                           )
                           .join(", ");
 
                         const extraCount = members.length - 5;
+
                         const isTypingUserList = isTyping
                           ?.filter((u) => u._id !== profileData?._id)
                           ?.map((u) => u.name)
                           ?.join(", ");
 
                         if (isTypingUserList) {
-                          return (`${isTypingUserList} is Typing....`)
+                          return `${isTypingUserList} is Typing....`;
                         } else if (activeUsers.length >= 2 && currentUserActive) {
-                          return (`${selectedUser?.members.filter(user =>
-                            onlineStatus.onlineUsers.includes(user?._id)
-                          ).length} members | active now`)
+                          return `${activeUsers.length} members | active now`;
                         } else if (activeUsers.length <= 1) {
-                          return `${displayedNames}${extraCount > 0 ? `...` : ""}`;
+                          return `${displayedNames}${extraCount > 0 ? "..." : ""}`;
                         }
                       })()
-                    }
+                    )}
                   </p>
                 </div>
               </div>
               {selectedUser?.conversationType === "single" ?
                 <div className="flex items-center gap-2 px-1 -mr-[10px]">
+
+                  {/* Desktop Phone + Video */}
                   <div className="hidden xl:flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation(); // parent ke onClick ko rokta hai
-                      }}
-                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
                     >
                       <Phone className="w-5 h-5" />
                     </button>
+
                     <button
                       type="button"
-                      onClick={(e) => {
-                        e.stopPropagation(); // parent ke onClick ko rokta hai
-                      }}
-                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
                     >
                       <Video className="w-5 h-5" />
                     </button>
-                    {/* <button
-                      type="button"
-                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer "
-                      onClick={() => setIsUserDetailsView(!isUserDetailsView)}
-                    >
-                      <User className="w-5 h-5" />
-                    </button> */}
                   </div>
 
+                  {/* MENU */}
                   <Menu as="div" className="relative inline-block text-left z-20">
                     {({ close }) => (
                       <>
+                        {/* Button */}
                         <div>
-                          <MenuButton className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
-                            onClick={(e) => {
-                              e.stopPropagation(); // parent ke onClick ko rokta hai
-                            }}
+                          <MenuButton
+                            className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
+                            <EllipsisVertical className="w-5 h-5" />
                           </MenuButton>
                         </div>
 
+                        {/* Dropdown */}
                         <MenuItems
                           transition
-                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right 
+                         divide-y divide-gray-100 dark:divide-gray-700 
+                         rounded-md bg-white dark:bg-gray-800 
+                         shadow-lg ring-1 ring-black/5 
+                         dark:ring-white/10 
+                         transition focus:outline-hidden 
+                         data-closed:scale-95 data-closed:opacity-0"
                         >
+                          {/* View Details */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition   "
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
                               setIsUserDetailsView(!isUserDetailsView);
@@ -960,24 +1017,30 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <User className="w-5 h-5" />
                             View details
                           </button>
+
+                          {/* Phone */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            className="flex items-center xl:hidden gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Archive clicked")
                               close();
                             }}
                           >
                             <Phone className="w-5 h-5" />
                             Voice call
                           </button>
+
+                          {/* Video */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            className="flex items-center xl:hidden gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Archive clicked")
                               close();
                             }}
                           >
@@ -985,13 +1048,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             Video call
                           </button>
 
-                          {/* New Options */}
+                          {/* Archive */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Archive clicked")
                               close();
                             }}
                           >
@@ -999,12 +1063,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             Archive
                           </button>
 
+                          {/* Mute */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Mute clicked")
                               close();
                             }}
                           >
@@ -1012,37 +1078,44 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             Mute notifications
                           </button>
 
+                          {/* Export */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleExportChat()
+                              handleExportChat();
                               close();
                             }}
                           >
-                            {/* Users Icon with Plus on top-right */}
-                            <span className="relative">
-                              <Share className="w-5 h-5" />
-                            </span>
-
+                            <Share className="w-5 h-5" />
                             Export Chat
                           </button>
+
+                          {/* Close Chat */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              dispatch(closeChat())
+                              dispatch(closeChat());
                               close();
                             }}
                           >
                             <CircleX className="w-5 h-5" />
                             Close chat
                           </button>
+
+                          {/* Clear Chat */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-gray-800 dark:text-gray-200 
+                           hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
                               setIsModalOpen(true);
@@ -1053,12 +1126,14 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             Clear chat
                           </button>
 
+                          {/* Delete Chat */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                           text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 
+                           transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Delete Chat clicked")
                               close();
                             }}
                           >
@@ -1069,7 +1144,8 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       </>
                     )}
                   </Menu>
-                </div> :
+                </div>
+                :
                 <>
                   <Menu as="div" className="relative inline-block text-left z-20">
                     {({ close }) => (
@@ -1077,9 +1153,11 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         <div>
                           <MenuButton
                             onClick={(e) => {
-                              e.stopPropagation(); // parent ke onClick ko rokta hai
+                              e.stopPropagation();
                             }}
-                            className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer"
+                            className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
                           >
                             <EllipsisVertical aria-hidden="true" className="w-5 h-5" />
                           </MenuButton>
@@ -1087,14 +1165,25 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
 
                         <MenuItems
                           transition
-                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                          className="absolute right-0 z-10 mt-2 w-56 origin-top-right 
+                   divide-y divide-gray-100 dark:divide-gray-700
+                   rounded-md bg-white dark:bg-gray-800 
+                   shadow-lg ring-1 ring-black/5 dark:ring-white/10 
+                   transition focus:outline-hidden 
+                   data-closed:scale-95 data-closed:transform data-closed:opacity-0 
+                   data-enter:duration-100 data-enter:ease-out 
+                   data-leave:duration-75 data-leave:ease-in"
                         >
+
+                          {/* Group Info */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                     text-gray-800 dark:text-gray-200 
+                     hover:bg-gray-200 dark:hover:bg-gray-700 transition xl:hidden"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setIsUserDetailsView(!isUserDetailsView)
+                              setIsUserDetailsView(!isUserDetailsView);
                               close();
                             }}
                           >
@@ -1102,67 +1191,81 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             Group info
                           </button>
 
+                          {/* Mute */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                     text-gray-800 dark:text-gray-200 
+                     hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              console.log("Mute clicked")
+                              console.log("Mute clicked");
                               close();
                             }}
                           >
                             <VolumeX className="w-5 h-5" />
                             Mute notification
                           </button>
+
+                          {/* Add Members */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                     text-gray-800 dark:text-gray-200 
+                     hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              setAddMembersGroupModle(true)
+                              setAddMembersGroupModle(true);
                               close();
                             }}
                           >
-                            {/* Users Icon with Plus on top-right */}
                             <span className="relative">
                               <Users className="w-5 h-5" />
-                              <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 bg-transparent rounded-full shadow" />
+                              <Plus className="w-3 h-3 absolute top-0 -right-2 
+                             text-gray-700 dark:text-gray-200 
+                             bg-transparent rounded-full shadow" />
                             </span>
-
                             Add members
                           </button>
+
+                          {/* Export Chat */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                     text-gray-800 dark:text-gray-200 
+                     hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleExportChat()
+                              handleExportChat();
                               close();
                             }}
                           >
-                            {/* Users Icon with Plus on top-right */}
-                            <span className="relative">
-                              <Share className="w-5 h-5" />
-                            </span>
-
+                            <Share className="w-5 h-5" />
                             Export Chat
                           </button>
 
+                          {/* Close Chat */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                     text-gray-800 dark:text-gray-200 
+                     hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
-                              dispatch(closeChat())
+                              dispatch(closeChat());
                               close();
                             }}
                           >
                             <CircleX className="w-5 h-5" />
                             Close chat
                           </button>
+
+                          {/* Clear Chat */}
                           <button
                             type="button"
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                            className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                     text-gray-800 dark:text-gray-200 
+                     hover:bg-gray-200 dark:hover:bg-gray-700 transition"
                             onClick={(e) => {
                               e.stopPropagation();
                               setIsModalOpen(true);
@@ -1172,38 +1275,42 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                             <MessageSquareX className="w-5 h-5" />
                             Clear chat
                           </button>
-                          {
-                            selectedUser?.admin?._id === profileData?._id ?
-                              <button
-                                type="button"
-                                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsDeleteGroupModalOpen(true)
-                                  close();
-                                }}
-                              >
-                                <Trash2 className="w-5 h-5 text-red-600" />
-                                Delete group
-                              </button>
-                              :
-                              <button
-                                type="button"
-                                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setIsLeaveGroupModalOpen(true)
-                                  close();
-                                }}
-                              >
-                                <LogOut className="w-5 h-5 text-red-600" />
-                                Leave group
-                              </button>
-                          }
+
+                          {/* Delete or Leave Group */}
+                          {selectedUser?.admin?._id === profileData?._id ? (
+                            <button
+                              type="button"
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                       text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsDeleteGroupModalOpen(true);
+                                close();
+                              }}
+                            >
+                              <Trash2 className="w-5 h-5 text-red-600" />
+                              Delete group
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                       text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30 transition"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setIsLeaveGroupModalOpen(true);
+                                close();
+                              }}
+                            >
+                              <LogOut className="w-5 h-5 text-red-600" />
+                              Leave group
+                            </button>
+                          )}
                         </MenuItems>
                       </>
                     )}
                   </Menu>
+
                 </>
               }
             </div>
@@ -1212,11 +1319,24 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
             <div
               ref={messagesContainerRef}
               onScroll={handleScroll}
-              className="flex-1 overflow-y-auto px-4 sm:px-6 py-0 pt-4 bg-gray-100 space-y-3"
+              className="
+                flex-1 overflow-y-auto 
+                px-4 sm:px-6 py-0 pt-4 
+                bg-gray-100 dark:bg-gray-900 
+                space-y-3
+                "
             >
+
               {!isUserAtBottom && (
                 <div
-                  className="absolute bottom-20 right-4 p-2 bg-gray-200 text-gray-700 rounded-full cursor-pointer z-40 flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow"
+                  className="absolute bottom-20 right-4 
+               p-2 
+               bg-gray-200 dark:bg-gray-700 
+               text-gray-700 dark:text-gray-200 
+               rounded-full cursor-pointer z-40 
+               flex items-center justify-center 
+               hover:bg-gray-300/50 dark:hover:bg-gray-600/50 
+               transition duration-300 shadow"
                   onClick={scrollToBottom}
                   style={{ width: "40px", height: "40px" }}
                 >
@@ -1224,123 +1344,506 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               )}
 
+
               {selectedUser.conversationType === "single" ? (
                 <>
+                  {/* 🔐 Encryption Info */}
                   <div className="flex-1 flex items-center justify-center p-4">
-                    <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
-                      <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
+                    <div className="flex items-center gap-2 bg-gray-200 dark:bg-gray-800 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
+                      <span className="text-gray-500 dark:text-gray-300 text-xl flex-shrink-0 flex items-center h-full">
                         <Lock />
                       </span>
-                      <p className="text-sm text-gray-600 leading-relaxed">
+                      <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
                         Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
                       </p>
                     </div>
                   </div>
-                  {
-                    Object.keys(groupedMessages).length > 0 ? (
+
+                  {/* 📨 Messages */}
+                  {Object.keys(groupedMessages).length > 0 ? (
+                    Object.keys(groupedMessages).map((date, index) => (
+                      <div key={index} className="mb-4">
+                        {/* Date Label */}
+                        <div className="sticky top-0 z-10 text-center text-sm text-gray-800 dark:text-gray-200 pb-3 font-medium">
+                          <span className="bg-gray-300/80 dark:bg-gray-700/80 text-gray-900 dark:text-gray-100 p-1 rounded-md">{date}</span>
+                        </div>
+
+                        {groupedMessages[date].map((message, idx) => {
+                          const dicreptMessage = decryptMessage(message.message);
+                          const dicreptFileUrl = decryptMessage(message.fileUrl);
+                          const isSender = message.isSenderId?._id === profileData?._id;
+
+                          return (
+                            <div
+                              key={idx}
+                              className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                            >
+                              <div
+                                className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
+                  ${isSender
+                                    ? "bg-gray-500 text-white dark:bg-gray-600 self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+                                    : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 rounded-tr-xl rounded-tl-xl rounded-br-xl"
+                                  }`}
+                              >
+                                {/* ==== FILE MESSAGE ==== */}
+                                {message.messageType === "file" ? (
+                                  checkIfImage(dicreptFileUrl) ? (
+                                    <div
+                                      className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                      onClick={() => {
+                                        dispatch(setViewImages([dicreptFileUrl]));
+                                        setShowImage(true);
+                                      }}
+                                    >
+                                      {dicreptFileUrl ? (
+                                        <img
+                                          className="h-full w-full object-cover"
+                                          src={dummyImage}
+                                          alt="Sent Image"
+                                        />
+                                      ) : (
+                                        <div className="absolute inset-0 flex items-center justify-center ">
+                                          <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ) : (
+                                    <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 dark:bg-gray-700 dark:border-gray-600 w-full cursor-pointer">
+                                      <div
+                                        className="flex items-center gap-2"
+                                        onClick={() => downloadFile(dicreptFileUrl, message._id, idx)}
+                                      >
+                                        <FileArchive className="text-gray-600 dark:text-gray-300 text-3xl" />
+                                        <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate max-w-[180px] sm:max-w-[200px]">
+                                          {dicreptFileUrl.split("/").pop()}
+                                        </span>
+                                      </div>
+                                      {!message.isDownload &&
+                                        message.isReceiverId === profileData?._id && (
+                                          <span className="bg-sky-200 dark:bg-gray-600 rounded-full p-1 hover:bg-gray-300 dark:hover:bg-gray-500">
+                                            {Downloading === idx ? (
+                                              <span className="text-sm font-medium text-gray-700 dark:text-gray-200">
+                                                {DownloadProgress}%
+                                              </span>
+                                            ) : (
+                                              <ArrowDownToLine className="text-gray-500 dark:text-gray-200" />
+                                            )}
+                                          </span>
+                                        )}
+                                    </div>
+                                  )
+                                ) : message.messageType === "audio" ? (
+                                  <div className="flex items-center max-w-xs w-full bg-gray-100 dark:bg-gray-700 rounded-lg px-3 py-2 mb-4 shadow relative">
+                                    <AudioMessagePlayer audioUrl={dicreptFileUrl} />
+                                  </div>
+                                ) : (
+                                  /* ==== TEXT MESSAGE ==== */
+                                  <p className="pr-14 break-words min-h-6">
+                                    {detectURLs(dicreptMessage).map((part, i2) =>
+                                      isValidURL(part) ? (
+                                        <a
+                                          key={i2}
+                                          href={part}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="hover:text-blue-400 dark:hover:text-blue-300 underline"
+                                        >
+                                          {part}
+                                        </a>
+                                      ) : (
+                                        part
+                                      )
+                                    )}
+                                  </p>
+                                )}
+
+                                {/* TIME & TICKS */}
+                                <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80 text-gray-700 dark:text-gray-300">
+                                  <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
+
+                                  {(isSender && selectedUser?.conversationType === "single") && (
+                                    <>
+                                      {message?.status.length === 0 ? (
+                                        <Clock3 size={12} />
+                                      ) : message?.status[0]?.status === "delivered" ? (
+                                        <CheckCheck size={12} />
+                                      ) : message?.status[0]?.status === "read" ? (
+                                        <CheckCheck size={12} className="text-blue-500" />
+                                      ) : (
+                                        <Check size={12} />
+                                      )}
+                                    </>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))
+                  ) : (
+                    <div className="flex-1 flex items-center justify-center">
+                      {/* No Message Found */}
+                    </div>
+                  )}
+                </>
+
+
+              ) : (
+                invite ? (
+                  <>
+                    {/* Date Header */}
+                    <div className="sticky top-0 z-10 text-center text-xs sm:text-sm 
+                text-gray-800 dark:text-gray-200 pb-2 font-medium">
+                      <span className="bg-gray-300/80 dark:bg-gray-700/60 px-2 py-0.5 rounded-md">
+                        24/06/2025
+                      </span>
+                    </div>
+
+                    {/* Encryption Info */}
+                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4 py-2">
+                      <div className="flex items-center gap-2 
+                  bg-gray-200 dark:bg-gray-800 
+                  px-3 py-1.5 rounded-md 
+                  w-full max-w-full sm:max-w-md">
+                        <span className="text-gray-500 dark:text-gray-300 text-lg sm:text-xl flex-shrink-0 flex items-center h-full">
+                          <Lock strokeWidth={1.2} />
+                        </span>
+                        <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300 leading-snug">
+                          Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Invitation Card */}
+                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4 py-2">
+                      <div className="w-full max-w-full sm:max-w-md 
+                  bg-white dark:bg-gray-900 
+                  rounded-xl shadow-md 
+                  p-3 sm:p-4 space-y-2 sm:space-y-3">
+
+                        <div className="bg-gray-50 dark:bg-gray-800 
+                    p-3 sm:p-3 rounded-xl text-center 
+                    space-y-1.5 sm:space-y-2">
+
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                            You’ve been invited to the group
+                          </p>
+
+                          <h2 className="text-lg sm:text-xl font-semibold 
+                     text-gray-900 dark:text-gray-100">
+                            {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
+                          </h2>
+
+                          <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-300">by</p>
+
+                          {/* Inviter Avatar */}
+                          <div className="flex justify-center">
+                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center 
+                        rounded-full border-2 sm:border-3 
+                        border-gray-500 dark:border-gray-400 
+                        bg-gray-400 dark:bg-gray-700 
+                        text-white font-semibold text-sm sm:text-base overflow-hidden">
+                              {invite?.invitedBy?.profile ? (
+                                <img
+                                  src={invite?.invitedBy.profile}
+                                  alt="Profile"
+                                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover"
+                                />
+                              ) : (
+                                invite?.invitedBy?.name
+                                  ?.split(" ")
+                                  .filter((_, index) => index === 0 || index === 1)
+                                  .map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()
+                              )}
+                            </div>
+                          </div>
+
+                          <p className="text-sm sm:text-base font-bold 
+                    text-gray-800 dark:text-gray-100 mt-1">
+                            {invite?.invitedBy?.name?.charAt(0).toUpperCase() + invite?.invitedBy?.name?.slice(1)}
+                          </p>
+
+                          {/* Buttons */}
+                          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-1.5">
+
+                            {/* Accept */}
+                            <button
+                              type="button"
+                              onClick={() => handleAcceptAndRejectInvitation("accepted")}
+                              className="flex items-center justify-center gap-1 
+                     px-4 sm:px-5 py-1.5 border border-yellow-400 
+                     text-yellow-600 dark:text-yellow-400 
+                     rounded-full font-medium 
+                     hover:bg-yellow-100 dark:hover:bg-yellow-900/20 
+                     transition text-sm"
+                              disabled={loadingType === "accepted"}
+                            >
+                              {loadingType === "accepted" ? (
+                                <>Loading...</>
+                              ) : (
+                                <>
+                                  <CircleCheck strokeWidth={1.2} /> Accept
+                                </>
+                              )}
+                            </button>
+
+                            {/* Decline */}
+                            <button
+                              type="button"
+                              onClick={() => handleAcceptAndRejectInvitation("declined")}
+                              className="flex items-center justify-center gap-1 
+                     px-4 sm:px-5 py-1.5 border border-red-400 
+                     text-red-500 dark:text-red-400 
+                     rounded-full font-medium 
+                     hover:bg-red-100 dark:hover:bg-red-900/20 
+                     transition text-sm"
+                              disabled={loadingType === "declined"}
+                            >
+                              {loadingType === "declined" ? (
+                                <>Loading...</>
+                              ) : (
+                                <>
+                                  <CircleX strokeWidth={1.2} /> Decline
+                                </>
+                              )}
+                            </button>
+
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+
+                  </>
+                ) : (
+                  <>
+
+                    {/* 🔐 Encryption Banner */}
+                    <div className="flex-1 flex items-center justify-center p-4">
+                      <div className="flex items-center gap-2 
+                  bg-gray-200 dark:bg-gray-800 
+                  p-3 rounded-md 
+                  max-w-[150vw] sm:max-w-md w-full">
+                        <span className="text-gray-500 dark:text-gray-300 text-xl flex-shrink-0 flex items-center h-full">
+                          <Lock />
+                        </span>
+                        <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed">
+                          Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* 👑 Admin-only Group Header */}
+                    {userDetails?.admin?._id === profileData?._id && !invite && (
+                      <div className="flex-1 flex items-center justify-center p-4">
+                        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg 
+                    bg-white dark:bg-gray-900 
+                    rounded-xl shadow-md overflow-hidden">
+
+                          {/* Group Image */}
+                          <div className="w-full aspect-video flex items-center justify-center 
+                      bg-gray-100 dark:bg-gray-800">
+                            {userDetails?.profile ? (
+                              <img
+                                src={userDetails?.profile || dummyImage}
+                                alt="Profile"
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <span className="text-3xl sm:text-4xl font-semibold 
+                           text-gray-600 dark:text-gray-300">
+                                {userDetails?.name
+                                  ?.split(" ")
+                                  ?.map((n) => n[0])
+                                  .join("")
+                                  .toUpperCase()}
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Group Details */}
+                          <div className="p-3 sm:p-4 text-center space-y-1">
+                            <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
+                              You’ve created the group
+                            </p>
+
+                            <h2 className="text-base sm:text-lg font-semibold 
+                       text-gray-900 dark:text-gray-100 break-words">
+                              {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
+                            </h2>
+
+                            {/* Buttons */}
+                            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-2">
+                              <button
+                                type="button"
+                                onClick={() => setIsUserDetailsView(true)}
+                                className="flex items-center justify-center gap-1.5 
+                       px-3 py-1.5 sm:px-4 sm:py-2 
+                       border border-yellow-400 
+                       text-yellow-600 dark:text-yellow-400 
+                       rounded-full font-medium 
+                       hover:bg-yellow-100 dark:hover:bg-yellow-900/20 
+                       transition text-sm"
+                              >
+                                <Info strokeWidth={1.2} /> Group Info
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => setAddMembersGroupModle(true)}
+                                className="flex items-center justify-center gap-1.5 
+                       px-3 py-1.5 sm:px-4 sm:py-2 
+                       border border-yellow-400 
+                       text-yellow-600 dark:text-yellow-400 
+                       rounded-full font-medium 
+                       hover:bg-yellow-100 dark:hover:bg-yellow-900/20 
+                       transition text-sm"
+                              >
+                                <PlusCircle strokeWidth={1.2} /> Add Members
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* 🗨️ Grouped Messages */}
+                    {Object.keys(groupedMessages).length > 0 ? (
                       Object.keys(groupedMessages).map((date, index) => (
                         <div key={index} className="mb-4">
-                          <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                            <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
+
+                          {/* Date Header */}
+                          <div className="sticky top-0 z-10 text-center text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      pb-3 font-medium">
+                            <span className="bg-gray-300/80 dark:bg-gray-700/50 p-1 rounded-md">
+                              {date}
+                            </span>
                           </div>
+
                           {groupedMessages[date].map((message, idx) => {
-                            const dicreptMessage = decryptMessage(message.message)
-                            const dicreptFileUrl = decryptMessage(message.fileUrl)
+                            const dicreptMessage = decryptMessage(message.message);
+                            const dicreptFileUrl = decryptMessage(message.fileUrl);
+
                             const isSender = message.isSenderId?._id === profileData?._id;
+                            const isAllDelivered = message.status?.every((s) => s.status !== "sent");
+                            const isAllRead = message.status?.every((s) => s.status === "read");
+
                             return (
                               <div
                                 key={idx}
-                                className={`flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
+                                className={`relative flex flex-col mb-2 ${isSender ? "items-end" : "items-start"
+                                  }`}
                               >
+                                {/* Profile for receiver */}
+                                {!isSender && (
+                                  <div className="absolute left-8 bottom-2 translate-x-[-120%] flex items-end">
+                                    {message.isSenderId?.profile ? (
+                                      <img
+                                        src={message.isSenderId.profile || dummyImage}
+                                        alt="User"
+                                        className="w-8 h-8 rounded-full object-cover"
+                                      />
+                                    ) : (
+                                      <div className="w-8 h-8 rounded-full 
+                                  bg-gray-300 dark:bg-gray-700 
+                                  text-white flex items-center justify-center 
+                                  text-[10px] font-semibold">
+                                        {message.isSenderId?.name
+                                          ?.split(" ")
+                                          ?.map((n) => n[0])
+                                          .join("")
+                                          .toUpperCase()}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+
+                                {/* Message Bubble */}
                                 <div
                                   className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
-                                  ${isSender
-                                      ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
-                                      : "bg-white text-gray-800 rounded-tr-xl rounded-tl-xl rounded-br-xl"
+                ${isSender
+                                      ? "bg-gray-500 text-white rounded-tl-xl rounded-tr-xl rounded-bl-xl"
+                                      : "bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 ms-7 rounded-tr-xl rounded-tl-xl rounded-br-xl"
                                     }`}
                                 >
+                                  {/* Sender Name */}
+                                  <div className="text-xs mb-1 font-medium 
+                               dark:text-gray-300">
+                                    {isSender ? "You" : message.isSenderId?.name || "Unknown"}
+                                  </div>
+
+                                  {/* File / Audio / Text */}
                                   {message.messageType === "file" ? (
                                     checkIfImage(dicreptFileUrl) ? (
                                       <div
-                                        className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
+                                        className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 
+                               overflow-hidden rounded-lg"
                                         onClick={() => {
                                           dispatch(setViewImages([dicreptFileUrl]));
                                           setShowImage(true);
                                         }}
                                       >
-                                        {(dicreptFileUrl) ? (
-                                          <img
-                                            className="h-full w-full object-cover"
-                                            // src={`${import.meta.env.VITE_SOCKET_URL}/${dicreptFileUrl}`}
-                                            src={dummyImage}
-                                            alt="Sent Image"
-                                          />
-                                        ) : (
-                                          <div className="absolute inset-0 flex items-center justify-center ">
-                                            <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
-                                          </div>
-                                        )}
+                                        <img
+                                          className="h-full w-full object-cover"
+                                          src={dummyImage}
+                                          alt="Sent"
+                                        />
                                       </div>
                                     ) : (
-                                      <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
-                                        <div className="flex items-center gap-2" onClick={() =>
-                                          downloadFile(dicreptFileUrl, message._id, idx)
-                                        }>
-                                          <FileArchive className="text-gray-600 text-3xl" />
-                                          <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
+                                      <div className="flex justify-between items-center p-2 mb-4 
+                                  border rounded-lg bg-gray-100 dark:bg-gray-800 
+                                  w-full cursor-pointer">
+                                        <div
+                                          className="flex items-center gap-2"
+                                          onClick={() => downloadFile(dicreptFileUrl, message._id, idx)}
+                                        >
+                                          <FileArchive className="text-gray-600 dark:text-gray-300 text-3xl" />
+                                          <span className="text-sm font-medium text-gray-800 dark:text-gray-100 truncate max-w-[200px]">
                                             {dicreptFileUrl.split("/").pop()}
                                           </span>
                                         </div>
-                                        {!message.isDownload && message.isReceiverId === profileData?._id && (
-                                          <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
-                                            {Downloading === idx ? (
-                                              <span className="text-sm font-medium text-gray-700">
-                                                {DownloadProgress}%
-                                              </span>
-                                            ) : (
-                                              <ArrowDownToLine className="text-gray-500" />
-                                            )}
-                                          </span>
-                                        )}
                                       </div>
                                     )
-                                    // <></>
-                                  ) :
-                                    message.messageType === "audio" ? (
-                                      <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                        <AudioMessagePlayer audioUrl={dicreptFileUrl} />
-                                      </div>
-                                    ) : (
-                                      <p className="pr-14 break-words min-h-6">
-                                        {detectURLs(dicreptMessage).map((part, i2) =>
-                                          isValidURL(part) ? (
-                                            <a
-                                              key={i2}
-                                              href={part}
-                                              target="_blank"
-                                              rel="noopener noreferrer"
-                                              className="hover:text-blue-300 underline"
-                                            >
-                                              {part}
-                                            </a>
-                                          ) : (
-                                            part
-                                          )
-                                        )}
-                                      </p>
-                                    )
-                                  }
+                                  ) : message.messageType === "audio" ? (
+                                    <div className="flex items-center max-w-xs w-full bg-gray-100 dark:bg-gray-800 rounded-lg px-3 py-2 mb-4 shadow">
+                                      <AudioMessagePlayer audioUrl={message.fileUrl} />
+                                    </div>
+                                  ) : (
+                                    <p className="pr-14 break-words min-h-6 dark:text-white">
+                                      {detectURLs(dicreptMessage).map((part, i) =>
+                                        isValidURL(part) ? (
+                                          <a
+                                            key={i}
+                                            href={part}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="hover:text-blue-400 underline"
+                                          >
+                                            {part}
+                                          </a>
+                                        ) : (
+                                          part
+                                        )
+                                      )}
+                                    </p>
+                                  )}
 
+                                  {/* Timestamp + Status */}
                                   <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
                                     <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
-                                    {(isSender && selectedUser?.conversationType === "single") && (
+
+                                    {isSender && (
                                       <>
-                                        {message?.status.length === 0 ? (
+                                        {message.status.length === 0 ? (
                                           <Clock3 size={12} />
-                                        ) : message?.status[0]?.status === "delivered" ? (
-                                          <CheckCheck size={12} />
-                                        ) : message?.status[0]?.status === "read" ? (
+                                        ) : isAllRead ? (
                                           <CheckCheck size={12} className="text-blue-500" />
+                                        ) : isAllDelivered ? (
+                                          <CheckCheck size={12} />
                                         ) : (
                                           <Check size={12} />
                                         )}
@@ -1353,342 +1856,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           })}
                         </div>
                       ))
-                    ) :
-                      //  messageLoading ? (
-                      //   <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
-                      //     <Spinner className="h-5 w-5 text-secondary/50" />
-                      //   </div>
-                      // ) :
-                      (
-                        <div className="flex-1 flex items-center justify-center">
-                          {/* <p className="text-gray-500 text-center">No Message Found</p> */}
-                        </div>
-                      )
-                  }
-                </>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-center"></div>
+                    )}
 
-              ) : (
-                // ---- GROUP CHAT ----
-                invite ? (
-                  <>
-                    {/* Date Header */}
-                    <div className="sticky top-0 z-10 text-center text-xs sm:text-sm text-gray-800 pb-2 font-medium">
-                      <span className="bg-gray-300/80 px-2 py-0.5 rounded-md">24/06/2025</span>
-                    </div>
-
-                    {/* Encryption Info */}
-                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4 py-2">
-                      <div className="flex items-center gap-2 bg-gray-200 px-3 py-1.5 rounded-md w-full max-w-full sm:max-w-md">
-                        <span className="text-gray-500 text-lg sm:text-xl flex-shrink-0 flex items-center h-full">
-                          <Lock strokeWidth={1.2} />
-                        </span>
-                        <p className="text-xs sm:text-sm text-gray-600 leading-snug">
-                          Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Invitation Card */}
-                    <div className="flex-1 flex items-center justify-center px-2 sm:px-4 py-2">
-                      <div className="w-full max-w-full sm:max-w-md bg-white rounded-xl shadow-md p-3 sm:p-4 space-y-2 sm:space-y-3">
-                        <div className="bg-gray-50 p-3 sm:p-3 rounded-xl text-center space-y-1.5 sm:space-y-2">
-                          <p className="text-xs sm:text-sm text-gray-600">You’ve been invited to the group</p>
-                          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                            {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
-                          </h2>
-                          <p className="text-xs sm:text-sm text-gray-600">by</p>
-
-                          {/* Inviter Avatar */}
-                          <div className="flex justify-center">
-                            <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full border-2 sm:border-3 border-gray-500 bg-gray-400 text-white font-semibold text-sm sm:text-base">
-                              {invite.invitedBy?.profile ? (
-                                <img
-                                  src={invite.invitedBy.profile}
-                                  alt="Profile"
-                                  className="w-10 h-10 sm:w-11 sm:h-11 rounded-full"
-                                />
-                              ) : invite.invitedBy?.name
-                                ?.split(" ")
-                                .filter((_, index) => index === 0 || index === 1)
-                                .map((n) => n[0])
-                                .join("")
-                                .toUpperCase()}
-                            </div>
-                          </div>
-
-                          <p className="text-sm sm:text-base font-bold text-gray-800 mt-1">
-                            {invite.invitedBy?.name?.charAt(0).toUpperCase() + invite.invitedBy?.name?.slice(1)}
-                          </p>
-
-                          {/* Buttons */}
-                          <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-1.5">
-                            <button
-                              type="button"
-                              onClick={() => handleAcceptAndRejectInvitation("accepted")}
-                              className="flex items-center justify-center gap-1 px-4 sm:px-5 py-1.5 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
-                              disabled={loadingType === "accepted"}
-                            >
-                              {loadingType === "accepted" ? <>Loading...</> : <><CircleCheck strokeWidth={1.2} /> Accept</>}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => handleAcceptAndRejectInvitation("declined")}
-                              className="flex items-center justify-center gap-1 px-4 sm:px-5 py-1.5 border border-red-400 text-red-500 rounded-full font-medium hover:bg-red-100 transition text-sm"
-                              disabled={loadingType === "declined"}
-                            >
-                              {loadingType === "declined" ? <>Loading...</> : <><CircleX strokeWidth={1.2} /> Decline</>}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <>
-
-                    <div className="flex-1 flex items-center justify-center p-4">
-                      <div className="flex items-center gap-2 bg-gray-200 p-3 rounded-md max-w-[150vw] sm:max-w-md w-full">
-                        <span className="text-gray-500 text-xl flex-shrink-0 flex items-center h-full">
-                          <Lock />
-                        </span>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          Messages and calls are end-to-end encrypted. Only members in this chat can read, listen to, or share them.
-                        </p>
-                      </div>
-                    </div>
-                    {
-                      (userDetails?.admin?._id === profileData?._id && !invite) &&
-                      <div className="flex-1 flex items-center justify-center p-4">
-                        <div className="w-full max-w-sm sm:max-w-md lg:max-w-lg bg-white rounded-xl shadow-md overflow-hidden">
-
-                          {/* Group Image / Profile */}
-                          <div className="w-full aspect-video flex items-center justify-center bg-gray-100">
-                            {userDetails?.profile ? (
-                              <img
-                                src={userDetails?.profile || dummyImage}
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <span className="text-3xl sm:text-4xl font-semibold text-gray-600">
-                                {userDetails?.name
-                                  ?.split(" ")
-                                  .filter((_, index) => index === 0 || index === 1)
-                                  .map((n) => n[0])
-                                  .join("")
-                                  .toUpperCase()}
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Group Details */}
-                          <div className="p-3 sm:p-4 text-center space-y-1">
-                            <p className="text-xs sm:text-sm text-gray-600">
-                              You’ve created the group
-                            </p>
-                            <h2 className="text-base sm:text-lg font-semibold text-gray-900 break-words">
-                              {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
-                            </h2>
-
-                            {/* Buttons */}
-                            <div className="flex flex-col sm:flex-row justify-center gap-2 sm:gap-3 pt-2">
-                              <button
-                                type="button"
-                                onClick={() => setIsUserDetailsView(true)}
-                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
-                              >
-                                <Info strokeWidth={1.2} /> Group Info
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setAddMembersGroupModle(true)}
-                                className="flex items-center justify-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 border border-yellow-400 text-yellow-600 rounded-full font-medium hover:bg-yellow-100 transition text-sm"
-                              >
-                                <PlusCircle strokeWidth={1.2} /> Add Members
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    }
-
-
-                    {
-                      Object.keys(groupedMessages).length > 0 ? (
-                        Object.keys(groupedMessages).map((date, index) => (
-                          <div key={index} className="mb-4">
-                            <div className="sticky top-0 z-10 text-center text-sm text-gray-800 pb-3 font-medium">
-                              <span className="bg-gray-300/80 p-1 rounded-md">{date}</span>
-                            </div>
-                            {/* {index === 0 && (
-                              
-                            )} */}
-                            {groupedMessages[date].map((message, idx) => {
-                              const dicreptMessage = decryptMessage(message.message)
-                              const dicreptFileUrl = decryptMessage(message.fileUrl)
-                              const isSender = message.isSenderId?._id === profileData?._id;
-                              const isAllDelivered = message.status.length > 0 ? message.status.every(s => s.status !== "sent") : false;
-                              const isAllRead = message.status.length > 0 ? message.status.every(s => s.status === "read") : false;
-                              return (
-                                <div
-                                  key={idx}
-                                  className={`relative flex flex-col mb-2 ${isSender ? "items-end" : "items-start"}`}
-                                >
-                                  {!isSender && (
-                                    <div className="absolute left-8 bottom-2 translate-x-[-120%] flex items-end">
-                                      {message.isSenderId?.profile ? (
-                                        // Show initials inside a styled circle when no profile image
-                                        <div className="w-8 h-8 rounded-full bg-gray-300 text-white flex items-center justify-center text-[10px] font-semibold">
-                                          {message.isSenderId?.name
-                                            ?.split(" ")
-                                            .filter((_, index) => index === 0 || index === 1)
-                                            .map((n) => n[0])
-                                            .join("")
-                                            .toUpperCase()}
-                                        </div>
-                                      ) : (
-                                        // Show profile image if available
-                                        <img
-                                          src={message.isSenderId.profile || dummyImage}
-                                          alt="User"
-                                          className="w-8 h-8 rounded-full object-cover"
-                                        />
-                                      )}
-                                    </div>
-                                  )}
-
-                                  <div
-                                    className={`relative px-3 py-2 mb-1 max-w-full sm:max-w-md break-words
-                                          ${isSender
-                                        ? "bg-gray-500 text-white self-end rounded-tl-xl rounded-tr-xl rounded-bl-xl"
-                                        : "bg-white text-gray-800 ms-7 rounded-tr-xl rounded-tl-xl rounded-br-xl"
-                                      }`}
-                                  >
-                                    {!isSender && (
-                                      <div className="flex items-start gap-2">
-
-                                        {/* <div className="bg-gray-100 px-4 py-2 rounded-xl max-w-xs sm:max-w-md relative"> */}
-                                        <div className="text-xs text-gray-500 font-medium mb-1">
-                                          {message.isSenderId?.name || "Unknown"}
-                                        </div>
-                                        {/* </div> */}
-                                      </div>
-                                    )}
-                                    {isSender && (
-                                      <div className="flex items-start gap-2">
-                                        {/* <div className="bg-gray-100 px-4 py-2 rounded-xl max-w-xs sm:max-w-md relative"> */}
-                                        <div className="text-xs text-white-500 font-medium mb-1">
-                                          {"You" || "Unknown"}
-                                        </div>
-                                        {/* </div> */}
-                                      </div>
-                                    )}
-                                    {message.messageType === "file" ? (
-                                      checkIfImage(dicreptFileUrl) ? (
-                                        <div
-                                          className="cursor-pointer h-48 w-full mb-4 sm:w-48 md:w-60 overflow-hidden rounded-lg"
-                                          onClick={() => {
-                                            dispatch(setViewImages([dicreptFileUrl]));
-                                            setShowImage(true);
-                                          }}
-                                        >
-                                          {(dicreptFileUrl) ? (
-                                            <img
-                                              className="h-full w-full object-cover"
-                                              // src={`${import.meta.env.VITE_SOCKET_URL}/${dicreptFileUrl}`}
-                                              src={dummyImage}
-                                              alt="Sent Image"
-                                            />
-                                          ) : (
-                                            <div className="absolute inset-0 flex items-center justify-center ">
-                                              <span className="animate-spin h-6 w-6 border-4 border-gray-200 border-t-transparent rounded-full"></span>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ) : (
-                                        <div className="flex justify-between items-center p-2 mb-4 border rounded-lg bg-gray-100 w-full cursor-pointer">
-                                          <div className="flex items-center gap-2" onClick={() =>
-                                            downloadFile(dicreptFileUrl, message._id, idx)
-                                          }>
-                                            <FileArchive className="text-gray-600 text-3xl" />
-                                            <span className="text-sm font-medium text-gray-800 truncate max-w-[180px] sm:max-w-[200px]">
-                                              {dicreptFileUrl.split("/").pop()}
-                                            </span>
-                                          </div>
-                                          {!message.isDownload && message.isReceiverId === profileData?._id && (
-                                            <span className="bg-sky-200 rounded-full p-1 hover:bg-gray-300">
-                                              {Downloading === idx ? (
-                                                <span className="text-sm font-medium text-gray-700">
-                                                  {DownloadProgress}%
-                                                </span>
-                                              ) : (
-                                                <ArrowDownToLine className="text-gray-500" />
-                                              )}
-                                            </span>
-                                          )}
-                                        </div>
-                                      )
-                                      // <></>
-                                    ) :
-                                      message.messageType === "audio" ? (
-                                        <div className="flex items-center max-w-xs w-full bg-gray-100 rounded-lg px-3 py-2 mb-4 shadow relative">
-                                          <AudioMessagePlayer audioUrl={message.fileUrl} />
-                                        </div>
-                                      ) : (
-                                        <p className="pr-14 break-words min-h-6">
-                                          {detectURLs(dicreptMessage).map((part, i2) =>
-                                            isValidURL(part) ? (
-                                              <a
-                                                key={i2}
-                                                href={part}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="hover:text-blue-300 underline"
-                                              >
-                                                {part}
-                                              </a>
-                                            ) : (
-                                              part
-                                            )
-                                          )}
-                                        </p>
-                                      )
-                                    }
-
-                                    <div className="absolute bottom-1 right-2 flex items-center space-x-1 text-[10px] opacity-80">
-                                      <span>{dayjs(message.createdAt).format("hh:mm A")}</span>
-                                      {isSender && (
-                                        <>
-                                          {message.status.length === 0 ? (
-                                            <Clock3 size={12} />
-                                          ) : isAllRead ? (
-                                            <CheckCheck size={12} className="text-blue-500" />
-                                          ) : isAllDelivered ? (
-                                            <CheckCheck size={12} />
-                                          ) : (
-                                            <Check size={12} />
-                                          )}
-                                        </>
-                                      )}
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ))
-                      ) :
-                        // messageLoading ? (
-                        // <div className="absolute left-240 top-27 -translate-x-1/2 z-50 p-2 bg-gray-200 text-gray-700 rounded-full flex items-center justify-center hover:bg-gray-500/20 transition duration-300 shadow" style={{ width: "40px", height: "40px" }}>
-                        //   <Spinner className="h-5 w-5 text-secondary/50" />
-                        // </div>
-                        // ) :
-                        (
-                          <div className="flex-1 flex items-center justify-center">
-                            {/* <p className="text-gray-500 text-center">No Message Found</p> */}
-                          </div>
-                        )
-                    }
                   </>
                 )
               )}
@@ -1701,17 +1872,22 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
               onDrop={handleDrop}
               onDragOver={(e) => e.preventDefault()}
               onDragEnter={(e) => e.preventDefault()}
-              className="flex items-center justify-end gap-2 px-4 py-3 relative bg-white border-t border-gray-300"
+              className="flex items-center justify-end gap-2 px-4 py-3 relative 
+             bg-white dark:bg-gray-900 
+             border-t border-gray-300 dark:border-gray-700"
             >
-
-              {/* File Preview Container */}
+              {/* File Preview */}
               {file?.length > 0 && (
                 <div
-                  className="absolute z-10 -top-[138px] left-0 grid gap-3 bg-white rounded-md shadow-lg p-3 border border-gray-200 max-w-full overflow-y-auto"
+                  className="absolute z-10 -top-[138px] left-0 grid gap-3 
+                 bg-white dark:bg-gray-800 
+                 rounded-md shadow-lg p-3 
+                 border border-gray-200 dark:border-gray-700 
+                 max-w-full overflow-y-auto"
                   style={{
                     gridTemplateColumns: `repeat(${Math.min(file.length, 4)}, minmax(0, 1fr))`,
                     width: `${Math.min(file.length, 4) * 8.5}rem`,
-                    maxHeight: "203px"
+                    maxHeight: "203px",
                   }}
                 >
                   {file.slice(0, 4).map((img, index) => {
@@ -1720,7 +1896,10 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                     return (
                       <div
                         key={index}
-                        className="relative flex items-center justify-center bg-gray-50 p-2 rounded-md shadow-sm w-24 h-24 sm:w-28 sm:h-28"
+                        className="relative flex items-center justify-center 
+                       bg-gray-50 dark:bg-gray-700 
+                       p-2 rounded-md shadow-sm 
+                       w-24 h-24 sm:w-28 sm:h-28"
                       >
                         {fileExtension === "pdf" ? (
                           <FaFilePdf className="w-16 h-16 text-red-500" />
@@ -1734,19 +1913,26 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                           <img
                             src={img}
                             alt={`Preview ${index}`}
-                            className="w-full h-full object-cover rounded-md border-2 border-gray-300"
+                            className="w-full h-full object-cover rounded-md 
+                           border-2 border-gray-300 dark:border-gray-600"
                           />
                         )}
 
                         {index === 3 && file.length > 4 && (
-                          <div className="absolute inset-0 bg-black bg-opacity-50 text-white flex items-center justify-center rounded-md text-lg font-semibold">
+                          <div className="absolute inset-0 
+                              bg-black/60 text-white 
+                              flex items-center justify-center 
+                              rounded-md text-lg font-semibold">
                             +{file.length - 4}
                           </div>
                         )}
 
                         <button
                           type="button"
-                          className="absolute top-1 right-1 bg-white text-red-500 rounded-full p-1 hover:text-red-700 shadow-md"
+                          className="absolute top-1 right-1 
+                         bg-white dark:bg-gray-800 
+                         text-red-500 rounded-full p-1 
+                         hover:text-red-700 shadow-md"
                           onClick={() => handleRemoveImage(index)}
                         >
                           <X className="w-4 h-4" />
@@ -1757,84 +1943,105 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                 </div>
               )}
 
-              {(recordedBlob) ? (
+              {/* Audio Recording UI */}
+              {recordedBlob ? (
                 <div className="flex justify-center gap-2 w-full max-w-[500px]">
-                  {/* Audio Player */}
-
-                  {/* Delete Button */}
+                  {/* Delete */}
                   <button
                     type="button"
-                    className="rounded-md hover:bg-gray-200 p-2 text-red-600 transition duration-200"
+                    className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                   p-2 text-red-600 transition duration-200"
                     onClick={handleDeleteAudio}
                   >
                     <Trash2 className="w-5 h-5" />
                   </button>
-                  {isPlayButton &&
+
+                  {/* Play / Pause */}
+                  {isPlayButton && (
                     <button
                       type="button"
-                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                      className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                     p-2 text-gray-700 dark:text-gray-300 transition duration-200"
                       onClick={!isPlay ? playRecording : StopPlayRecording}
                     >
                       {!isPlay ? <Play className="w-5 h-5" /> : <Pause className="w-5 h-5" />}
                     </button>
-                  }
-                  <div
-                    className="h-10 w-52"
-                    ref={waveformRef}
-                  />
-                  {
-                    isFinish ? (
-                      <button
-                        type="button"
-                        className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                        onClick={startRecording}
-                      >
-                        <Mic className="w-5 h-5" />
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
-                        onClick={stopRecording}
-                      >
-                        <Mic className="w-5 h-5" />
-                      </button>
-                    )
-                  }
+                  )}
+
+                  <div className="h-10 w-52" ref={waveformRef} />
+
+                  {/* Record / Stop */}
+                  {isFinish ? (
+                    <button
+                      type="button"
+                      className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                     p-2 text-gray-700 dark:text-gray-300"
+                      onClick={startRecording}
+                    >
+                      <Mic className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                     p-2 text-red-700 transition duration-200"
+                      onClick={stopRecording}
+                    >
+                      <Mic className="w-5 h-5" />
+                    </button>
+                  )}
                 </div>
               ) : (
                 <>
-                  {/* File Upload */}
+                  {/* File Upload Button */}
                   <div className="relative">
                     <button
                       type="button"
                       onClick={handleFileClick}
-                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
+                      className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                     p-2 text-gray-700 dark:text-gray-300 transition duration-200"
                     >
                       <Paperclip className="w-5 h-5" />
                     </button>
+
                     <input
                       type="file"
                       ref={fileInputRef}
-                      onChange={handleFileChange}
                       multiple
+                      onChange={handleFileChange}
                       className="hidden"
                     />
                   </div>
+
+                  {/* MAIN INPUT BOX */}
                   <input
                     type="text"
                     value={message}
                     onChange={(e) => {
                       const inputText = e.target.value;
                       const words = inputText.split(" ");
-                      if (words.length > 0 && words[0]) {
+                      if (words[0]) {
                         words[0] = words[0][0].toUpperCase() + words[0].slice(1);
                       }
                       setMessage(words.join(" "));
-                      socket.current.emit("typing", selectedUser?._id, profileData?._id, userDetails?._id, profileData?.name, selectedUser?.conversationType);
+                      socket.current.emit(
+                        "typing",
+                        selectedUser?._id,
+                        profileData?._id,
+                        userDetails?._id,
+                        profileData?.name,
+                        selectedUser?.conversationType
+                      );
                       if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
                       typingTimeoutRef.current = setTimeout(() => {
-                        socket.current.emit("stopTyping", selectedUser?._id, profileData?._id, userDetails?._id, profileData?.name, selectedUser?.conversationType);
+                        socket.current.emit(
+                          "stopTyping",
+                          selectedUser?._id,
+                          profileData?._id,
+                          userDetails?._id,
+                          profileData?.name,
+                          selectedUser?.conversationType
+                        );
                       }, 2000);
                     }}
                     onPaste={handlePaste}
@@ -1842,49 +2049,53 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       if (e.key === "Enter" && !message.trim()) {
                         e.preventDefault();
                         e.stopPropagation();
-                        // handleSubmit(e);
                       }
                     }}
                     placeholder="Type a message..."
-                    className="flex-1 min-w-[150px] px-4 py-2 rounded-md border border-gray-500 focus:outline-none text-gray-800"
+                    className="flex-1 min-w-[150px] px-4 py-2 rounded-md 
+                   border border-gray-500 dark:border-gray-700 
+                   focus:outline-none 
+                   text-gray-800 dark:text-gray-200 
+                   bg-white dark:bg-gray-800"
                   />
                 </>
-
               )}
 
-              {/* Voice Recorder */}
+              {/* Send / Mic Button */}
               <div>
-                {
-                  isSendDisabled ? (
-                    isFinish ? (
-                      <button
-                        type="button" // ✅ prevents <form> submission
-                        onClick={startRecording}
-                        className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                      >
-                        <Mic className="w-5 h-5" />
-                      </button>
-                    ) : (
-
-                      <button
-                        type="button"
-                        className="rounded-md hover:bg-gray-200 p-2 text-red-700 transition duration-200"
-                        onClick={stopRecording}
-                      >
-                        <Mic className="w-5 h-5" />
-                      </button>
-                    )) : (
+                {isSendDisabled ? (
+                  isFinish ? (
                     <button
-                      type="submit"
-                      className="rounded-md hover:bg-gray-200 p-2 text-gray-700 transition duration-200"
-                      disabled={isSendDisabled || invite}
+                      type="button"
+                      onClick={startRecording}
+                      className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                     p-2 text-gray-700 dark:text-gray-300 transition"
                     >
-                      <Send className="w-5 h-5" />
+                      <Mic className="w-5 h-5" />
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                     p-2 text-red-700 dark:text-red-400 transition"
+                      onClick={stopRecording}
+                    >
+                      <Mic className="w-5 h-5" />
                     </button>
                   )
-                }
+                ) : (
+                  <button
+                    type="submit"
+                    className="rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 
+                   p-2 text-gray-700 dark:text-gray-300 transition"
+                    disabled={isSendDisabled || invite}
+                  >
+                    <Send className="w-5 h-5" />
+                  </button>
+                )}
               </div>
             </form>
+
 
           </div >
         </>
@@ -1894,51 +2105,89 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
       {
         isUserDetailsView && (
           <div
-            className={`fixed z-20 top-0 right-0 h-full  w-full sm:w-96 bg-gray-200 border-l border-gray-300 p-4 overflow-y-auto transform transition-transform duration-300 ease-in-out
-            ${isUserDetailsView ? "translate-x-0" : "translate-x-full"} sm:relative sm:translate-x-0`}
-          >          <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold text-gray-800">User Info</h2>
+            className={`fixed z-20 top-0 right-0 h-full 
+        w-full sm:w-96 
+        bg-gray-200 dark:bg-gray-800 
+        border-l border-gray-300 dark:border-gray-700
+        p-4 overflow-y-auto 
+        transform transition-transform duration-300 ease-in-out
+        ${isUserDetailsView ? "translate-x-0" : "translate-x-full"} 
+        sm:relative sm:translate-x-0`}
+          >
+
+            {/* Header */}
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-100">
+                User Info
+              </h2>
               <button
                 type="button"
-                className=" text-xl text-gray-700 cursor-pointer hover:bg-gray-200 p-2 rounded-md"
+                className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out"
                 onClick={() => setIsUserDetailsView(false)}
               >
-                <X />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* User Avatar */}
             <div className="flex flex-col items-center text-center mb-6">
-              <div className=" rounded-full bg-gray-100 flex items-center justify-center text-2xl sm:text-2xl font-semibold text-gray-600">
+              <div className="rounded-full bg-gray-100 dark:bg-gray-700 
+                        flex items-center justify-center 
+                        text-2xl font-semibold text-gray-600 dark:text-gray-300">
                 {userDetails?.profile ? (
-                  <img src={userDetails?.profile || dummyImage} alt={"No Image"} className="w-24 h-24 rounded-full object-cover" />
-                ) : userDetails?.name?.split(" ")
-                  .map((word) => word[0])
-                  .join("")
-                  .toUpperCase()}
+                  <img
+                    src={userDetails?.profile || dummyImage}
+                    alt="No Image"
+                    className="w-24 h-24 rounded-full object-cover"
+                  />
+                ) : (
+                  userDetails?.name
+                    ?.split(" ")
+                    ?.map((w) => w[0])
+                    .join("")
+                    .toUpperCase()
+                )}
               </div>
-              <h3 className="mt-3 text-xl font-semibold text-gray-800">{userDetails?.name}</h3>
-              <p className="text-sm text-gray-500">Online</p>
+
+              <h3 className="mt-3 text-xl font-semibold text-gray-800 dark:text-gray-100">
+                {userDetails?.name}
+              </h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Online</p>
             </div>
 
             {/* More Details */}
             <div className="space-y-4">
+
               <div>
-                <h4 className="text-sm text-gray-500">Email</h4>
-                <p className="text-sm font-medium text-gray-800">{userDetails?.email}</p>
+                <h4 className="text-sm text-gray-500 dark:text-gray-400">Email</h4>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  {userDetails?.email}
+                </p>
               </div>
+
               <div>
-                <h4 className="text-sm text-gray-500">Location</h4>
-                <p className="text-sm font-medium text-gray-800">Indore, MP</p>
+                <h4 className="text-sm text-gray-500 dark:text-gray-400">Location</h4>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  Indore, MP
+                </p>
               </div>
+
               <div>
-                <h4 className="text-sm text-gray-500">Status Message</h4>
-                <p className="text-sm font-medium text-gray-800">"Living the code life!"</p>
+                <h4 className="text-sm text-gray-500 dark:text-gray-400">
+                  Status Message
+                </h4>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">
+                  "Living the code life!"
+                </p>
               </div>
+
             </div>
           </div>
         )
       }
+
 
       {
         showImage &&

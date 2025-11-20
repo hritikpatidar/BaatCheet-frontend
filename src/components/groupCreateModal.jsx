@@ -124,17 +124,22 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 sm:px-0">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white w-full max-w-lg p-8 rounded-2xl shadow-md border border-gray-300 font-sans"
+                className="bg-white dark:bg-gray-800 
+        w-full max-w-lg p-8 rounded-2xl shadow-md 
+        border border-gray-300 dark:border-gray-700 
+        font-sans"
             >
-                <h2 className="text-xl font-bold text-gray-800 text-center mb-6">Create Group 👥</h2>
+                <h2 className="text-xl font-bold text-gray-800 dark:text-gray-100 text-center mb-6">
+                    Create Group
+                </h2>
 
                 {/* Group Name */}
                 <div className="relative mb-4">
-                    <label className="text-sm font-medium text-gray-700 mb-1 block">
+                    <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 block">
                         Group Name
                     </label>
                     <div className="relative">
-                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Users className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" />
                         <input
                             type="text"
                             placeholder="Enter group name"
@@ -142,13 +147,13 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                             value={formData.groupName}
                             maxLength={30}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-12 py-2 ${errorMessages?.groupName
-                                ? "border border-red-500"
-                                : "border border-gray-300"
-                                } rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                            className={`w-full pl-10 pr-12 py-2 
+            ${errorMessages?.groupName ? "border border-red-500" : "border border-gray-300 dark:border-gray-600"} 
+            rounded-md bg-gray-50 dark:bg-gray-700 
+            text-sm text-gray-800 dark:text-gray-100 
+            focus:outline-none`}
                         />
-                        {/* Character Counter - Right Corner */}
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-500 dark:text-gray-400">
                             {formData.groupName.length}/30
                         </span>
                     </div>
@@ -156,109 +161,130 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
 
                 {/* Group Image */}
                 <div className="relative mb-4">
-                    <ImageIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <ImageIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" />
                     <input
                         type="file"
                         accept="image/*"
                         onChange={handleImageChange}
-                        className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md bg-gray-50 text-sm text-gray-800 cursor-pointer"
+                        className="w-full pl-10 pr-3 py-2 
+            border border-gray-300 dark:border-gray-600 
+            rounded-md 
+            bg-gray-50 dark:bg-gray-700 
+            text-sm text-gray-800 dark:text-gray-100 
+            cursor-pointer"
                     />
                 </div>
 
-                {/* Invites Multi-select Dropdown */}
+                {/* Invites Dropdown */}
                 <div className="relative mb-4">
-                    <UserCheck className="absolute left-3 top-1/3 transform -translate-y-1/2 text-gray-400" />
+                    <UserCheck className="absolute left-3 top-1/3 transform -translate-y-1/2 text-gray-400 dark:text-gray-300" />
 
                     <div
-                        className={`w-full pl-10 pr-3 py-2 ${errorMessages?.invites ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none cursor-pointer`}
+                        className={`w-full pl-10 pr-3 py-2 ${errorMessages?.invites
+                            ? "border border-red-500"
+                            : "border border-gray-300 dark:border-gray-600"
+                            } rounded-md 
+          bg-gray-50 dark:bg-gray-700 
+          text-sm text-gray-800 dark:text-gray-100 
+          focus:outline-none cursor-pointer`}
                         onClick={() => setDropdownOpen(!dropdownOpen)}
                     >
                         Invite Members
                         <ChevronDown
-                            className="absolute right-2 top-1/3 transform -translate-y-1/2 text-gray-400"
+                            className="absolute right-2 top-1/3 transform -translate-y-1/2 text-gray-400 dark:text-gray-500"
                             size={18}
                         />
                     </div>
 
-                    {/* New line showing selected members */}
-                    <p className="text-xs text-gray-500 mt-1 ml-1">
-                        {formData.invites.length} member{formData.invites.length !== 1 ? 's' : ''} selected
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 ml-1">
+                        {formData.invites.length} member
+                        {formData.invites.length !== 1 ? "s" : ""} selected
                     </p>
 
                     {dropdownOpen && (
-                        <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto text-sm">
-                            {userList?.filter((cv) => cv?._id !== profileData?._id).length === 0 ?
-                                <p className="p-2 text-gray-500">No users available</p>
-                                :
-                                userList?.filter((cv) => cv?._id !== profileData?._id).map((user) => {
-                                    const isSelected = formData.invites.some((u) => u === user._id);
-                                    return (
-                                        <div
-                                            key={user._id}
-                                            onClick={() => handleInviteSelect(user)}
-                                            className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer ${isSelected ? 'bg-gray-100' : 'hover:bg-gray-100'
-                                                }`}
-                                        >
-                                            {/* Left: Profile + Name + Status */}
-                                            <div className="flex items-center gap-3 overflow-hidden">
-                                                {/* Profile */}
-                                                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-400 text-white text-xs font-semibold overflow-hidden">
-                                                    {user.profile ? (
-                                                        <img
-                                                            src={user.profile}
-                                                            alt="Profile"
-                                                            className="w-8 h-8 rounded-full object-cover"
-                                                        />
-                                                    ) : (
-                                                        user.name
-                                                            .split(' ')
-                                                            .filter((_, index) => index === 0 || index === 1)
-                                                            .map((n) => n[0])
-                                                            .join('')
-                                                            .toUpperCase()
-                                                    )}
+                        <div className="absolute z-10 mt-1 w-full 
+              bg-white dark:bg-gray-800 
+              border border-gray-300 dark:border-gray-700 
+              rounded-md shadow-lg max-h-60 overflow-y-auto text-sm">
+                            {userList?.filter((cv) => cv?._id !== profileData?._id).length === 0 ? (
+                                <p className="p-2 text-gray-500 dark:text-gray-400">No users available</p>
+                            ) : (
+                                userList
+                                    ?.filter((cv) => cv?._id !== profileData?._id)
+                                    .map((user) => {
+                                        const isSelected = formData.invites.some((u) => u === user._id);
+                                        return (
+                                            <div
+                                                key={user._id}
+                                                onClick={() => handleInviteSelect(user)}
+                                                className={`flex items-center justify-between gap-3 px-3 py-2 cursor-pointer 
+                      ${isSelected
+                                                        ? "bg-gray-100 dark:bg-gray-700"
+                                                        : "hover:bg-gray-100 dark:hover:bg-gray-700"
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3 overflow-hidden">
+                                                    <div className="w-8 h-8 flex items-center justify-center rounded-full 
+                        bg-gray-400 dark:bg-gray-600 
+                        text-white dark:text-gray-100 
+                        text-xs font-semibold overflow-hidden">
+                                                        {user.profile ? (
+                                                            <img
+                                                                src={user.profile}
+                                                                alt="Profile"
+                                                                className="w-8 h-8 rounded-full object-cover"
+                                                            />
+                                                        ) : (
+                                                            user?.name
+                                                                ?.split(" ")
+                                                                .filter((_, index) => index === 0 || index === 1)
+                                                                .map((n) => n[0])
+                                                                .join("")
+                                                                .toUpperCase()
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex flex-col overflow-hidden">
+                                                        <p className="font-medium text-gray-800 dark:text-gray-100 truncate">
+                                                            {user?.name}
+                                                        </p>
+                                                        <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                            {user?.status}
+                                                        </p>
+                                                    </div>
                                                 </div>
 
-                                                {/* Name & Status */}
-                                                <div className="flex flex-col overflow-hidden">
-                                                    <p className="font-medium text-gray-800 truncate whitespace-nowrap">
-                                                        {user?.name}
-                                                    </p>
-                                                    <p className="text-xs text-gray-600 truncate whitespace-nowrap">
-                                                        {user?.status}
-                                                    </p>
-                                                </div>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isSelected}
+                                                    onChange={() => handleInviteSelect(user)}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                    className="custom-checkbox"
+                                                />
                                             </div>
-
-                                            {/* Right: Checkbox */}
-                                            <input
-                                                type="checkbox"
-                                                checked={isSelected}
-                                                onChange={() => handleInviteSelect(user)}
-                                                onClick={(e) => e.stopPropagation()}
-                                                className="custom-checkbox"
-                                            />
-                                        </div>
-                                    );
-                                })}
+                                        );
+                                    })
+                            )}
                         </div>
                     )}
                 </div>
 
-                {/* Toggle switches */}
+                {/* Toggles */}
                 <div className="grid grid-cols-1 gap-3 mb-6">
                     {Object.entries(formData.toggles).map(([key, value]) => (
                         <div key={key} className="flex items-center justify-between">
-                            <label className="text-sm capitalize text-gray-700">
-                                {key.replace(/_/g, ' ')}
+                            <label className="text-sm capitalize text-gray-700 dark:text-gray-300">
+                                {key.replace(/_/g, " ")}
                             </label>
                             <button
                                 type="button"
                                 onClick={() => handleToggleChange(key)}
-                                className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${value ? 'bg-green-500' : 'bg-gray-300'}`}
+                                className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${value ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+                                    }`}
                             >
                                 <div
-                                    className={`bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${value ? 'translate-x-6' : ''}`}
+                                    className={`bg-white dark:bg-gray-200 w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out ${value ? "translate-x-6" : ""
+                                        }`}
                                 ></div>
                             </button>
                         </div>
@@ -270,13 +296,22 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                     <button
                         type="button"
                         onClick={() => setOpenCreateGroupModle(false)}
-                        className="px-4 py-2 rounded-md border border-gray-400 text-gray-800 hover:bg-gray-100 transition"
+                        className="px-4 py-2 rounded-md 
+          border border-gray-400 dark:border-gray-600 
+          text-gray-800 dark:text-gray-100 
+          hover:bg-gray-100 dark:hover:bg-gray-700 
+          transition"
                     >
                         Cancel
                     </button>
+
                     <button
                         type="submit"
-                        className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
+                        className="col-span-2 md:col-span-2 w-full 
+          bg-gray-700 dark:bg-green-600 
+          hover:bg-gray-800 dark:hover:bg-green-700 
+          text-white font-semibold py-2 
+          rounded-md transition duration-200"
                         disabled={groupCreateLoading}
                     >
                         {groupCreateLoading ? "Logging in..." : "Create Group"}
@@ -284,6 +319,7 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                 </div>
             </form>
         </div>
+
     );
 };
 

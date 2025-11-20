@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Moon, Sun } from "lucide-react";
+import { getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserServices";
 
 
 const Themetoggle = () => {
-  const [theme, setTheme] = useState(localStorage.getItem("theme"));
+  const [theme, setTheme] = useState(getItemLocalStorage("theme"));
   const themetoggle = () => {
     const newTheme = theme === "dark" ? "light" : "dark"
     setTheme(newTheme);
     document.documentElement.classList.toggle('dark', newTheme === "dark");
-    localStorage.setItem('theme', newTheme);
+    setItemLocalStorage("theme", newTheme)
   };
 
   return (
@@ -24,9 +25,9 @@ const Themetoggle = () => {
   "
       onClick={themetoggle}
     >
-      {theme === 'light'
-        ? <Moon className="w-5 h-5" />
-        : <Sun className="w-5 h-5" />
+      {theme == 'dark'
+        ? <Sun className="w-5 h-5" />
+        : <Moon className="w-5 h-5" />
       }
     </div>
 

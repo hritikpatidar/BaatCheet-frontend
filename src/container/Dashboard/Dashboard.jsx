@@ -28,36 +28,47 @@ const DashboardPage = () => {
     });
 
     return (
-        <div className="min-h-screen bg-gray-100 font-sans px-2 sm:px-4 pt-12">
+        <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans px-2 sm:px-4 pt-12 transition-colors duration-300">
+
             {/* ===== Main Layout ===== */}
-            <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6 mt-6 h-[calc(100vh-6rem)] overflow-hidden ">
+            <main className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 
+                gap-4 md:gap-6 mt-6 
+                md:h-[calc(100vh-6rem)] 
+                md:overflow-hidden 
+                "
+            >
+
                 {/* ----- Left Sidebar ----- */}
                 <aside className="md:col-span-3 order-2 md:order-1 flex flex-col gap-4">
+
                     {/* Suggested Users */}
-                    <div className="bg-white h-76 rounded-xl p-4 shadow-sm border border-gray-100 flex flex-col">
-                        <h2 className="font-semibold text-gray-700 mb-3">Suggested Users</h2>
-                        {/* User List */}
-                        <ul className="space-y-2 overflow-y-auto flex-1">
+                    <div className="bg-white dark:bg-gray-800 h-76 rounded-xl p-4 
+          shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+
+                        <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
+                            Suggested Users
+                        </h2>
+
+                        <ul className="space-y-2 overflow-y-auto flex-1 
+            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                             {filteredUsers?.length === 0 ? (
-                                <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
+                                <li className="flex items-center justify-center h-40 
+                text-gray-500 dark:text-gray-400 text-sm">
                                     No user found
                                 </li>
                             ) : (
                                 filteredUsers.map((cv, i) => (
                                     <li
                                         key={i}
-                                        className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
+                                        className="cursor-pointer flex items-center gap-3 p-2 rounded-md 
+                    hover:bg-gray-300 dark:hover:bg-gray-700 
+                    shadow-sm transition"
                                         onClick={() => {
                                             const payload = {
                                                 _id: "",
                                                 conversationType: "single",
                                                 members: [
-                                                    {
-                                                        _id: cv?._id,
-                                                        name: cv?.name,
-                                                        email: cv?.email,
-                                                        profile: "",
-                                                    },
+                                                    { _id: cv?._id, name: cv?.name, email: cv?.email, profile: "" }
                                                 ],
                                                 status: "sent",
                                                 isChatDisabled: false,
@@ -65,22 +76,20 @@ const DashboardPage = () => {
                                             dispatch(setSelectUser(payload));
                                             dispatch(setChatMessagesClear([]));
                                             fetchMessages(1, payload);
-                                            navigate("/chat")
+                                            navigate("/chat");
                                         }}
                                     >
-                                        <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
-                                            {cv?.name
-                                                ?.split(" ")
-                                                ?.map((word) => word[0])
-                                                .join("")
-                                                .toUpperCase()}
+                                        <div className="w-10 h-10 flex items-center justify-center rounded-full 
+                    bg-gray-400 dark:bg-gray-600 text-white font-semibold">
+                                            {cv?.name?.split(" ").map((w) => w[0]).join("").toUpperCase()}
                                         </div>
+
                                         <div className="flex-1 overflow-hidden">
-                                            <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                                            <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
                                                 {cv.name}
                                             </p>
-                                            <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                                                {"This theme is awesome!"}
+                                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                This theme is awesome!
                                             </p>
                                         </div>
                                     </li>
@@ -90,92 +99,86 @@ const DashboardPage = () => {
                     </div>
 
                     {/* Recent Chats */}
-                    <div className="bg-white h-78 rounded-xl p-4 shadow-sm border border-gray-100">
-                        <h2 className="font-semibold text-gray-700 mb-3">Recent Chats</h2>
-                        {/* 🔹 Recent Chats */}
-                        <ul className="space-y-2 overflow-y-auto flex-1">
+                    <div className="bg-white dark:bg-gray-800 h-78 rounded-xl p-4 shadow-sm 
+          border border-gray-100 dark:border-gray-700">
+                        <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
+                            Recent Chats
+                        </h2>
+
+                        <ul className="space-y-2 overflow-y-auto flex-1 
+            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
                             {filteredList?.length === 0 ? (
-                                <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
+                                <li className="flex items-center justify-center h-40 
+                text-gray-500 dark:text-gray-400 text-sm">
                                     No user found
                                 </li>
                             ) : (
-                                filteredList?.map((cv, i) => {
-                                    const data = cv?.members?.find(
-                                        (item) => item._id !== profileData?._id
-                                    );
+                                filteredList.map((cv, i) => {
+                                    const data = cv.members.find((m) => m._id !== profileData?._id)
+                                    const user = {
+                                        senderId: cv?.lastMessageDetails?.isSenderId,
+                                        name: data?.name,
+                                        profile: data?.image,
+                                        message: cv?.lastMessageDetails?.message,
+                                        messageType: cv?.lastMessageDetails?.messageType,
+                                        time: cv?.lastMessageDetails?.timestamp
+                                    }
 
-                                    let user = {};
-                                    user.senderId = cv?.lastMessageDetails?.isSenderId;
-                                    user.name = data?.name;
-                                    user.profile = data?.image;
-                                    user.message = cv?.lastMessageDetails?.message;
-                                    user.messageType = cv?.lastMessageDetails?.messageType;
-                                    user.time = cv?.lastMessageDetails?.timestamp;
-
-
-                                    const isYour = user.senderId === profileData?._id;
-                                    const invite = cv?.invites?.find(
-                                        (invite) => invite?.invitedUser?._id === profileData?._id
-                                    );
+                                    const isYour = user.senderId === profileData?._id
 
                                     return (
                                         <li
                                             key={i}
-                                            className={`cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm`}
+                                            className="cursor-pointer flex items-center gap-3 p-2 rounded-md 
+                      hover:bg-gray-300 dark:hover:bg-gray-700 
+                      shadow-sm transition"
                                             onClick={() => {
-                                                if (hasMore) return;
                                                 dispatch(setSelectUser(cv));
                                                 dispatch(setChatMessagesClear([]));
-                                                setHasMore(true);
-                                                setPage(1);
                                                 fetchMessages(1, cv);
-                                                navigate("/chat")
+                                                navigate("/chat");
                                             }}
                                         >
+
                                             {/* Profile */}
-                                            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-2xl sm:text-2xl font-semibold text-gray-600 overflow-hidden">
+                                            <div className="w-12 h-12 flex items-center justify-center rounded-full 
+                      bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-200 
+                      text-2xl font-semibold overflow-hidden">
                                                 {user.profile ? (
-                                                    <img
-                                                        src={user.profile}
-                                                        alt={"No Image"}
-                                                        className="w-12 h-12 rounded-full object-cover"
-                                                    />
+                                                    <img src={user.profile} className="w-12 h-12 rounded-full object-cover" />
                                                 ) : (
-                                                    user?.name
-                                                        ?.split(" ")
-                                                        .filter((_, index) => index === 0 || index === 1)
-                                                        .map((n) => n[0])
-                                                        .join("")
-                                                        .toUpperCase()
+                                                    user.name?.split(" ").map((n, idx) =>
+                                                        idx < 2 ? n[0] : ""
+                                                    ).join("").toUpperCase()
                                                 )}
                                             </div>
 
                                             {/* Name + Message */}
                                             <div className="flex-1 overflow-hidden">
-                                                <p className="font-medium truncate">
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
                                                     {user.name}
                                                 </p>
-                                                <p className="text-xs truncate">
-                                                    <>
-                                                        {isYour ? t("you") + ": " : ""}
-                                                        {cv?.lastMessageDetails?.messageType === "file" || cv?.lastMessageDetails?.messageType === "audio"
-                                                            ? cv?.lastMessageDetails?.messageType === "file" ? "File" : "Audio"
-                                                            : decryptMessage(user?.message) || "Start Conversation"}
-                                                    </>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                    {isYour ? "You: " : ""}
+                                                    {user.messageType === "file" ? "File" :
+                                                        user.messageType === "audio" ? "Audio" :
+                                                            decryptMessage(user.message) || "Start Conversation"}
                                                 </p>
                                             </div>
 
-                                            {/* Time + unread count */}
-                                            <div className="flex flex-col items-end text-xs text-gray-500">
+                                            {/* Time */}
+                                            <div className="flex flex-col items-end text-xs text-gray-500 dark:text-gray-400">
                                                 {cv?.lastMessageDetails?.unReadMessages &&
-                                                    cv?._id !== selectedUser?._id &&
-                                                    !invite ? (
-                                                    <span className="inline-block bg-gray-500 text-white rounded-full px-2 py-0.5 mb-0.5">
+                                                    cv?._id !== selectedUser?._id ? (
+                                                    <span className="inline-block bg-gray-500 dark:bg-gray-600 text-white 
+                          rounded-full px-2 py-0.5 mb-0.5">
                                                         {formatter.format(cv?.lastMessageDetails?.unReadMessages)}
                                                     </span>
                                                 ) : null}
+
                                                 <span>{dayjs(user.time).format("hh:mm A")}</span>
                                             </div>
+
                                         </li>
                                     );
                                 })
@@ -185,98 +188,78 @@ const DashboardPage = () => {
                 </aside>
 
                 {/* ----- Center Feed ----- */}
-                <section className="  md:col-span-6 order-1 md:order-2 flex flex-col space-y-6  h-full overflow-y-auto pr-2">
-                    {/* Create Post */}
+                <section className="
+                    md:col-span-6 
+                    order-1 md:order-2 
+                    flex flex-col space-y-6 
+                    md:h-full 
+                    overflow-visible md:overflow-y-auto 
+                    pr-2 
+                    scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700"
+                >
+
                     <CreatePost />
 
-                    {/* Posts */}
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-semibold">
-                                R
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-700 text-sm sm:text-base">
-                                    Ritik Patidar
-                                </h3>
-                                <p className="text-xs sm:text-sm text-gray-500">2 hours ago</p>
-                            </div>
-                        </div>
+                    {/* Post */}
+                    {[1, 2, 3].map((item) => (
+                        <div key={item}
+                            className="bg-white dark:bg-gray-800 p-5 rounded-xl shadow-sm 
+            border border-gray-100 dark:border-gray-700"
+                        >
+                            <div className="flex items-center gap-3 mb-3">
+                                <div className="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600 
+                flex items-center justify-center text-white">
+                                    R
+                                </div>
 
-                        <p className="text-gray-700 mb-3 text-sm sm:text-base">
-                            This is a sample post content. You can customize this section to show
-                            user posts with or without images.
-                        </p>
-                        <img src={post1} alt="post" className="w-full rounded-lg mb-3 object-cover max-h-80 sm:max-h-72 md:max-h-64" />
-                        <div className="flex justify-between text-xs sm:text-sm text-gray-600 pt-2 border-t border-gray-100">
-                            <button className="hover:text-green-600 transition">👍 Like</button>
-                            <button className="hover:text-green-600 transition">💬 Comment</button>
-                            <button className="hover:text-green-600 transition">↗ Share</button>
-                        </div>
-                    </div>
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-semibold">
-                                R
+                                <div>
+                                    <h3 className="font-semibold text-gray-700 dark:text-gray-200">
+                                        Ritik Patidar
+                                    </h3>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                                        2 hours ago
+                                    </p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-700 text-sm sm:text-base">
-                                    Ritik Patidar
-                                </h3>
-                                <p className="text-xs sm:text-sm text-gray-500">2 hours ago</p>
-                            </div>
-                        </div>
 
-                        <p className="text-gray-700 mb-3 text-sm sm:text-base">
-                            This is a sample post content. You can customize this section to show
-                            user posts with or without images.
-                        </p>
-                        <img src={post1} alt="post" className="w-full rounded-lg mb-3 object-cover max-h-80 sm:max-h-72 md:max-h-64" />
-                        <div className="flex justify-between text-xs sm:text-sm text-gray-600 pt-2 border-t border-gray-100">
-                            <button className="hover:text-green-600 transition">👍 Like</button>
-                            <button className="hover:text-green-600 transition">💬 Comment</button>
-                            <button className="hover:text-green-600 transition">↗ Share</button>
-                        </div>
-                    </div>
-                    <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center font-semibold">
-                                R
-                            </div>
-                            <div>
-                                <h3 className="font-semibold text-gray-700 text-sm sm:text-base">
-                                    Ritik Patidar
-                                </h3>
-                                <p className="text-xs sm:text-sm text-gray-500">2 hours ago</p>
-                            </div>
-                        </div>
+                            <p className="text-gray-700 dark:text-gray-300 mb-3">
+                                This is a sample post content.
+                            </p>
 
-                        <p className="text-gray-700 mb-3 text-sm sm:text-base">
-                            This is a sample post content. You can customize this section to show
-                            user posts with or without images.
-                        </p>
-                        <img src={post1} alt="post" className="w-full rounded-lg mb-3 object-cover max-h-80 sm:max-h-72 md:max-h-64" />
-                        <div className="flex justify-between text-xs sm:text-sm text-gray-600 pt-2 border-t border-gray-100">
-                            <button className="hover:text-green-600 transition">👍 Like</button>
-                            <button className="hover:text-green-600 transition">💬 Comment</button>
-                            <button className="hover:text-green-600 transition">↗ Share</button>
+                            <img src={post1} className="w-full rounded-lg mb-3 object-cover" />
+
+                            <div className="flex justify-between text-xs 
+              text-gray-600 dark:text-gray-400 
+              pt-2 border-t border-gray-200 dark:border-gray-700">
+
+                                <button className="hover:text-green-600 dark:hover:text-green-400">👍 Like</button>
+                                <button className="hover:text-green-600 dark:hover:text-green-400">💬 Comment</button>
+                                <button className="hover:text-green-600 dark:hover:text-green-400">↗ Share</button>
+
+                            </div>
                         </div>
-                    </div>
-                    {/* ...more posts */}
+                    ))}
                 </section>
 
                 {/* ----- Right Sidebar ----- */}
-                <aside className="md:col-span-3 order-3 flex flex-col gap-4" >
-                    {/* 🔔 Notifications Section */}
-                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                <aside className="md:col-span-3 order-3 flex flex-col gap-4">
+
+                    {/* Notifications */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm 
+          border border-gray-100 dark:border-gray-700">
+
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="font-semibold text-gray-700 text-lg">Notifications</h2>
-                            <button className="text-green-600 text-sm hover:font-bold">
+                            <h2 className="font-semibold text-gray-700 dark:text-gray-200 text-lg">
+                                Notifications
+                            </h2>
+                            <button className="text-green-600 dark:text-green-400 text-sm hover:font-bold">
                                 Clear All
                             </button>
                         </div>
 
-                        <ul className="max-h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                        <ul className="max-h-48 overflow-y-auto 
+            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+
                             {[
                                 { icon: "💬", message: "New comment on your post", time: "2m ago" },
                                 { icon: "👤", message: "Friend request from Ankit", time: "15m ago" },
@@ -286,30 +269,38 @@ const DashboardPage = () => {
                             ].map((notif, i) => (
                                 <li
                                     key={i}
-                                    className="flex items-center justify-between p-2 rounded-lg hover:bg-green-50 transition cursor-pointer"
+                                    className="flex items-center justify-between p-2 rounded-lg 
+                  hover:bg-green-50 dark:hover:bg-green-900/20 
+                  transition cursor-pointer"
                                 >
                                     <div className="flex items-center">
                                         <span className="text-lg">{notif.icon}</span>
-                                        <span className="text-gray-700 text-sm">{notif.message}</span>
+                                        <span className="text-gray-700 dark:text-gray-300 text-sm">
+                                            {notif.message}
+                                        </span>
                                     </div>
-                                    <span className="text-xs text-gray-400">{notif.time}</span>
+                                    <span className="text-xs text-gray-400 dark:text-gray-500">
+                                        {notif.time}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
                     </div>
 
+                    {/* Trending Topics */}
+                    <div className="bg-white dark:bg-gray-800 rounded-xl p-4 shadow-sm 
+          border border-gray-100 dark:border-gray-700">
 
-                    {/* 🔥 Trending Topics Section */}
-                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
                         <div className="flex items-center justify-between mb-3">
-                            <h2 className="font-semibold text-gray-700 text-lg">Trending Topics</h2>
-                            <button className="text-green-600 text-sm hover:font-bold">
+                            <h2 className="font-semibold text-gray-700 dark:text-gray-200 text-lg">
+                                Trending Topics
+                            </h2>
+                            <button className="text-green-600 dark:text-green-400 text-sm hover:font-bold">
                                 View All
                             </button>
                         </div>
 
-                        <ul className="">
-                            {/* Topic Item */}
+                        <ul>
                             {[
                                 { tag: "#reactjs", posts: "12.4K posts" },
                                 { tag: "#tailwind", posts: "8.9K posts" },
@@ -318,14 +309,16 @@ const DashboardPage = () => {
                             ].map((topic, i) => (
                                 <li
                                     key={i}
-                                    className="group flex items-center justify-between p-2 rounded-lg hover:bg-green-50 transition cursor-pointer "
+                                    className="group flex items-center justify-between p-2 rounded-lg 
+                  hover:bg-green-50 dark:hover:bg-green-900/20 
+                  transition cursor-pointer"
                                 >
-                                    <div className="flex items-center">
-                                        <span className="text-green-600 font-medium group-hover:text-green-700">
-                                            {topic.tag}
-                                        </span>
-                                    </div>
-                                    <span className="text-xs text-gray-500">{topic.posts}</span>
+                                    <span className="text-green-600 dark:text-green-400 font-medium">
+                                        {topic.tag}
+                                    </span>
+                                    <span className="text-xs text-gray-500 dark:text-gray-400">
+                                        {topic.posts}
+                                    </span>
                                 </li>
                             ))}
                         </ul>
@@ -333,6 +326,7 @@ const DashboardPage = () => {
                 </aside>
             </main>
         </div>
+
     );
 };
 

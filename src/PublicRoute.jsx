@@ -16,20 +16,30 @@ export const PublicRoute = () => {
       {(!adminLogin) ? (
         <>
           {/* Fixed Transparent Header */}
-          <header className="fixed top-0 left-0 w-full bg-gray-100 md:bg-transparent py-2 px-4 z-10">
+          <header
+            className="fixed top-0 left-0 w-full 
+    bg-gray-100 dark:bg-gray-900 
+    md:bg-transparent md:dark:bg-transparent
+    backdrop-blur-sm
+    py-2 px-4 z-10 transition-colors duration-300"
+          >
             <a
               href="/"
-              className="projectName flex items-center space-x-1 font-semibold text-gray-800 hover:text-blue-600 transition-colors"
+              className="projectName flex items-center space-x-1 font-semibold 
+      text-gray-800 dark:text-gray-200 
+      hover:text-blue-600 dark:hover:text-blue-400 
+      transition-colors"
             >
-              {/* <img
-                src={logo1}
-                alt="BlinkChat Logo"
-                className="h-6 sm:h-8 md:h-10 lg:h-12 object-contain"
-              /> */}
-              <span className="text-teal-600 text-xl sm:text-xl md:text-3xl">Baat</span>
-              <span className="text-gray-800 text-lg sm:text-xl md:text-2xl">Cheet</span>
+              <span className="text-teal-600 dark:text-teal-400 text-xl sm:text-xl md:text-3xl">
+                Baat
+              </span>
+
+              <span className="text-gray-800 dark:text-gray-200 text-lg sm:text-xl md:text-2xl">
+                Cheet
+              </span>
             </a>
           </header>
+
           <Outlet />
         </>
       ) : (

@@ -78,27 +78,50 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4">
-      <div className="bg-white w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300">
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">Welcome Back 👋</h2>
+    <div className="flex min-h-screen items-center justify-center 
+    bg-gray-100 dark:bg-gray-900 font-sans px-4"
+    >
+      <div
+        className="bg-white dark:bg-gray-800 
+      w-full max-w-xl p-8 rounded-2xl shadow-md 
+      border border-gray-300 dark:border-gray-700"
+      >
+        <h2 className="text-2xl font-bold 
+        text-gray-800 dark:text-gray-100 
+        text-center mb-6"
+        >
+          Welcome Back 👋
+        </h2>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
           {/* Email */}
           <div className="relative col-span-2">
-            <Mail className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400`} />
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 
+            text-gray-400 dark:text-gray-500" />
+
             <input
               type="email"
               placeholder="Email"
               name="email"
               value={loginFormDetails?.email}
               onChange={handleChange}
-              className={`w-full pl-10 pr-3 py-2 ${errorMessages?.email ? "border border-red-500" : "border border-gray-300"}  rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+              className={`w-full pl-10 pr-3 py-2 rounded-md text-sm 
+            bg-gray-50 dark:bg-gray-700 
+            text-gray-800 dark:text-gray-100 
+            border 
+            ${errorMessages?.email
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"}
+            focus:outline-none focus:ring-2 
+            focus:ring-gray-400 dark:focus:ring-gray-500`}
             />
           </div>
 
           {/* Password */}
           <div className="relative col-span-2">
-            <Lock className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400`} />
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 
+            text-gray-400 dark:text-gray-500" />
 
             <input
               type={showPassword ? "text" : "password"}
@@ -106,70 +129,103 @@ export default function LoginPage() {
               name="password"
               value={loginFormDetails?.password}
               onChange={handleChange}
-              className={`w-full pl-10 pr-10 py-2 ${errorMessages?.password ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+              className={`w-full pl-10 pr-10 py-2 rounded-md text-sm 
+            bg-gray-50 dark:bg-gray-700 
+            text-gray-800 dark:text-gray-100 
+            border 
+            ${errorMessages?.password
+                  ? "border-red-500"
+                  : "border-gray-300 dark:border-gray-600"}
+            focus:outline-none focus:ring-2 
+            focus:ring-gray-400 dark:focus:ring-gray-500`}
             />
 
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+              className="absolute right-3 top-1/2 -translate-y-1/2 
+            text-gray-500 dark:text-gray-400"
             >
-              {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+              {showPassword ? (
+                <EyeOff className="w-5 h-5" />
+              ) : (
+                <Eye className="w-5 h-5" />
+              )}
             </button>
           </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
-            className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
             disabled={loading}
+            className="col-span-2 w-full bg-gray-700 dark:bg-gray-600 
+          hover:bg-gray-800 dark:hover:bg-gray-500 
+          text-white font-semibold py-2 rounded-md 
+          transition duration-200"
           >
             {loading ? "Logging in..." : "Login"}
           </button>
 
-          {/* Divider & Social Buttons */}
-          <div className="mb-6 col-span-2 ">
-            <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
-              <hr className="flex-grow border-gray-300" />
+          {/* Divider & Social */}
+          <div className="mb-6 col-span-2">
+            <div className="flex items-center justify-center text-sm 
+            text-gray-500 dark:text-gray-400 mb-4"
+            >
+              <hr className="flex-grow border-gray-300 dark:border-gray-600" />
               <span className="mx-2">or sign up with</span>
-              <hr className="flex-grow border-gray-300" />
+              <hr className="flex-grow border-gray-300 dark:border-gray-600" />
             </div>
+
             <div className="grid grid-cols-2 gap-3">
+              {/* Google */}
               <button
                 type="button"
-                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                className="flex items-center justify-center w-full py-2 
+              border border-gray-300 dark:border-gray-600 
+              rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 
+              transition"
               >
-                <img src={google} alt="Google" className="h-5 w-5 mr-2" />
-                <span className="text-sm text-gray-700 font-medium">Google</span>
+                <img src={google} className="h-5 w-5 mr-2" />
+                <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">
+                  Google
+                </span>
               </button>
 
+              {/* Apple */}
               <button
                 type="button"
-                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+                className="flex items-center justify-center w-full py-2 
+              border border-gray-300 dark:border-gray-600 
+              rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 
+              transition"
               >
-                <img src={apple} alt="Apple" className="h-5 w-5 mr-2" />
-                <span className="text-sm text-gray-700 font-medium">Apple</span>
+                <img src={apple} className="h-5 w-5 mr-2" />
+                <span className="text-sm text-gray-700 dark:text-gray-200 font-medium">
+                  Apple
+                </span>
               </button>
             </div>
           </div>
         </form>
 
-        {/* Divider */}
-        <div className="mb-6 flex items-center justify-between text-sm text-gray-500">
-          <hr className="flex-grow border-gray-300" />
+        {/* Bottom Divider */}
+        <div className="mb-6 flex items-center justify-between 
+        text-sm text-gray-500 dark:text-gray-400"
+        >
+          <hr className="flex-grow border-gray-300 dark:border-gray-600" />
           <span className="mx-2">or</span>
-          <hr className="flex-grow border-gray-300" />
+          <hr className="flex-grow border-gray-300 dark:border-gray-600" />
         </div>
 
         {/* Footer */}
-        <p className="text-center text-sm text-gray-600">
+        <p className="text-center text-sm text-gray-600 dark:text-gray-300">
           Don’t have an account?{" "}
-          <button
-            // onClick={() => navigate("/sign-up")}
-            className="text-gray-700 font-semibold hover:underline"
-          >
+          <button className="text-gray-700 dark:text-gray-200 font-semibold hover:underline">
             Sign up
           </button>
         </p>
       </div>
     </div>
+
   );
 }

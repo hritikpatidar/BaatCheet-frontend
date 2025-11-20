@@ -57,6 +57,10 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
   // Function to highlight search text
   const highlightText = (text, search) => {
+    if (!search || search.trim() === "") {
+      return <span className="text-gray-800 dark:text-gray-100">{text}</span>;
+    }
+
     const regex = new RegExp(`(${search.trim()})`, "gi");
     const parts = text.split(regex);
 
@@ -64,11 +68,11 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === search.toLowerCase().trim() ? (
-            <span key={i} className="text-green-500 font-semibold">
+            <span key={i} className="text-green-600 dark:text-green-400 font-semibold">
               {part}
             </span>
           ) : (
-            <span key={i} className="text-gray-800">
+            <span key={i} className="text-gray-800 dark:text-gray-100">
               {part}
             </span>
           )
@@ -77,23 +81,34 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
     );
   };
 
+
   return (
     <>
       <div
-        className={`fixed z-30 h-full w-full bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
-              ${showSidebar ? "translate-x-0" : "-translate-x-full"} sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
+        className={`fixed z-30 h-full w-full 
+        bg-gray-100 dark:bg-gray-900 
+        border-r border-gray-300 dark:border-gray-700
+        p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+        ${showSidebar ? "translate-x-0" : "-translate-x-full"}
+        sm:relative sm:translate-x-0 sm:w-56 md:w-72 xl:w-96`}
       >
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
-          <span className="projectName cursor-pointer" onClick={async() => {
+        <h3 className="text-lg font-semibold mb-4 
+        text-gray-800 dark:text-gray-100 
+        flex justify-between items-center"
+        >
+          <span className="projectName cursor-pointer" onClick={async () => {
             await navigate("/")
             dispatch(closeChat())
           }}>
-            <span className='text-teal-600'>Baat</span><span className='text-gray-800'>Cheet</span>
+            <span className="text-teal-600">Baat</span>
+            <span className="text-gray-800 dark:text-gray-100">Cheet</span>
           </span>
 
           <div className="flex items-center gap-2">
             <button
-              className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md group"
+              className="hidden xl:flex relative rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
               onClick={() => {
                 setIsUserListOpen(!isUserListOpen)
                 setSearchTerm("");
@@ -102,24 +117,32 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               <MessageSquarePlus className="w-5 h-5" />
 
               {/* Tooltip */}
-              <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+              <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap 
+              bg-gray-300 dark:bg-gray-700 
+              text-gray-700 dark:text-gray-200 
+              text-xs px-2 py-1 rounded opacity-0 
+              group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                 Add user
               </span>
             </button>
 
             {selectedChatType === "group" &&
               <button
-                className="hidden xl:flex relative text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md group"
+                className="hidden xl:flex relative rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
                 onClick={() => setOpenCreateGroupModle(true)}
               >
-                {/* Main Users Icon */}
                 <Users className="w-5 h-5" />
-
-                {/* Positioned Plus Icon */}
-                <Plus className="w-3 h-3 absolute top-2 -right-0 text-gray-700 bg-transparent rounded-full shadow" />
+                <Plus className="w-3 h-3 absolute top-2 -right-0 
+                 hover:text-teal-400 dark:hover:text-teal-300" />
 
                 {/* Tooltip */}
-                <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                <span className="absolute top-10 left-1/2 -translate-x-1/2 whitespace-nowrap 
+                bg-gray-300 dark:bg-gray-700 
+                text-gray-700 dark:text-gray-200 
+                text-xs px-2 py-1 rounded opacity-0 
+                group-hover:opacity-100 transition-opacity pointer-events-none z-50">
                   Create group
                 </span>
               </button>
@@ -129,29 +152,38 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               {({ close }) => (
                 <>
                   <div>
-                    <MenuButton className="rounded-md hover:bg-gray-200 p-2 text-gray-700 cursor-pointer">
+                    <MenuButton
+                      className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out"
+                    >
                       {/* <EllipsisVertical className="w-5 h-5" aria-hidden=" " /> */}
-                      <div
+                      {/* <div
                         className="relative text-xl text-gray-700 hover:bg-gray-200  cursor-pointer rounded-md group"
-                      >
-                        <EllipsisVertical className="w-5 h-5" />
+                      > */}
+                      <EllipsisVertical className="w-5 h-5" />
 
-                        {/* Tooltip */}
-                        <span className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                          Manu
-                        </span>
-                      </div>
+                      {/* Tooltip */}
+                      <span className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-300 text-gray-700 text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                        Manu
+                      </span>
+                      {/* </div> */}
                     </MenuButton>
                   </div>
 
                   <MenuItems
                     transition
-                    className="absolute -right-4 z-10 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
+                    className="absolute -right-4 z-10 mt-2 w-56 origin-top-right 
+                    divide-y divide-gray-100 dark:divide-gray-700
+                    rounded-md bg-white dark:bg-gray-800
+                    shadow-lg ring-1 ring-black/5 transition"
                   >
                     {/* Profile Section */}
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         console.log("Profile clicked")
                         close();
@@ -163,7 +195,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden  "
+                      className="xl:hidden flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         setIsUserListOpen(!isUserListOpen)
                         setSearchTerm("");
@@ -175,7 +209,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     </button>
                     <button
                       type="button"
-                      className="relative flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition xl:hidden"
+                      className="xl:hidden flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         setOpenCreateGroupModle(true)
                         close();
@@ -184,7 +220,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                       {/* Users Icon with Plus on top-right */}
                       <span className="relative">
                         <Users className="w-5 h-5" />
-                        <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 bg-transparent rounded-full shadow" />
+                        <Plus className="w-3 h-3 absolute top-0 -right-2 text-gray-700 dark:text-gray-300" />
                       </span>
 
                       Create group
@@ -193,7 +229,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         console.log("Account Settings clicked")
                         close();
@@ -204,7 +242,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     </button>
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         console.log("Theme Toggle clicked")
                         close();
@@ -215,7 +255,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     </button>
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         console.log("Notifications clicked")
                         close();
@@ -226,7 +268,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     </button>
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 transition"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-gray-800 dark:text-gray-200 
+                      hover:bg-gray-200 dark:hover:bg-gray-700"
                       onClick={() => {
                         console.log("Support clicked")
                         close();
@@ -239,7 +283,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                     {/* Logout */}
                     <button
                       type="button"
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm 
+                      text-red-600 hover:bg-red-100 dark:hover:bg-red-900/30"
                       onClick={() => {
                         setIsLogoutModalOpen(true)
                         close();
@@ -255,7 +300,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             </Menu>
 
             <button
-              className="sm:hidden text-xl hover:bg-gray-200 p-2 text-gray-700 cursor-pointer rounded-md"
+              className="sm:hidden rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
               onClick={() => setShowSidebar(false)}
             >
               <X className="w-5 h-5" />
@@ -265,55 +312,60 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
         </h3>
         {/* Search */}
         <div className="mb-4 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 
+          text-gray-500 dark:text-gray-400 w-5 h-5" />
           <input
             type="text"
             placeholder="Search or start a new chat"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 pl-10 rounded-md border border-gray-300 bg-white focus:outline-none text-sm text-gray-800"
+            className="w-full px-3 py-2 pl-10 rounded-md border
+            border-gray-300 dark:border-gray-700
+            bg-white dark:bg-gray-800
+            text-gray-800 dark:text-gray-200
+            focus:outline-none text-sm"
           />
         </div>
 
         {/* Tabs: Group / Single */}
-        <div className="flex mb-4 border border-gray-300 rounded-md overflow-hidden">
+        <div className="flex mb-4 border 
+        border-gray-300 dark:border-gray-700 
+        rounded-md overflow-hidden">
+
           <button
-            className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "single" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
+            className={`flex-1 py-2 text-sm font-medium 
+            ${selectedChatType === "single"
+                ? "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
             onClick={() => {
               setSearchTerm("");
-              dispatch(setSelectedChatType("single"))
+              dispatch(setSelectedChatType("single"));
               socket.current.emit("conversation", profileData._id);
             }}
           >
             Single
-            {singleMessageCount.length > 0 &&
-              <span className=" inline-block bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
-                {formatter.format(singleMessageCount.length)}
-              </span>
-            }
           </button>
+
           <button
-            className={`flex-1 py-2 text-sm font-medium ${selectedChatType === "group" ? "bg-gray-300 text-gray-900" : "bg-white text-gray-600 cursor-pointer"}`}
+            className={`flex-1 py-2 text-sm font-medium 
+            ${selectedChatType === "group"
+                ? "bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                : "bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400"}`}
             onClick={() => {
-              dispatch(setSelectedChatType("group"))
+              dispatch(setSelectedChatType("group"));
               setSearchTerm("");
               socket.current.emit("groupConversation", profileData._id);
-
             }}
           >
             Group
-            {groupMessageCount.length > 0 &&
-              <span className=" inline-block bg-red-500 text-white rounded-full px-2 ml-1 text-xs">
-                {formatter.format(groupMessageCount.length)}
-              </span>
-            }
           </button>
+
         </div>
 
         {/* 🔹 Recent Chats */}
         <ul className="space-y-2 overflow-y-auto flex-1">
           {filteredList?.length === 0 ? (
-            <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
+            <li className="flex items-center justify-center h-40 text-gray-500 dark:text-gray-400 text-sm">
               {selectedChatType === "single" ? "No user found" : "No group found"}
             </li>
           ) : (
@@ -347,8 +399,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
               return (
                 <li
                   key={i}
-                  className={`cursor-pointer flex items-center gap-3 p-2 rounded-md ${cv?._id === selectedUser?._id && "bg-gray-300"
-                    } hover:bg-gray-300 shadow-sm`}
+                  className={`cursor-pointer flex items-center gap-3 p-2 rounded-md 
+    ${cv?._id === selectedUser?._id ? "bg-gray-300 dark:bg-gray-700" : ""}
+    hover:bg-gray-300 dark:hover:bg-gray-700 shadow-sm`}
                   onClick={() => {
                     if (hasMore) return;
                     setShowSidebar(false);
@@ -360,7 +413,9 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   }}
                 >
                   {/* Profile */}
-                  <div className="w-12 h-12 flex items-center justify-center rounded-full bg-gray-100 text-2xl sm:text-2xl font-semibold text-gray-600 overflow-hidden">
+                  <div className="w-12 h-12 flex items-center justify-center rounded-full 
+      bg-gray-200 dark:bg-gray-500 
+      text-2xl font-semibold text-gray-600 dark:text-gray-300 overflow-hidden">
                     {user.profile ? (
                       <img
                         src={user.profile}
@@ -379,15 +434,19 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                   {/* Name + Message */}
                   <div className="flex-1 overflow-hidden">
-                    <p className="font-medium truncate">
+                    <p className="font-medium text-gray-800 dark:text-gray-100 truncate">
                       {highlightText(user.name, searchTerm)}
                     </p>
-                    <p className="text-xs truncate">
+
+                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
                       {selectedChatType === "single" ? (
                         <>
                           {isYour ? t("you") + ": " : ""}
-                          {cv?.lastMessageDetails?.messageType === "file" || cv?.lastMessageDetails?.messageType === "audio"
-                            ? cv?.lastMessageDetails?.messageType === "file" ? "File" : "Audio"
+                          {cv?.lastMessageDetails?.messageType === "file" ||
+                            cv?.lastMessageDetails?.messageType === "audio"
+                            ? cv?.lastMessageDetails?.messageType === "file"
+                              ? "File"
+                              : "Audio"
                             : decryptMessage(user?.message) || "Start Conversation"}
                         </>
                       ) : invite ? (
@@ -399,27 +458,33 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                             : cv?.lastMessageDetails
                               ? cv?.lastMessageDetails?.isSenderId?.name + ": "
                               : ""}
-                          {cv?.lastMessageDetails?.messageType === "file" || cv?.lastMessageDetails?.messageType === "audio"
-                            ? cv?.lastMessageDetails?.messageType === "file" ? "File" : "Audio"
-                            : decryptMessage(user?.message) ||
-                            "Starts Conversation"}
+                          {cv?.lastMessageDetails?.messageType === "file" ||
+                            cv?.lastMessageDetails?.messageType === "audio"
+                            ? cv?.lastMessageDetails?.messageType === "file"
+                              ? "File"
+                              : "Audio"
+                            : decryptMessage(user?.message) || "Starts Conversation"}
                         </>
                       )}
                     </p>
                   </div>
 
-                  {/* Time + unread count */}
-                  <div className="flex flex-col items-end text-xs text-gray-500">
+                  {/* Time + Unread Count */}
+                  <div className="flex flex-col items-end text-xs text-gray-500 dark:text-gray-400">
                     {cv?.lastMessageDetails?.unReadMessages &&
                       cv?._id !== selectedUser?._id &&
                       !invite ? (
-                      <span className="inline-block bg-gray-500 text-white rounded-full px-2 py-0.5 mb-0.5">
+                      <span className="inline-block bg-gray-500 dark:bg-gray-700 
+          text-white dark:text-gray-200 
+          rounded-full px-2 py-0.5 mb-0.5">
                         {formatter.format(cv?.lastMessageDetails?.unReadMessages)}
                       </span>
                     ) : null}
+
                     <span>{dayjs(user.time).format("hh:mm A")}</span>
                   </div>
                 </li>
+
               );
             })
           )}
@@ -427,15 +492,20 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
       </div>
 
       <div
-        className={`fixed z-50 h-full w-full sm:w-56 md:w-72 xl:w-96 bg-gray-200 border-r border-gray-300 p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
-              ${isUserListOpen ? "translate-x-0" : "-translate-x-full"} `}
+        className={`fixed z-50 h-full w-full sm:w-56 md:w-72 xl:w-96 
+         bg-gray-200 dark:bg-gray-800 
+        border-r border-gray-300 dark:border-gray-700 
+        p-4 flex flex-col transform transition-transform duration-300 ease-in-out 
+        ${isUserListOpen ? "translate-x-0" : "-translate-x-full"}`}
       >
         {/* Header */}
-        <h3 className="text-lg font-semibold mb-4 text-gray-800 flex justify-between items-center">
+        <h3 className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-100 flex justify-between items-center">
           <button
-            className="text-xl text-gray-700 hover:bg-gray-200 p-2 cursor-pointer rounded-md"
+            className="rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                     text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
+                      dark:bg-gray-800 transition-all ease-in-out "
             onClick={() => {
-              setIsUserListOpen(false)
+              setIsUserListOpen(false);
               setSearchTerm("");
             }}
           >
@@ -445,30 +515,39 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
         {/* Search */}
         <div className="mb-4 relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 w-5 h-5" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 
+        text-gray-500 dark:text-gray-400 w-5 h-5" />
+
           <input
             type="text"
             placeholder="Search or start a new chat"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full px-3 py-2 pl-10 rounded-md border border-gray-300 bg-white focus:outline-none text-sm text-gray-800"
+            className="w-full px-3 py-2 pl-10 rounded-md 
+              border border-gray-300 dark:border-gray-600 
+             bg-white dark:bg-gray-700 
+              focus:outline-none 
+              text-sm text-gray-800 dark:text-gray-100"
           />
         </div>
 
-        <h3 className="text-gray-500 font-bold ml-2 mb-3">Connect with us</h3>
+        <h3 className="text-gray-500 dark:text-gray-400 font-bold ml-2 mb-3">
+          Connect with us
+        </h3>
 
-        {/* User List */}
         {/* User List */}
         <ul className="space-y-2 overflow-y-auto flex-1">
           {filteredUsers?.length === 0 ? (
-            <li className="flex items-center justify-center h-40 text-gray-500 text-sm">
+            <li className="flex items-center justify-center h-40 text-gray-500 dark:text-gray-400 text-sm">
               No user found
             </li>
           ) : (
             filteredUsers.map((cv, i) => (
               <li
                 key={i}
-                className="cursor-pointer flex items-center gap-3 p-2 rounded-md hover:bg-gray-300 shadow-sm"
+                className="cursor-pointer flex items-center gap-3 p-2 rounded-md 
+            hover:bg-gray-300 dark:hover:bg-gray-700 
+            shadow-sm"
                 onClick={() => {
                   const payload = {
                     _id: "",
@@ -491,19 +570,21 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
                   fetchMessages(1, payload);
                 }}
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-400 text-white font-semibold">
+                <div className="w-10 h-10 flex items-center justify-center rounded-full 
+            bg-gray-400 dark:bg-gray-600 
+            text-white dark:text-gray-200 font-semibold">
                   {cv?.name
                     ?.split(" ")
                     ?.map((word) => word[0])
                     .join("")
                     .toUpperCase()}
                 </div>
+
                 <div className="flex-1 overflow-hidden">
-                  <p className="font-medium text-gray-800 truncate whitespace-nowrap overflow-hidden text-ellipsis">
-                    {/* {cv.name} */}
+                  <p className="font-medium text-gray-800 dark:text-gray-100 truncate whitespace-nowrap overflow-hidden text-ellipsis">
                     {highlightText(cv.name, searchTerm)}
                   </p>
-                  <p className="text-xs text-gray-600 truncate whitespace-nowrap overflow-hidden text-ellipsis">
+                  <p className="text-xs text-gray-600 dark:text-gray-400 truncate whitespace-nowrap overflow-hidden text-ellipsis">
                     {"This theme is awesome!"}
                   </p>
                 </div>
@@ -511,8 +592,8 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
             ))
           )}
         </ul>
-
       </div>
+
 
       {isLogoutModalOpen && (
         <LogOutModal setIsLogoutModalOpen={setIsLogoutModalOpen} loading={loading} setLoading={setLoading} />
