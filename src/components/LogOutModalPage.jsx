@@ -19,6 +19,11 @@ const LogOutModal = ({ setIsLogoutModalOpen, loading, setLoading }) => {
             if (theme) {
                 setItemLocalStorage("theme", theme);
             }
+            if (theme === "dark") {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
             dispatch({ type: "RESET" });
             navigate("/login");
         }, 2000);

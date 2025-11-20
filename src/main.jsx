@@ -2,7 +2,7 @@ import { StrictMode, useEffect } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { clearLocalStorage, getItemLocalStorage } from './Utils/browserServices.js';
+import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from './Utils/browserServices.js';
 import { Provider } from 'react-redux';
 import store from './Redux/app/store.js';
 import { Toaster } from 'react-hot-toast';
@@ -31,10 +31,19 @@ const checkTokenValidity = (token) => {
 const TokenValidationWrapper = ({ children }) => {
   useEffect(() => {
     const token = getItemLocalStorage("token");
+    const theme = getItemLocalStorage("theme");
     const isValid = checkTokenValidity(token);
-
+    debugger
     if (!isValid) {
       clearLocalStorage();
+      if (theme) {
+        setItemLocalStorage("theme", theme);
+        if (theme === "dark") {
+          document.documentElement.classList.add("dark");
+        } else {
+          document.documentElement.classList.remove("dark");
+        }
+      }
     }
   }, []);
 

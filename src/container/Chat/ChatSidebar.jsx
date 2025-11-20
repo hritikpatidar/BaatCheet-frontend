@@ -6,7 +6,7 @@ import { clearChatState, closeChat, setChatMessagesClear, setSelectedChatType, s
 import { useSocket } from "../../context/SocketContext";
 import { Bell, EllipsisVertical, LifeBuoy, LogOut, MessageSquarePlus, MoveLeft, Plus, Search, Settings, SunMoon, User, Users, X } from 'lucide-react';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-import { clearLocalStorage, getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserServices";
+import {  getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserServices";
 import dummyImage from "../../assets/dummyImage.png"
 import dayjs from "dayjs";
 import utc from 'dayjs/plugin/utc';
