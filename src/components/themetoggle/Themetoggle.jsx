@@ -4,14 +4,22 @@ import { getItemLocalStorage, setItemLocalStorage } from "../../Utils/browserSer
 
 
 const Themetoggle = () => {
-  const [theme, setTheme] = useState(getItemLocalStorage("theme"));
-  const themetoggle = () => {
-    const newTheme = theme === "dark" ? "light" : "dark"
-    setTheme(newTheme);
-    document.documentElement.classList.toggle('dark', newTheme === "dark");
-    setItemLocalStorage("theme", newTheme)
-  };
+  const [theme, setTheme] = useState(getItemLocalStorage("theme") || "light");
 
+  useEffect(() => {
+    // page load pe theme apply kar do
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [theme]);
+
+  const themetoggle = () => {
+    const newTheme = theme === "dark" ? "light" : "dark";
+    setTheme(newTheme);
+    setItemLocalStorage("theme", newTheme);
+  };
   return (
     <div
       className="

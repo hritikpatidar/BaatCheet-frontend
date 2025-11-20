@@ -18,6 +18,10 @@
 /* @custom-variant dark(&:where(dark, .dark *)); */
 @custom-variant dark (&:where(.dark *));
 
+* {
+  user-select: none
+}
+
 body {
   font-family: Arial, sans-serif;
   margin: 0;
@@ -88,7 +92,8 @@ select:-webkit-autofill:focus {
   appearance: none;
   width: 16px;
   height: 16px;
-  border: 2px solid #cbd5e0; /* Tailwind's gray-300 */
+  border: 2px solid #cbd5e0;
+  /* Tailwind's gray-300 */
   border-radius: 4px;
   background-color: #fff;
   cursor: pointer;
@@ -97,11 +102,13 @@ select:-webkit-autofill:focus {
 }
 
 .custom-checkbox:hover {
-  border-color: #a0aec0; /* Tailwind's gray-400 */
+  border-color: #a0aec0;
+  /* Tailwind's gray-400 */
 }
 
 .custom-checkbox:checked {
-  background-color: #767677; /* Tailwind's blue-500 */
+  background-color: #767677;
+  /* Tailwind's blue-500 */
   border-color: #767677;
 }
 
