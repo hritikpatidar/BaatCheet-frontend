@@ -7,8 +7,6 @@ import NotFound from './components/NotFound';
 import LoginPage from './container/AuthPages/LoginPage';
 import { SignupForm } from './container/AuthPages/SignupForm';
 import DashboardPage from './container/Dashboard/Dashboard';
-import ListPage from './container/List/ListPage';
-import AIChatPage from './container/AiChat/AiChatPage';
 import AIChatApp from './container/AiChat/AIChatApp';
 // import { generateToken, messaging } from "./firebase";
 // import { onMessage } from "firebase/messaging";
