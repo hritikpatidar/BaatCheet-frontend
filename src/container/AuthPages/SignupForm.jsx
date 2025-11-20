@@ -196,88 +196,361 @@ export const SignupForm = () => {
 
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4 pt-12">
-            <div className="bg-white w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300">
-                <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+        // <div className="flex min-h-screen items-center justify-center bg-gray-100 font-sans px-4 pt-12">
+        //     <div className="bg-white w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300">
+        //         <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
+        //             Create Account 👤
+        //         </h2>
+
+        //         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        //             {/* Full Name */}
+        //             <div className="relative col-span-2 md:col-span-1">
+        //                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <input
+        //                     type="text"
+        //                     placeholder="Full Name"
+        //                     name="name"
+        //                     value={formDetails?.name}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-3 py-2 ${errorMessages?.name ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+        //                 />
+        //             </div>
+
+        //             {/* Username */}
+        //             <div className="relative col-span-2 md:col-span-1">
+        //                 <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <input
+        //                     type="text"
+        //                     placeholder="Username"
+        //                     name="user_name"
+        //                     value={formDetails?.user_name}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-3 py-2 ${errorMessages?.user_name ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+        //                 />
+        //             </div>
+
+        //             {/* Email */}
+        //             <div className="relative col-span-2">
+        //                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <input
+        //                     type="email"
+        //                     placeholder="Email"
+        //                     name="email"
+        //                     value={formDetails?.email}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-3 py-2 ${errorMessages?.email ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+        //                 />
+        //             </div>
+
+        //             {/* Phone Number */}
+        //             <div className="relative col-span-2 md:col-span-1">
+        //                 <PhoneInput
+        //                     country={"gb"}
+        //                     defaultCountry="gb"
+        //                     value={formDetails.phone_no}
+        //                     onChange={handlePhoneChange}
+        //                     countryCodeEditable={false}
+        //                     containerClass="input"
+        //                     inputClass={` pl-10 pr-3 py-4.5 !w-full md:!w-[245px] ${errorMessages?.phone_no ? "!border !border-red-500" : "border border-gray-300"} rounded-lg bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+        //                     inputProps={{
+        //                         placeholder: "Phone Number",
+        //                     }}
+        //                 />
+        //             </div>
+
+        //             {/* Date of Birth */}
+        //             <div className="relative col-span-2 md:col-span-1">
+        //                 <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <input
+        //                     type="date"
+        //                     name="dob"
+        //                     value={formDetails?.dob}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-3 py-2 ${errorMessages?.dob ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none cursor-pointer`}
+        //                 />
+        //             </div>
+
+        //             {/* Gender */}
+        //             <div className="relative col-span-2">
+        //                 <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <select
+        //                     name="gender"
+        //                     value={formDetails?.gender}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-3 py-2 ${errorMessages?.gender ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none cursor-pointer`}
+        //                 >
+        //                     <option value="">Select Gender</option>
+        //                     <option value="male">Male</option>
+        //                     <option value="female">Female</option>
+        //                     <option value="other">Other</option>
+        //                 </select>
+        //             </div>
+
+        //             {/* Password */}
+        //             <div className="relative col-span-2 md:col-span-1">
+        //                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <input
+        //                     type={showPassword.password ? "text" : "password"}
+        //                     placeholder="Password"
+        //                     name="password"
+        //                     value={formDetails?.password}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-10 py-2 ${errorMessages?.password ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+        //                 />
+        //                 <button
+        //                     type="button"
+        //                     onClick={() => setShowPassword({
+        //                         password: !showPassword.password,
+        //                         confirm_password: showPassword?.confirm_password
+        //                     })}
+        //                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+        //                 >
+        //                     {showPassword.password ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+        //                 </button>
+        //             </div>
+
+        //             {/*Confirm Password */}
+        //             <div className="relative col-span-2 md:col-span-1">
+        //                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        //                 <input
+        //                     type={showPassword.confirm_password ? "text" : "password"}
+        //                     placeholder="Confirm Password"
+        //                     name="confirm_password"
+        //                     value={formDetails?.confirm_password}
+        //                     onChange={handleChange}
+        //                     className={`w-full pl-10 pr-10 py-2 ${errorMessages?.confirm_password ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+        //                 />
+        //                 <button
+        //                     type="button"
+        //                     onClick={() => setShowPassword({
+        //                         password: showPassword.password,
+        //                         confirm_password: !showPassword?.confirm_password
+        //                     })}
+        //                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+        //                 >
+        //                     {showPassword?.confirm_password ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+        //                 </button>
+        //             </div>
+
+        //             {/* Sign Up Button spans full width */}
+        //             <button
+        //                 type="submit"
+        //                 className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
+        //                 disabled={loading}
+        //             >
+        //                 {loading ? "Signing up..." : "Sign Up"}
+        //             </button>
+        //             {/* Divider & Social Buttons */}
+        //             <div className="mb-6 col-span-2 ">
+        //                 <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
+        //                     <hr className="flex-grow border-gray-300" />
+        //                     <span className="mx-2">or sign up with</span>
+        //                     <hr className="flex-grow border-gray-300" />
+        //                 </div>
+        //                 <div className="grid grid-cols-2 gap-3">
+        //                     <button
+        //                         type="button"
+        //                         className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+        //                     >
+        //                         <img src={google} alt="Google" className="h-5 w-5 mr-2" />
+        //                         <span className="text-sm text-gray-700 font-medium">Google</span>
+        //                     </button>
+
+        //                     <button
+        //                         type="button"
+        //                         className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+        //                     >
+        //                         <img src={apple} alt="Apple" className="h-5 w-5 mr-2" />
+        //                         <span className="text-sm text-gray-700 font-medium">Apple</span>
+        //                     </button>
+        //                 </div>
+        //             </div>
+        //         </form>
+
+        //         {/* Divider */}
+        //         <div className="mb-6 flex items-center justify-between text-sm text-gray-500">
+        //             <hr className="flex-grow border-gray-300" />
+        //             <span className="mx-2">or</span>
+        //             <hr className="flex-grow border-gray-300" />
+        //         </div>
+
+        //         {/* Footer */}
+        //         <p className="text-center text-sm text-gray-600">
+        //             Already have an account?{" "}
+        //             <button
+        //                 onClick={() => navigate("/login")}
+        //                 className="text-gray-700 font-semibold hover:underline"
+        //             >
+        //                 Login
+        //             </button>
+        //         </p>
+        //     </div>
+
+        //     {isOtpModalOpen && (
+        //         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 sm:px-0">
+        //             <div className="bg-gray-100 border border-gray-300 shadow-2xl rounded-xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 transition-all duration-300">
+        //                 <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
+        //                     Verify One‑Time Password
+        //                 </h2>
+        //                 <p className="text-sm sm:text-base text-gray-600 mb-6">
+        //                     Please enter the OTP sent to your phone/email.
+        //                 </p>
+
+        //                 <div className="flex justify-center mb-6 space-x-2">
+        //                     <OtpInput
+        //                         value={otp}
+        //                         onChange={handleChangeOtp}
+        //                         numInputs={4}
+        //                         shouldAutoFocus
+        //                         inputType="tel"
+        //                         containerStyle="flex justify-center space-x-2"
+        //                         inputStyle="w-12 h-12 border rounded text-center text-lg focus:outline-none focus:ring-2 focus:ring-indigo-400"
+        //                         renderInput={(props, index) => (
+        //                             <input
+        //                                 {...props}
+        //                                 className={`!w-14 h-14 text-lg !text-gray-600 font-medium text-center rounded-md border ${otpErrorMessage ? "border-red-500" : "border-gray-300 focus:border-gray-300"
+        //                                     } focus:outline-none focus:ring-2 focus:ring-gray-300 transition`}
+        //                                 onFocus={() => handleInputFocus(index)}
+        //                                 onBlur={handleInputBlur}
+        //                             />
+        //                         )}
+        //                     />
+        //                 </div>
+
+        //                 <div className="flex justify-between items-center mb-6">
+        //                     <button
+        //                         disabled={resendCooldown > 0}
+        //                         onClick={handleResendOtp}
+        //                         className={`text-sm text-indigo-600 hover:underline focus:outline-none ${resendCooldown > 0 ? "opacity-50 cursor-not-allowed" : ""
+        //                             }`}
+        //                     >
+        //                         {resendCooldown > 0
+        //                             ? `Resend OTP in ${resendCooldown}s`
+        //                             : "Resend OTP"}
+        //                     </button>
+        //                     <button
+        //                         onClick={handleVerifyOtp}
+        //                         disabled={loading || otp.length < 4}
+        //                         className={`px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition ${loading || otp.length < 4
+        //                             ? "opacity-60 cursor-not-allowed"
+        //                             : ""
+        //                             }`}
+        //                     >
+        //                         {loading ? "Verifying..." : "Verify OTP"}
+        //                     </button>
+        //                 </div>
+
+        //                 {/* <button
+        //                     onClick={() => setIsOtpModalOpen(false)}
+        //                     className="w-full text-center text-sm text-gray-600 hover:underline focus:outline-none"
+        //                 >
+        //                     Cancel
+        //                 </button> */}
+        //             </div>
+        //         </div>
+        //     )}
+
+        // </div>
+        <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-900 font-sans px-4 pt-12">
+
+            <div className="bg-white dark:bg-gray-800 w-full max-w-xl p-8 rounded-2xl shadow-md border border-gray-300 dark:border-gray-700">
+
+                <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 text-center mb-6">
                     Create Account 👤
                 </h2>
 
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
                     {/* Full Name */}
                     <div className="relative col-span-2 md:col-span-1">
-                        <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <input
                             type="text"
-                            placeholder="Full Name"
                             name="name"
+                            placeholder="Full Name"
                             value={formDetails?.name}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-3 py-2 ${errorMessages?.name ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                            className={`w-full pl-10 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border ${errorMessages?.name ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+            focus:outline-none`}
                         />
                     </div>
 
                     {/* Username */}
                     <div className="relative col-span-2 md:col-span-1">
-                        <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <UserCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <input
                             type="text"
-                            placeholder="Username"
                             name="user_name"
+                            placeholder="Username"
                             value={formDetails?.user_name}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-3 py-2 ${errorMessages?.user_name ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                            className={`w-full pl-10 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border ${errorMessages?.user_name ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+            focus:outline-none`}
                         />
                     </div>
 
                     {/* Email */}
                     <div className="relative col-span-2">
-                        <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <input
                             type="email"
-                            placeholder="Email"
                             name="email"
+                            placeholder="Email"
                             value={formDetails?.email}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-3 py-2 ${errorMessages?.email ? "border border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                            className={`w-full pl-10 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border ${errorMessages?.email ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+            focus:outline-none`}
                         />
                     </div>
 
-                    {/* Phone Number */}
+                    {/* Phone */}
                     <div className="relative col-span-2 md:col-span-1">
                         <PhoneInput
                             country={"gb"}
-                            defaultCountry="gb"
                             value={formDetails.phone_no}
                             onChange={handlePhoneChange}
                             countryCodeEditable={false}
-                            containerClass="input"
-                            inputClass={` pl-10 pr-3 py-4.5 !w-full md:!w-[245px] ${errorMessages?.phone_no ? "!border !border-red-500" : "border border-gray-300"} rounded-lg bg-gray-50 text-sm text-gray-800 focus:outline-none`}
-                            inputProps={{
-                                placeholder: "Phone Number",
-                            }}
+
+                            // WRAPPER — background fix
+                            containerClass="!w-full bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-300 dark:border-gray-600"
+
+                            // INPUT — inside field
+                            inputClass={`!w-full !bg-gray-50 dark:!bg-gray-700 !text-gray-800 dark:!text-gray-200 
+      !pl-12 !pr-3 !py-2 !border-0 focus:outline-none`}
+
+                            buttonClass="!bg-gray-50 dark:!bg-gray-700 !border-0 text-gray-600 dark:text-gray-300"
+
+                            inputProps={{ placeholder: "Phone Number" }}
                         />
                     </div>
 
-                    {/* Date of Birth */}
+                    {/* DOB */}
                     <div className="relative col-span-2 md:col-span-1">
-                        <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <input
                             type="date"
                             name="dob"
                             value={formDetails?.dob}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-3 py-2 ${errorMessages?.dob ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none cursor-pointer`}
+                            className={`w-full pl-10 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border ${errorMessages?.dob ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+            focus:outline-none cursor-pointer`}
                         />
                     </div>
 
                     {/* Gender */}
                     <div className="relative col-span-2">
-                        <UserCheck className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <UserCheck className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <select
                             name="gender"
-                            value={formDetails?.gender}
+                            value={formDetails.gender}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-3 py-2 ${errorMessages?.gender ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none cursor-pointer`}
+                            className={`w-full pl-10 pr-3 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border ${errorMessages?.gender ? "border-red-500" : "border-gray-300 dark:border-gray-600"} 
+            focus:outline-none`}
                         >
                             <option value="">Select Gender</option>
                             <option value="male">Male</option>
@@ -288,111 +561,114 @@ export const SignupForm = () => {
 
                     {/* Password */}
                     <div className="relative col-span-2 md:col-span-1">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <input
                             type={showPassword.password ? "text" : "password"}
-                            placeholder="Password"
                             name="password"
-                            value={formDetails?.password}
+                            placeholder="Password"
+                            value={formDetails.password}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-10 py-2 ${errorMessages?.password ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                            className={`w-full pl-10 pr-10 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border focus:outline-none ${errorMessages?.password ? "border-red-500" : "border-gray-300 dark:border-gray-600 "}`}
                         />
+
                         <button
                             type="button"
-                            onClick={() => setShowPassword({
-                                password: !showPassword.password,
-                                confirm_password: showPassword?.confirm_password
-                            })}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+                            onClick={() =>
+                                setShowPassword({ ...showPassword, password: !showPassword.password })
+                            }
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300"
                         >
-                            {showPassword.password ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            {showPassword.password ? <EyeOff /> : <Eye />}
                         </button>
                     </div>
 
-                    {/*Confirm Password */}
+                    {/* Confirm Password */}
                     <div className="relative col-span-2 md:col-span-1">
-                        <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                        <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-800 dark:text-gray-200" />
                         <input
                             type={showPassword.confirm_password ? "text" : "password"}
-                            placeholder="Confirm Password"
                             name="confirm_password"
-                            value={formDetails?.confirm_password}
+                            placeholder="Confirm Password"
+                            value={formDetails.confirm_password}
                             onChange={handleChange}
-                            className={`w-full pl-10 pr-10 py-2 ${errorMessages?.confirm_password ? "!border !border-red-500" : "border border-gray-300"} rounded-md bg-gray-50 text-sm text-gray-800 focus:outline-none`}
+                            className={`w-full pl-10 pr-10 py-2 rounded-md bg-gray-50 dark:bg-gray-700 text-sm text-gray-800 dark:text-gray-200 
+            border focus:outline-none ${errorMessages?.confirm_password ? "border-red-500" : "border-gray-300 dark:border-gray-600 "}`}
                         />
+
                         <button
                             type="button"
-                            onClick={() => setShowPassword({
-                                password: showPassword.password,
-                                confirm_password: !showPassword?.confirm_password
-                            })}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+                            onClick={() =>
+                                setShowPassword({
+                                    ...showPassword,
+                                    confirm_password: !showPassword.confirm_password,
+                                })
+                            }
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-300"
                         >
-                            {showPassword?.confirm_password ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                            {showPassword.confirm_password ? <EyeOff /> : <Eye />}
                         </button>
                     </div>
 
-                    {/* Sign Up Button spans full width */}
+                    {/* Submit */}
                     <button
                         type="submit"
-                        className="col-span-2 md:col-span-2 w-full bg-gray-700 hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition duration-200"
-                        disabled={loading}
+                        className="col-span-2 w-full bg-gray-700 dark:bg-gray-600 
+                            hover:bg-gray-800 dark:hover:bg-gray-500 
+                            text-white font-semibold py-2 rounded-md 
+                            transition duration-200"
                     >
                         {loading ? "Signing up..." : "Sign Up"}
                     </button>
-                    {/* Divider & Social Buttons */}
-                    <div className="mb-6 col-span-2 ">
-                        <div className="flex items-center justify-center text-sm text-gray-500 mb-4">
-                            <hr className="flex-grow border-gray-300" />
+
+                    {/* Divider */}
+                    <div className="col-span-2 my-4">
+                        <div className="flex items-center justify-center text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            <hr className="flex-grow border-gray-300 dark:border-gray-700" />
                             <span className="mx-2">or sign up with</span>
-                            <hr className="flex-grow border-gray-300" />
+                            <hr className="flex-grow border-gray-300 dark:border-gray-700" />
                         </div>
+
                         <div className="grid grid-cols-2 gap-3">
-                            <button
-                                type="button"
-                                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-                            >
-                                <img src={google} alt="Google" className="h-5 w-5 mr-2" />
-                                <span className="text-sm text-gray-700 font-medium">Google</span>
+                            <button className="flex items-center justify-center py-2 border border-gray-300 dark:border-gray-600 
+            rounded-md bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <img src={google} className="h-5 w-5 mr-2" />
+                                Google
                             </button>
 
-                            <button
-                                type="button"
-                                className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition"
-                            >
-                                <img src={apple} alt="Apple" className="h-5 w-5 mr-2" />
-                                <span className="text-sm text-gray-700 font-medium">Apple</span>
+                            <button className="flex items-center justify-center py-2 border border-gray-300 dark:border-gray-600 
+            rounded-md bg-gray-50 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600">
+                                <img src={apple} className="h-5 w-5 mr-2" />
+                                Apple
                             </button>
                         </div>
                     </div>
                 </form>
 
-                {/* Divider */}
-                <div className="mb-6 flex items-center justify-between text-sm text-gray-500">
-                    <hr className="flex-grow border-gray-300" />
-                    <span className="mx-2">or</span>
-                    <hr className="flex-grow border-gray-300" />
-                </div>
-
                 {/* Footer */}
-                <p className="text-center text-sm text-gray-600">
+                <p className="text-center text-sm text-gray-600 dark:text-gray-400">
                     Already have an account?{" "}
                     <button
                         onClick={() => navigate("/login")}
-                        className="text-gray-700 font-semibold hover:underline"
+                        className="text-gray-700 dark:text-gray-200 font-semibold hover:underline"
                     >
                         Login
                     </button>
                 </p>
             </div>
 
+
+            {/* OTP MODAL */}
             {isOtpModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm px-4 sm:px-0">
-                    <div className="bg-gray-100 border border-gray-300 shadow-2xl rounded-xl w-full max-w-sm sm:max-w-md p-5 sm:p-6 transition-all duration-300">
-                        <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">
-                            Verify One‑Time Password
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+
+                    <div className="bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700
+        shadow-2xl rounded-xl w-full max-w-sm p-6">
+
+                        <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                            Verify One-Time Password
                         </h2>
-                        <p className="text-sm sm:text-base text-gray-600 mb-6">
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1 mb-6">
                             Please enter the OTP sent to your phone/email.
                         </p>
 
@@ -417,39 +693,33 @@ export const SignupForm = () => {
                             />
                         </div>
 
-                        <div className="flex justify-between items-center mb-6">
+                        <div className="flex justify-between items-center mt-6">
                             <button
                                 disabled={resendCooldown > 0}
                                 onClick={handleResendOtp}
-                                className={`text-sm text-indigo-600 hover:underline focus:outline-none ${resendCooldown > 0 ? "opacity-50 cursor-not-allowed" : ""
-                                    }`}
+                                className={`text-sm text-indigo-600 dark:text-indigo-400 hover:underline 
+              ${resendCooldown > 0 && "opacity-50 cursor-not-allowed"}`}
                             >
                                 {resendCooldown > 0
-                                    ? `Resend OTP in ${resendCooldown}s`
+                                    ? `Resend in ${resendCooldown}s`
                                     : "Resend OTP"}
                             </button>
+
                             <button
-                                onClick={handleVerifyOtp}
                                 disabled={loading || otp.length < 4}
-                                className={`px-4 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700 transition ${loading || otp.length < 4
-                                    ? "opacity-60 cursor-not-allowed"
-                                    : ""
-                                    }`}
+                                onClick={handleVerifyOtp}
+                                className="px-4 py-2 rounded-md bg-indigo-600 dark:bg-indigo-700 
+              text-white hover:bg-indigo-700 dark:hover:bg-indigo-800 disabled:opacity-60"
                             >
-                                {loading ? "Verifying..." : "Verify OTP"}
+                                {loading ? "Verifying..." : "Verify"}
                             </button>
                         </div>
 
-                        {/* <button
-                            onClick={() => setIsOtpModalOpen(false)}
-                            className="w-full text-center text-sm text-gray-600 hover:underline focus:outline-none"
-                        >
-                            Cancel
-                        </button> */}
                     </div>
                 </div>
             )}
 
         </div>
+
     );
 }

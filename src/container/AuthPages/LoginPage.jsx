@@ -220,7 +220,9 @@ export default function LoginPage() {
         {/* Footer */}
         <p className="text-center text-sm text-gray-600 dark:text-gray-300">
           Don’t have an account?{" "}
-          <button className="text-gray-700 dark:text-gray-200 font-semibold hover:underline">
+          <button
+            // onClick={() => navigate("/sign-up")}
+            className="text-gray-700 dark:text-gray-200 font-semibold hover:underline">
             Sign up
           </button>
         </p>
