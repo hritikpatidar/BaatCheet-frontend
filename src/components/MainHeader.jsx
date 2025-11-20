@@ -109,8 +109,17 @@ const MainHeader = () => {
                     </div>
                 </div>
 
+                <div className="md:hidden  items-center gap-2">
+
+                    {/* Theme Toggle */}
+                    <div className="relative">
+                        <div >
+                            <Themetoggle />
+                        </div>
+                    </div>
+                </div>
                 {/* Profile Dropdown */}
-                <Menu as="div" className="relative inline-block text-left pl-4 ">
+                <Menu as="div" className="relative inline-block text-left pl-4 h-9">
                     <div>
                         <MenuButton className="rounded-md text-gray-700 dark:text-gray-200 cursor-pointer">
                             <img
