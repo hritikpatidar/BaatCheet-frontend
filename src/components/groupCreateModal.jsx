@@ -279,7 +279,7 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                             <button
                                 type="button"
                                 onClick={() => handleToggleChange(key)}
-                                className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${value ? "bg-green-500" : "bg-gray-300 dark:bg-gray-600"
+                                className={`w-12 h-6 flex items-center rounded-full p-1 duration-300 ease-in-out ${value ? "bg-teal-500" : "bg-gray-300 dark:bg-gray-600"
                                     }`}
                             >
                                 <div
@@ -308,8 +308,8 @@ const GroupCreateModal = ({ setOpenCreateGroupModle }) => {
                     <button
                         type="submit"
                         className="col-span-2 md:col-span-2 w-full 
-          bg-gray-700 dark:bg-green-600 
-          hover:bg-gray-800 dark:hover:bg-green-700 
+          bg-gray-700 dark:bg-teal-600 
+          hover:bg-gray-800 dark:hover:bg-teal-700 
           text-white font-semibold py-2 
           rounded-md transition duration-200"
                         disabled={groupCreateLoading}

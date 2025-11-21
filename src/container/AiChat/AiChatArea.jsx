@@ -856,7 +856,7 @@ const AIChatArea = ({ showSidebar, setShowSidebar }) => {
                   <h2 className="text-md font-bold text-gray-800 max-w-[150px] sm:max-w-[200px] lg:max-w-[250px] truncate">
                     {userDetails?.name?.charAt(0).toUpperCase() + userDetails?.name?.slice(1)}
                   </h2>
-                  <p className="text-sm text-green-600">
+                  <p className="text-sm text-teal-600">
                     {selectedUser?.conversationType === "single" ?
                       isTyping.length > 0 ? "Typing..."
                         :
@@ -1725,7 +1725,7 @@ const AIChatArea = ({ showSidebar, setShowSidebar }) => {
                         {fileExtension === "pdf" ? (
                           <FaFilePdf className="w-16 h-16 text-red-500" />
                         ) : fileExtension === "xlsx" || fileExtension === "xls" ? (
-                          <FaFileExcel className="w-16 h-16 text-green-500" />
+                          <FaFileExcel className="w-16 h-16 text-teal-500" />
                         ) : fileExtension === "docx" || fileExtension === "doc" ? (
                           <FaFileWord className="w-16 h-16 text-blue-500" />
                         ) : fileExtension === "mp3" ? (

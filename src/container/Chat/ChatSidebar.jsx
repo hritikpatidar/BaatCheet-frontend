@@ -68,7 +68,7 @@ const ChatSidebar = ({ showSidebar, setShowSidebar }) => {
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === search.toLowerCase().trim() ? (
-            <span key={i} className="text-green-600 dark:text-green-400 font-semibold">
+            <span key={i} className="text-teal-600 dark:text-teal-400 font-semibold">
               {part}
             </span>
           ) : (

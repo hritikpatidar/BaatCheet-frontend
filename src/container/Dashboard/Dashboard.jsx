@@ -8,11 +8,13 @@ import { useSocket } from "../../context/SocketContext";
 import { decryptMessage, formatter } from "../../Utils/Auth";
 import dayjs from "dayjs";
 import CreatePost from "../../components/createPost";
+import { Heart, MessageCircle, Share2, ThumbsUp } from "lucide-react";
 
 const DashboardPage = () => {
     const navigate = useNavigate();
     const dispatch = useDispatch();
     const { t } = useTranslation();
+    const [liked, setLiked] = useState(false);
     const profileData = useSelector((state) => state?.authReducer?.AuthSlice?.profileDetails);
     const { userList, singleConversationList, selectedUser } = useSelector((state) => state?.ChatDataSlice);
     const { socket, fetchMessages, hasMore, setHasMore, setPage, } = useSocket();
@@ -43,70 +45,94 @@ const DashboardPage = () => {
 
                     {/* Suggested Users */}
                     <div className="bg-white dark:bg-gray-800 h-76 rounded-xl p-4 
-          shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
+                            shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col">
 
                         <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
                             Suggested Users
                         </h2>
 
                         <ul className="space-y-2 overflow-y-auto flex-1 
-            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+                                scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+
                             {filteredUsers?.length === 0 ? (
                                 <li className="flex items-center justify-center h-40 
-                text-gray-500 dark:text-gray-400 text-sm">
+                                     text-gray-500 dark:text-gray-400 text-sm">
                                     No user found
                                 </li>
                             ) : (
                                 filteredUsers.map((cv, i) => (
                                     <li
                                         key={i}
-                                        className="cursor-pointer flex items-center gap-3 p-2 rounded-md 
-                    hover:bg-gray-300 dark:hover:bg-gray-700 
-                    shadow-sm transition"
-                                        onClick={() => {
-                                            const payload = {
-                                                _id: "",
-                                                conversationType: "single",
-                                                members: [
-                                                    { _id: cv?._id, name: cv?.name, email: cv?.email, profile: "" }
-                                                ],
-                                                status: "sent",
-                                                isChatDisabled: false,
-                                            };
-                                            dispatch(setSelectUser(payload));
-                                            dispatch(setChatMessagesClear([]));
-                                            fetchMessages(1, payload);
-                                            navigate("/chat");
-                                        }}
+                                        className="cursor-pointer flex items-center justify-between gap-3 p-2 rounded-md 
+                                             hover:bg-gray-300 dark:hover:bg-gray-700 shadow-sm transition"
                                     >
-                                        <div className="w-10 h-10 flex items-center justify-center rounded-full 
-                    bg-gray-400 dark:bg-gray-600 text-white font-semibold">
-                                            {cv?.name?.split(" ").map((w) => w[0]).join("").toUpperCase()}
+
+                                        {/* LEFT SIDE — Avatar + Name */}
+                                        <div
+                                            className="flex items-center gap-2 flex-1"
+                                            onClick={() => {
+                                                const payload = {
+                                                    _id: "",
+                                                    conversationType: "single",
+                                                    members: [
+                                                        { _id: cv?._id, name: cv?.name, email: cv?.email, profile: "" }
+                                                    ],
+                                                    status: "sent",
+                                                    isChatDisabled: false,
+                                                };
+                                                dispatch(setSelectUser(payload));
+                                                dispatch(setChatMessagesClear([]));
+                                                fetchMessages(1, payload);
+                                                navigate("/chat");
+                                            }}
+                                        >
+                                            {/* Avatar */}
+                                            <div className="w-10 h-10 flex items-center justify-center rounded-full 
+                                                 bg-gray-400 dark:bg-gray-600 text-white font-semibold">
+                                                {cv?.name?.split(" ").map((w) => w[0]).join("").toUpperCase()}
+                                            </div>
+
+                                            {/* User Details */}
+                                            <div className="flex-1 overflow-hidden">
+                                                <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
+                                                    {cv.name}
+                                                </p>
+                                                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                    This theme is awesome!
+                                                </p>
+                                            </div>
                                         </div>
 
-                                        <div className="flex-1 overflow-hidden">
-                                            <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
-                                                {cv.name}
-                                            </p>
-                                            <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                                                This theme is awesome!
-                                            </p>
-                                        </div>
+                                        {/* RIGHT SIDE — FOLLOW BUTTON */}
+                                        <button
+                                            className="text-xs sm:text-sm bg-teal-500 hover:bg-teal-600 
+                                                text-white px-3 py-1 rounded-full shadow 
+                                                transition active:scale-95"
+                                            onClick={(e) => {
+                                                e.stopPropagation(); // card click se bachane ke liye
+                                                console.log("Follow clicked for:", cv.name);
+                                            }}
+                                        >
+                                            Follow
+                                        </button>
                                     </li>
                                 ))
                             )}
                         </ul>
                     </div>
 
+
                     {/* Recent Chats */}
                     <div className="bg-white dark:bg-gray-800 h-78 rounded-xl p-4 shadow-sm 
-          border border-gray-100 dark:border-gray-700">
+    border border-gray-100 dark:border-gray-700 flex flex-col">
+
                         <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
                             Recent Chats
                         </h2>
 
                         <ul className="space-y-2 overflow-y-auto flex-1 
-            scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+        scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-700">
+
                             {filteredList?.length === 0 ? (
                                 <li className="flex items-center justify-center h-40 
                 text-gray-500 dark:text-gray-400 text-sm">
@@ -114,7 +140,7 @@ const DashboardPage = () => {
                                 </li>
                             ) : (
                                 filteredList.map((cv, i) => {
-                                    const data = cv.members.find((m) => m._id !== profileData?._id)
+                                    const data = cv.members.find((m) => m._id !== profileData?._id);
                                     const user = {
                                         senderId: cv?.lastMessageDetails?.isSenderId,
                                         name: data?.name,
@@ -122,16 +148,15 @@ const DashboardPage = () => {
                                         message: cv?.lastMessageDetails?.message,
                                         messageType: cv?.lastMessageDetails?.messageType,
                                         time: cv?.lastMessageDetails?.timestamp
-                                    }
+                                    };
 
-                                    const isYour = user.senderId === profileData?._id
+                                    const isYour = user.senderId === profileData?._id;
 
                                     return (
                                         <li
                                             key={i}
-                                            className="cursor-pointer flex items-center gap-3 p-2 rounded-md 
-                      hover:bg-gray-300 dark:hover:bg-gray-700 
-                      shadow-sm transition"
+                                            className="cursor-pointer flex items-center justify-between gap-3 p-2 rounded-md 
+                            hover:bg-gray-300 dark:hover:bg-gray-700 shadow-sm transition"
                                             onClick={() => {
                                                 dispatch(setSelectUser(cv));
                                                 dispatch(setChatMessagesClear([]));
@@ -139,52 +164,64 @@ const DashboardPage = () => {
                                                 navigate("/chat");
                                             }}
                                         >
+                                            {/* LEFT SIDE — Avatar + Name + Message */}
+                                            <div className="flex items-center gap-3 flex-1 overflow-hidden">
 
-                                            {/* Profile */}
-                                            <div className="w-12 h-12 flex items-center justify-center rounded-full 
-                      bg-gray-100 dark:bg-gray-600 text-gray-600 dark:text-gray-200 
-                      text-2xl font-semibold overflow-hidden">
-                                                {user.profile ? (
-                                                    <img src={user.profile} className="w-12 h-12 rounded-full object-cover" />
-                                                ) : (
-                                                    user.name?.split(" ").map((n, idx) =>
-                                                        idx < 2 ? n[0] : ""
-                                                    ).join("").toUpperCase()
-                                                )}
+                                                {/* Avatar Style Same as Suggested Users */}
+                                                <div className="w-10 h-10 flex items-center justify-center rounded-full 
+                                bg-gray-400 dark:bg-gray-600 text-white font-semibold overflow-hidden">
+
+                                                    {user.profile ? (
+                                                        <img
+                                                            src={user.profile}
+                                                            className="w-full h-full rounded-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        user.name
+                                                            ?.split(" ")
+                                                            .map((n, idx) => idx < 2 ? n[0] : "")
+                                                            .join("")
+                                                            .toUpperCase()
+                                                    )}
+                                                </div>
+
+                                                {/* Name + Last Message */}
+                                                <div className="flex-1 overflow-hidden">
+                                                    <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
+                                                        {user.name}
+                                                    </p>
+
+                                                    <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
+                                                        {isYour ? "You: " : ""}
+                                                        {user.messageType === "file"
+                                                            ? "File"
+                                                            : user.messageType === "audio"
+                                                                ? "Audio"
+                                                                : decryptMessage(user.message) || "Start Conversation"}
+                                                    </p>
+                                                </div>
                                             </div>
 
-                                            {/* Name + Message */}
-                                            <div className="flex-1 overflow-hidden">
-                                                <p className="font-medium text-gray-800 dark:text-gray-200 truncate">
-                                                    {user.name}
-                                                </p>
-                                                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">
-                                                    {isYour ? "You: " : ""}
-                                                    {user.messageType === "file" ? "File" :
-                                                        user.messageType === "audio" ? "Audio" :
-                                                            decryptMessage(user.message) || "Start Conversation"}
-                                                </p>
-                                            </div>
-
-                                            {/* Time */}
+                                            {/* RIGHT SIDE — Unread Badge + Time */}
                                             <div className="flex flex-col items-end text-xs text-gray-500 dark:text-gray-400">
+
                                                 {cv?.lastMessageDetails?.unReadMessages &&
                                                     cv?._id !== selectedUser?._id ? (
-                                                    <span className="inline-block bg-gray-500 dark:bg-gray-600 text-white 
-                          rounded-full px-2 py-0.5 mb-0.5">
+                                                    <span className="inline-block bg-gray-500 dark:bg-gray-600 
+                                    text-white rounded-full px-2 py-0.5 mb-1">
                                                         {formatter.format(cv?.lastMessageDetails?.unReadMessages)}
                                                     </span>
                                                 ) : null}
 
                                                 <span>{dayjs(user.time).format("hh:mm A")}</span>
                                             </div>
-
                                         </li>
                                     );
                                 })
                             )}
                         </ul>
                     </div>
+
                 </aside>
 
                 {/* ----- Center Feed ----- */}
@@ -237,19 +274,40 @@ const DashboardPage = () => {
 
                             {/* Footer */}
                             <div className="flex justify-between text-xs 
-        text-gray-600 dark:text-gray-400 
-        pt-2 border-t border-gray-200 dark:border-gray-700">
+                                text-gray-600 dark:text-gray-400 
+                                pt-2 border-t border-gray-200 dark:border-gray-700">
 
-                                <button className="hover:text-green-600 dark:hover:text-green-400">
-                                    👍 Like
+                                <button
+                                    className="flex items-center gap-1 cursor-pointer select-none transition hover:text-teal-600 dark:hover:text-teal-400"
+                                >
+                                    <Heart
+                                        onClick={() => setLiked(!liked)}
+                                        className={`w-5 h-5 transition-all duration-300  hover:text-teal-600 dark:hover:text-teal-400
+                                             ${liked
+                                                ? "fill-red-500 text-red-500 "
+                                                : "text-gray-600 dark:text-gray-300"
+                                            }
+                                        `}
+                                    />
+
+                                    <span
+                                        className={`transition-all duration-300 
+                                            "text-gray-700 dark:text-gray-300"
+                                        `}
+                                    >
+                                        Like
+                                    </span>
                                 </button>
 
-                                <button className="hover:text-green-600 dark:hover:text-green-400">
-                                    💬 Comment
+
+                                <button className="flex items-center gap-1 hover:text-teal-600 dark:hover:text-teal-400 transition">
+                                    <MessageCircle className="w-5 h-5" />
+                                    Comment
                                 </button>
 
-                                <button className="hover:text-green-600 dark:hover:text-green-400">
-                                    ↗ Share
+                                <button className="flex items-center gap-1 hover:text-teal-600 dark:hover:text-teal-400 transition">
+                                    <Share2 className="w-5 h-5" />
+                                    Share
                                 </button>
 
                             </div>
@@ -269,7 +327,7 @@ const DashboardPage = () => {
                             <h2 className="font-semibold text-gray-700 dark:text-gray-200 text-lg">
                                 Notifications
                             </h2>
-                            <button className="text-green-600 dark:text-green-400 text-sm hover:font-bold">
+                            <button className="text-teal-600 dark:text-teal-400 text-sm hover:font-bold">
                                 Clear All
                             </button>
                         </div>
@@ -287,7 +345,7 @@ const DashboardPage = () => {
                                 <li
                                     key={i}
                                     className="flex items-center justify-between p-2 rounded-lg 
-                  hover:bg-green-50 dark:hover:bg-green-900/20 
+                  hover:bg-teal-50 dark:hover:bg-teal-900/20 
                   transition cursor-pointer"
                                 >
                                     <div className="flex items-center">
@@ -312,7 +370,7 @@ const DashboardPage = () => {
                             <h2 className="font-semibold text-gray-700 dark:text-gray-200 text-lg">
                                 Trending Topics
                             </h2>
-                            <button className="text-green-600 dark:text-green-400 text-sm hover:font-bold">
+                            <button className="text-teal-600 dark:text-teal-400 text-sm hover:font-bold">
                                 View All
                             </button>
                         </div>
@@ -327,10 +385,10 @@ const DashboardPage = () => {
                                 <li
                                     key={i}
                                     className="group flex items-center justify-between p-2 rounded-lg 
-                  hover:bg-green-50 dark:hover:bg-green-900/20 
+                  hover:bg-teal-50 dark:hover:bg-teal-900/20 
                   transition cursor-pointer"
                                 >
-                                    <span className="text-green-600 dark:text-green-400 font-medium">
+                                    <span className="text-teal-600 dark:text-teal-400 font-medium">
                                         {topic.tag}
                                     </span>
                                     <span className="text-xs text-gray-500 dark:text-gray-400">
@@ -342,7 +400,7 @@ const DashboardPage = () => {
                     </div>
                 </aside>
             </main>
-        </div>
+        </div >
 
     );
 };

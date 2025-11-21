@@ -14,6 +14,7 @@ const MainHeader = () => {
     const [loading, setLoading] = useState(false);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const { singleConversationList, groupConversationList } = useSelector((state) => state?.ChatDataSlice);
+    const { profileDetails } = useSelector((state) => state?.authReducer?.AuthSlice);
 
     // Dummy counts for demo
     const singleMessageCount = singleConversationList?.filter(i => i?.lastMessageDetails?.unReadMessages > 0) || []
@@ -123,8 +124,7 @@ const MainHeader = () => {
                     <div>
                         <MenuButton className="rounded-md text-gray-700 dark:text-gray-200 cursor-pointer">
                             <img
-                                src={dummyImage}
-                                alt="Profile"
+                                src={!profileDetails?.profile ? profileDetails.profile : dummyImage} alt="Profile"
                                 className="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-300 dark:border-gray-500"
                                 onClick={() => setDropdownOpen(!dropdownOpen)}
                                 aria-hidden="true"
@@ -196,6 +196,7 @@ const MainHeader = () => {
 
                         {/* MAIN MENU OPTIONS */}
                         <button
+                            onClick={() => navigate("/profile")}
                             className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
                         >
                             <User className="w-5 h-5" />

@@ -35,7 +35,7 @@ const AddMembersModal = () => {
       <>
         {parts.map((part, i) =>
           part.toLowerCase() === search.toLowerCase().trim() ? (
-            <span key={i} className="text-green-500 font-semibold">
+            <span key={i} className="text-teal-500 font-semibold">
               {part}
             </span>
           ) : (

@@ -76,14 +76,14 @@ const CreatePost = () => {
         {/* Upload */}
         <label className="flex items-center gap-2 cursor-pointer group">
             <div className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 
-                group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition">
+                group-hover:bg-teal-100 dark:group-hover:bg-teal-900/30 transition">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
                     strokeWidth={2}
                     stroke="currentColor"
-                    className="w-4 h-4 text-green-600 dark:text-green-400"
+                    className="w-4 h-4 text-teal-600 dark:text-teal-400"
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
                 </svg>
@@ -102,7 +102,7 @@ const CreatePost = () => {
         {/* Post Button */}
         <button
             onClick={handlePost}
-            className="flex items-center gap-1 bg-green-500 hover:bg-green-600 
+            className="flex items-center gap-1 bg-teal-500 hover:bg-teal-600 
             text-white px-4 py-1.5 rounded-md text-sm active:scale-95 transition"
         >
             <svg

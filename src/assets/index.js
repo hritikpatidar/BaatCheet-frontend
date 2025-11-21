@@ -6,6 +6,7 @@ import apple from "../assets/apple icon.svg";
 import post from "../assets/post.jpg";
 import post1 from "../assets/post1.jpg";
 import dummyImage from "../assets/dummyImage.png"
+import profileBanner from "../assets/profilebanner.jpg"
 export {
     logo,
     logo1,
@@ -14,5 +15,6 @@ export {
     apple,
     post,
     post1,
-    dummyImage
+    dummyImage,
+    profileBanner
 }

@@ -899,7 +899,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                       userDetails?.name?.slice(1)}
                   </h2>
 
-                  <p className="text-sm text-green-600 dark:text-green-400">
+                  <p className="text-sm text-teal-600 dark:text-teal-400">
                     {selectedUser?.conversationType === "single" ? (
                       isTyping.length > 0 ? (
                         "Typing..."
@@ -1904,7 +1904,7 @@ const ChatArea = ({ showSidebar, setShowSidebar }) => {
                         {fileExtension === "pdf" ? (
                           <FaFilePdf className="w-16 h-16 text-red-500" />
                         ) : fileExtension === "xlsx" || fileExtension === "xls" ? (
-                          <FaFileExcel className="w-16 h-16 text-green-500" />
+                          <FaFileExcel className="w-16 h-16 text-teal-500" />
                         ) : fileExtension === "docx" || fileExtension === "doc" ? (
                           <FaFileWord className="w-16 h-16 text-blue-500" />
                         ) : fileExtension === "mp3" ? (

@@ -8,6 +8,7 @@ import LoginPage from './container/AuthPages/LoginPage';
 import { SignupForm } from './container/AuthPages/SignupForm';
 import DashboardPage from './container/Dashboard/Dashboard';
 import AIChatApp from './container/AiChat/AIChatApp';
+import Profile from './container/Dashboard/profile';
 // import { generateToken, messaging } from "./firebase";
 // import { onMessage } from "firebase/messaging";
 // import { useEffect } from 'react';
@@ -32,6 +33,7 @@ export default function App() {
           </Route>
           <Route element={<PrivateRoute />}>
             <Route path="/" element={<DashboardPage />} />
+            <Route path="/profile" element={<Profile />} />
             <Route path="/chat" element={<ChatApp />} />
             <Route path="/ai-chat" element={<AIChatApp />} />
             {/* <Route path="/ai-chat" element={<AIChatPage />} /> */}
