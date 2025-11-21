@@ -33,7 +33,7 @@ const Profile = () => {
                     <div className="sm:col-span-1 flex flex-col items-center sm:items-start">
 
                         {/* Avatar */}
-                        <div className="-mt-20 sm:-mt-24 relative z-20">
+                        <div className="-mt-20 sm:-mt-24 relative z-0">
                             <img
                                 src={!profileDetails?.profile ? profileDetails.profile : dummyImage}
                                 alt="avatar"

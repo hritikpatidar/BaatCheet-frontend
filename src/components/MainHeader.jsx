@@ -22,7 +22,7 @@ const MainHeader = () => {
     const unreadMessages = singleMessageCount.length + groupMessageCount.length;
     const unreadNotifications = 5;
     return (
-        <header className="fixed top-0 left-0 w-full bg-white dark:bg-gray-800 py-2 px-4 z-10 shadow flex items-center justify-between">
+        <header className="fixed top-0 left-0 w-full bg-white dark:bg-gray-800 p-4 z-10 shadow flex items-center justify-between">
             {/* Left side: Logo */}
             <a
                 href="/"
@@ -121,125 +121,136 @@ const MainHeader = () => {
                 </div>
                 {/* Profile Dropdown */}
                 <Menu as="div" className="relative inline-block text-left pl-4 h-9">
-                    <div>
-                        <MenuButton className="rounded-md text-gray-700 dark:text-gray-200 cursor-pointer">
-                            <img
-                                src={!profileDetails?.profile ? profileDetails.profile : dummyImage} alt="Profile"
-                                className="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-300 dark:border-gray-500"
-                                onClick={() => setDropdownOpen(!dropdownOpen)}
-                                aria-hidden="true"
-                            />
-                        </MenuButton>
-                    </div>
+                    {({ close }) => (
+                        <>
+                            <div>
+                                <MenuButton className="rounded-md text-gray-700 dark:text-gray-200 cursor-pointer">
+                                    <img
+                                        src={!profileDetails?.profile ? profileDetails.profile : dummyImage} alt="Profile"
+                                        className="w-10 h-10 rounded-full cursor-pointer border-2 border-gray-300 dark:border-gray-500"
+                                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                                        aria-hidden="true"
+                                    />
+                                </MenuButton>
+                            </div>
 
-                    <MenuItems
-                        transition
-                        className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y 
+                            <MenuItems
+                                transition
+                                className="absolute right-0 z-10 mt-2 w-56 origin-top-right divide-y 
                 divide-gray-100 dark:divide-gray-700 rounded-md bg-white dark:bg-gray-800 
                 shadow-lg ring-1 ring-black/5 dark:ring-white/10 transition 
                 focus:outline-hidden data-closed:scale-95 data-closed:opacity-0"
-                    >
-                        {/* MOBILE ITEMS */}
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
-                            onClick={() => navigate("/")}
-                        >
-                            <Grip className="w-5 h-5" />
-                            Home
-                        </button>
+                            >
+                                {/* MOBILE ITEMS */}
+                                <button
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
+                                    onClick={() => {
+                                        navigate("/")
+                                        close();
+                                    }}
+                                >
+                                    <Grip className="w-5 h-5" />
+                                    Home
+                                </button>
 
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
-                            onClick={() => navigate("/posts")}
-                        >
-                            <Image className="w-5 h-5" />
-                            Post
-                        </button>
+                                <button
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
+                                    onClick={() => {
+                                        navigate("/posts")
+                                        close();
+                                    }}
+                                >
+                                    <Image className="w-5 h-5" />
+                                    Post
+                                </button>
 
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
-                            onClick={() => navigate("/ai-chat")}
-                        >
-                            <Brain className="w-5 h-5" />
-                            AI Chat
-                        </button>
+                                <button
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
+                                    onClick={() => {
+                                        navigate("/ai-chat")
+                                        close();
+                                    }}
+                                >
+                                    <Brain className="w-5 h-5" />
+                                    AI Chat
+                                </button>
 
-                        <button
-                            className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
-                            onClick={() => navigate("/chat")}
-                        >
-                            <span className="flex items-center gap-3">
-                                <MessageCircle className="w-5 h-5" />
-                                Chat
-                            </span>
-                            {unreadMessages > 0 && (
-                                <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                                    {formatter.format(unreadMessages)}
-                                </span>
-                            )}
-                        </button>
+                                <button
+                                    className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
+                                    onClick={() => {
+                                        navigate("/chat")
+                                        close();
+                                    }}
+                                >
+                                    <span className="flex items-center gap-3">
+                                        <MessageCircle className="w-5 h-5" />
+                                        Chat
+                                    </span>
+                                    {unreadMessages > 0 && (
+                                        <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                            {formatter.format(unreadMessages)}
+                                        </span>
+                                    )}
+                                </button>
 
-                        <button
-                            className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
-                            onClick={() => console.log("Notification clicked")}
-                        >
-                            <span className="flex items-center gap-3">
-                                <Bell className="w-5 h-5" />
-                                Notification
-                            </span>
-                            {unreadNotifications > 0 && (
-                                <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
-                                    {formatter.format(unreadNotifications)}
-                                </span>
-                            )}
-                        </button>
+                                <button
+                                    className="flex items-center justify-between w-full px-4 py-2 text-sm text-gray-800 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition md:hidden"
+                                    onClick={() => {
+                                        console.log("Notification clicked")
+                                        close();
+                                    }}
+                                >
+                                    <span className="flex items-center gap-3">
+                                        <Bell className="w-5 h-5" />
+                                        Notification
+                                    </span>
+                                    {unreadNotifications > 0 && (
+                                        <span className="bg-red-500 text-white text-xs w-5 h-5 flex items-center justify-center rounded-full">
+                                            {formatter.format(unreadNotifications)}
+                                        </span>
+                                    )}
+                                </button>
 
-                        {/* MAIN MENU OPTIONS */}
-                        <button
-                            onClick={() => navigate("/profile")}
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                        >
-                            <User className="w-5 h-5" />
-                            Profile
-                        </button>
+                                {/* MAIN MENU OPTIONS */}
+                                <button
+                                    onClick={() => {
+                                        navigate("/profile")
+                                        close();
+                                    }}
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                                >
+                                    <User className="w-5 h-5" />
+                                    Profile
+                                </button>
 
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                        >
-                            <Settings className="w-5 h-5" />
-                            Account Settings
-                        </button>
+                                <button
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                                >
+                                    <Settings className="w-5 h-5" />
+                                    Account Settings
+                                </button>
 
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                        >
-                            <SunMoon className="w-5 h-5" />
-                            Theme: Light/Dark
-                        </button>
+                                <button
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
+                                >
+                                    <LifeBuoy className="w-5 h-5" />
+                                    Support
+                                </button>
 
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                        >
-                            <Bell className="w-5 h-5" />
-                            Notifications
-                        </button>
-
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-200"
-                        >
-                            <LifeBuoy className="w-5 h-5" />
-                            Support
-                        </button>
-
-                        {/* LOGOUT */}
-                        <button
-                            className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-red-200 dark:hover:bg-red-700/30 text-red-600 dark:text-red-400"
-                            onClick={() => setIsLogoutModalOpen(true)}
-                        >
-                            <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
-                            <span className="font-medium">Logout</span>
-                        </button>
-                    </MenuItems>
+                                {/* LOGOUT */}
+                                <button
+                                    className="flex items-center gap-3 w-full px-4 py-2 text-sm hover:bg-red-200 dark:hover:bg-red-700/30 text-red-600 dark:text-red-400"
+                                    onClick={() => {
+                                        setIsLogoutModalOpen(true)
+                                        close();
+                                    }}
+                                >
+                                    <LogOut className="w-5 h-5 text-red-600 dark:text-red-400" />
+                                    <span className="font-medium">Logout</span>
+                                </button>
+                            </MenuItems>
+                        </>
+                    )}
                 </Menu>
             </div>
 

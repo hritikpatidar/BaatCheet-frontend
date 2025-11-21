@@ -19,8 +19,10 @@
 @custom-variant dark (&:where(.dark *));
 
 * {
-  user-select: none
+  user-select: none;
 }
+
+
 
 body {
   font-family: Arial, sans-serif;
@@ -31,6 +33,9 @@ body {
 
 button {
   cursor: pointer;
+}
+body::-webkit-scrollbar {
+  width: 0px !important;
 }
 
 ::-webkit-scrollbar {
