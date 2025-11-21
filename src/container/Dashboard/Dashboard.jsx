@@ -105,9 +105,9 @@ const DashboardPage = () => {
 
                                         {/* RIGHT SIDE — FOLLOW BUTTON */}
                                         <button
-                                            className="text-xs sm:text-sm bg-teal-500 hover:bg-teal-600 
-                                                text-white px-3 py-1 rounded-full shadow 
-                                                transition active:scale-95"
+                                            className="text-[9px] sm:text-[10px] bg-teal-500 hover:bg-teal-600 
+                                            text-white px-2 py-[2px] rounded-full shadow 
+                                            transition active:scale-95"
                                             onClick={(e) => {
                                                 e.stopPropagation(); // card click se bachane ke liye
                                                 console.log("Follow clicked for:", cv.name);
@@ -124,7 +124,7 @@ const DashboardPage = () => {
 
                     {/* Recent Chats */}
                     <div className="bg-white dark:bg-gray-800 h-78 rounded-xl p-4 shadow-sm 
-    border border-gray-100 dark:border-gray-700 flex flex-col">
+                            border border-gray-100 dark:border-gray-700 flex flex-col">
 
                         <h2 className="font-semibold text-gray-700 dark:text-gray-200 mb-3">
                             Recent Chats
