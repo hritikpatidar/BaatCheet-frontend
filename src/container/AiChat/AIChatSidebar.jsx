@@ -155,7 +155,7 @@ const AIChatSidebar = ({ showSidebar, setShowSidebar }) => {
 
                 <button
                   onClick={() => setIsSearchTerm(false)}
-                  className="ml-3 p-2 rounded-full p-2 shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
+                  className="ml-3 p-2 rounded-full shadow-md  shadow-teal-400 dark:shadow-teal-600  cursor-pointer 
                      text-gray-600 dark:text-gray-200  hover:text-teal-400 dark:hover:text-teal-300  bg-white
                       dark:bg-gray-800 transition-all ease-in-out"
                 >
